@@ -95,17 +95,18 @@ public class SieuThiMiniGUI extends JFrame {
         JPanel pnlButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         pnlButtons.setOpaque(false);
 
-        JButton btnDocDB = createActionBtn("Đọc Dữ Liệu", false);
+        JButton btnDocDB = createActionBtn("Đọc Dữ Liệu");
         btnDocDB.addActionListener(e -> docDSSP());
 
-        JButton btnAdd = createActionBtn("+ Thêm", true);
+        JButton btnAdd = createActionBtn("+ Thêm");
         btnAdd.addActionListener(e -> showForm(null));
 
-        JButton btnDelete = createActionBtn("- Xóa Sản Phẩm", false);
-        btnDelete.setForeground(Color.RED);
+        JButton btnDelete = createActionBtn("- Xóa Sản Phẩm");
         btnDelete.addActionListener(e -> deleteSelectedProduct());
 
-        pnlButtons.add(btnDocDB); pnlButtons.add(btnAdd); pnlButtons.add(btnDelete);
+        pnlButtons.add(btnDocDB); 
+        pnlButtons.add(btnAdd); 
+        pnlButtons.add(btnDelete);
         topToolBar.add(pnlButtons, BorderLayout.EAST);
         card.add(topToolBar, BorderLayout.NORTH);
 
@@ -154,16 +155,23 @@ public class SieuThiMiniGUI extends JFrame {
         ((DefaultTableCellRenderer)header.getDefaultRenderer()).setHorizontalAlignment(JLabel.LEFT);
     }
 
-    private JButton createActionBtn(String text, boolean isPrimary) {
+    private JButton createActionBtn(String text) {
         JButton btn = new JButton(text);
         btn.setPreferredSize(new Dimension(140, 38));
         btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btn.setFocusPainted(false);
-        if (isPrimary) { btn.setBackground(primaryColor); btn.setForeground(Color.WHITE); }
-        else { btn.setBackground(Color.WHITE); btn.setForeground(primaryColor); btn.setBorder(new LineBorder(primaryColor, 1)); }
+        
+        // Màu nền xám xanh nhạt (Slate 200) - rất dịu mắt và hiện đại
+        btn.setBackground(new Color(226, 232, 240)); 
+        
+        // Chữ màu đen theo yêu cầu của bạn
+        btn.setForeground(Color.BLACK); 
+        
+        // Thêm một đường viền xám mỏng để nút nhìn sắc nét hơn trên nền trắng
+        btn.setBorder(new LineBorder(new Color(203, 213, 225), 1)); 
+        
         return btn;
     }
-
     private void initMainContent() {
         pnlMainContent = new JPanel(cardLayout);
         pnlMainContent.add(createSanPhamPanel(), "Sản Phẩm");
@@ -217,7 +225,7 @@ public class SieuThiMiniGUI extends JFrame {
         }
 
         HangSanXuatBUS hsxBus = new HangSanXuatBUS();
-        hsxBus.docDSLSP(); // Vẫn dùng tên hàm cũ theo BUS của bạn
+        hsxBus.docDSHSX();
         JComboBox<String> cbHang = new JComboBox<>();
         cbHang.addItem("-- Chọn Hãng Sản Xuất --");
         for (HangSanXuatDTO hsx : HangSanXuatBUS.dshsx) {

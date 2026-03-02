@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class HangSanXuatBUS {
     public static ArrayList<HangSanXuatDTO> dshsx;
     public HangSanXuatBUS(){}
-    public void docDSLSP(){
+    public void docDSHSX(){
         HangSanXuatDAO data = new HangSanXuatDAO();
         if (dshsx == null) dshsx = new ArrayList<HangSanXuatDTO>();
         dshsx = data.docDSHSX();

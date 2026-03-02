@@ -72,7 +72,7 @@ public class HangSanXuatDAO {
         try {
             String qry = "UPDATE hangsanxuat SET "
                     + "ten = '" + hsx.getTenHang() + "', "
-                    + "diaChia = '" + hsx.getDiaChi() + "', "
+                    + "diaChi = '" + hsx.getDiaChi() + "', "
                     + "phone = '" + hsx.getSdt() + "', "
                     + "WHERE id = '" + hsx.getMaHang() + "'";
             Statement st = cnn.createStatement();
