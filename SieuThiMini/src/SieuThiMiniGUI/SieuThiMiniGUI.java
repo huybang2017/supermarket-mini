@@ -50,7 +50,15 @@ public class SieuThiMiniGUI extends JFrame {
 
         for (String m : menus) {
             JButton btn = createSidebarBtn(m);
-            if (m.equals("Quản Lý Sản Phẩm")) {
+            btn.addActionListener(e ->{
+                switchTab(m);
+                resetSidebarButton();
+                btn.setBackground(new Color(240,247,255));
+                btn.setForeground(primaryColor);
+                btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
+
+            });
+            if (m.equals("Trang Tổng Quan")) {
                 btn.setBackground(new Color(240, 247, 255));
                 btn.setForeground(primaryColor);
                 btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
@@ -59,7 +67,18 @@ public class SieuThiMiniGUI extends JFrame {
         }
         add(sidebar, BorderLayout.WEST);
     }
-
+    private void switchTab(String tabName){
+        cardLayout.show(pnlMainContent,tabName);
+    }
+    private void resetSidebarButton(){
+        for(Component c : ((JPanel)((BorderLayout)getContentPane().getLayout()).getLayoutComponent(BorderLayout.WEST)).getComponents()){
+            if (c instanceof JButton) {
+                c.setBackground(sidebarBg);
+                c.setForeground(new Color(70,70,70));
+                c.setFont(new Font("Segoe UI" , Font.PLAIN, 15));
+            }
+        }
+    }
     private JButton createSidebarBtn(String text) {
         JButton btn = new JButton("  " + text);
         btn.setMaximumSize(new Dimension(250, 50));
@@ -71,7 +90,12 @@ public class SieuThiMiniGUI extends JFrame {
         btn.setHorizontalAlignment(SwingConstants.LEFT);
         return btn;
     }
-
+    private JPanel creatTongQuanPanel(){
+        JPanel pnl = new JPanel(new GridBagLayout());
+        pnl.setBackground(bgColor);
+        pnl.add(new JLabel("Chào Mừng Đến Trang Tổng Quan"));
+        return pnl;
+    }
     private JPanel createSanPhamPanel() {
         JPanel pnl = new JPanel(new BorderLayout(20, 20));
         pnl.setBackground(bgColor);
@@ -174,7 +198,11 @@ public class SieuThiMiniGUI extends JFrame {
     }
     private void initMainContent() {
         pnlMainContent = new JPanel(cardLayout);
-        pnlMainContent.add(createSanPhamPanel(), "Sản Phẩm");
+        pnlMainContent.add(creatTongQuanPanel(),"Trang Tổng Quan");
+        pnlMainContent.add(new JPanel(),"Loại Sản Phẩm");
+        // pnlMainContent.add(createSanPhamPanel(), "Sản Phẩm");
+        pnlMainContent.add(createSanPhamPanel(),"Quản Lý Sản Phẩm");
+        pnlMainContent.add(new JPanel(),"Quản Lý Nhập Hàng");
         add(pnlMainContent, BorderLayout.CENTER);
     }
 
