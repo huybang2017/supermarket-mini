@@ -7,9 +7,11 @@ import javax.swing.table.*;
 import DTO.ChiTietPhieuNhapHangDTO;
 import DTO.NhaCungCapDTO;
 import DTO.PhieuNhapHangDTO;
+import DTO.SanPhamDTO;
 import SieuThiMiniBUS.ChiTietPhieuNhapHangBUS;
 import SieuThiMiniBUS.NhaCungCapBUS;
 import SieuThiMiniBUS.PhieuNhapHangBUS;
+import SieuThiMiniBUS.SanPhamBUS;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -23,6 +25,7 @@ public class NhapHangGUI extends JPanel {
     private PhieuNhapHangBUS pnBUS = new PhieuNhapHangBUS();
     private NhaCungCapBUS nccBUS = new NhaCungCapBUS();
     private ChiTietPhieuNhapHangBUS ctBUS = new ChiTietPhieuNhapHangBUS();
+    private SanPhamBUS spBUS = new SanPhamBUS();
 
     private Color secondaryColor = new Color(108, 117, 125);
     private Color bgColor = new Color(244, 246, 249);
@@ -73,7 +76,7 @@ public class NhapHangGUI extends JPanel {
         topToolBar.add(pnlButtons, BorderLayout.EAST);
 
         JButton btnThem = createActionBtn("Tạo Phiếu Mới");
-        btnThem.addActionListener(e -> openForm(null));
+        btnThem.addActionListener(e -> openForm(null,null));
 
         JButton btnXoa = createActionBtn("Xóa Phiếu");
         btnXoa.addActionListener(e -> deletePhieu());
@@ -167,8 +170,8 @@ public class NhapHangGUI extends JPanel {
     // --- CÁC HÀM XỬ LÝ LOGIC ---
 
     public void docDSPN() {
-        pnBUS.docDSPN(); // Gọi BUS lấy dữ liệu
-        model.setRowCount(0); // Xóa dữ liệu cũ trên bảng
+        pnBUS.docDSPN();
+        model.setRowCount(0);
         for (PhieuNhapHangDTO pn : PhieuNhapHangBUS.dspn) {
             Vector<Object> row = new Vector<>();
             row.add(pn.getMaPNH());
@@ -206,39 +209,48 @@ public class NhapHangGUI extends JPanel {
         }
     }
 
-    private void openForm(PhieuNhapHangDTO pn) {
+    private void openForm(PhieuNhapHangDTO pn, SanPhamDTO sp) {
         Window parentWindow = SwingUtilities.getWindowAncestor(this);
         JDialog dialog = new JDialog((Frame) parentWindow, pn == null ? "Thêm Phiếu Nhập" : "Sửa Phiếu Nhập", true);
         dialog.setSize(500, 450);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
     
-        JPanel pnlForm = new JPanel(new GridLayout(5, 2, 10, 25));
+        JPanel pnlForm = new JPanel(new GridLayout(8, 2, 10, 25));
         pnlForm.setBorder(new EmptyBorder(30, 30, 30, 30));
         pnlForm.setBackground(Color.WHITE);
     
-// Sử dụng String.valueOf() để ép kiểu số sang chuỗi
+        
+
         JTextField txtID = new JTextField(pn != null ? String.valueOf(pn.getMaPNH()) : "1"); 
         JTextField txtMaNV = new JTextField(pn != null ? String.valueOf(pn.getMaNV()) : "1");
         JTextField txtNgay = new JTextField(pn != null ? pn.getNgayNhap().toString() : new java.sql.Date(System.currentTimeMillis()).toString());
         JTextField txtTongTien = new JTextField(pn != null ? String.valueOf(pn.getTongTien()) : "0");
-    
+        JTextField txtDonGia = new JTextField (pn != null ? String.valueOf(sp.getDongia()) : "0");
+        JTextField txtSoLuong = new JTextField (pn!= null ? sp.getSoluong() : 0 );
+        
         nccBUS.docDSNCC();
         JComboBox<String> cbNCC = new JComboBox<>();
         cbNCC.addItem("-- Chọn Nhà Cung Cấp --");
         for (NhaCungCapDTO ncc : NhaCungCapBUS.dsncc) {
             cbNCC.addItem(ncc.getMaNCC() + " - " + ncc.getTenNCC());
         }
+
+        spBUS.docDSSP();
+        JComboBox<String> cbSP = new JComboBox<>();
+        cbSP.addItem("-- Chọn Sản Phẩm --");
+        for (SanPhamDTO spt : SanPhamBUS.dssp) {
+            cbSP.addItem(spt.getMasanpham() + " - " + spt.getTensanpham());
+        }
     
         if (pn != null) {
             txtID.setEditable(false);
-            txtID.setText(String.valueOf(pn.getMaPNH())); // Set mã vào textfield
+            txtID.setText(String.valueOf(pn.getMaPNH())); 
             
             for (int i = 0; i < cbNCC.getItemCount(); i++) {
-                // Chuyển mã NCC từ int sang String để so sánh với chuỗi trong ComboBox
                 String maNCCStr = String.valueOf(pn.getMaNCC());
                 
-                if (cbNCC.getItemAt(i).startsWith(maNCCStr + " -")) { // Thêm " -" để tránh nhầm mã 1 với 10, 11
+                if (cbNCC.getItemAt(i).startsWith(maNCCStr + " -")) { 
                     cbNCC.setSelectedIndex(i);
                     break; 
                 }
@@ -248,8 +260,12 @@ public class NhapHangGUI extends JPanel {
         pnlForm.add(new JLabel("Mã Phiếu Nhập:")); pnlForm.add(txtID);
         pnlForm.add(new JLabel("Nhà Cung Cấp:")); pnlForm.add(cbNCC);
         pnlForm.add(new JLabel("Mã Nhân Viên:")); pnlForm.add(txtMaNV);
+        pnlForm.add(new JLabel("Chọn Sản Phẩm:")); pnlForm.add(cbSP);
         pnlForm.add(new JLabel("Ngày Nhập (yyyy-mm-dd):")); pnlForm.add(txtNgay);
         pnlForm.add(new JLabel("Tổng Tiền:")); pnlForm.add(txtTongTien);
+        pnlForm.add(new JLabel("Đơn Giá:")); pnlForm.add(txtDonGia);
+        pnlForm.add(new JLabel("Số Lượng:")); pnlForm.add(txtSoLuong);
+
     
         JButton btnSave = new JButton(pn == null ? "Thêm Phiếu" : "Lưu Thay Đổi");
         btnSave.setBackground(new Color(40, 167, 69)); 
@@ -269,12 +285,20 @@ public class NhapHangGUI extends JPanel {
                 newPn.setMaNV(Integer.parseInt(txtMaNV.getText()));
                 newPn.setNgayNhap(java.sql.Date.valueOf(txtNgay.getText())); 
                 newPn.setTongTien(Double.parseDouble(txtTongTien.getText()));
+
+                ChiTietPhieuNhapHangDTO newCt = new ChiTietPhieuNhapHangDTO();
+                newCt.setMaPNH(Integer.parseInt((txtID.getText())));
+                newCt.setMaSP(Integer.parseInt(cbSP.getSelectedItem().toString().split(" - ")[0]));
+                newCt.setDonGia(Integer.parseInt(txtDonGia.getText()));
+                newCt.setSoLuong(Integer.parseInt(txtSoLuong.getText()));
     
                 if (pn == null) {
                     pnBUS.them(newPn);
+                    ctBUS.them(newCt);
                     JOptionPane.showMessageDialog(dialog, "Thêm phiếu nhập thành công!");
                 } else {
                     pnBUS.sua(newPn);
+                    ctBUS.sua(newCt);
                     JOptionPane.showMessageDialog(dialog, "Cập nhật thành công!");
                 }
                 
@@ -311,10 +335,18 @@ public class NhapHangGUI extends JPanel {
         int i = tblNhapHang.getSelectedRow();
         if (i >= 0) {
             int ma = Integer.parseInt(tblNhapHang.getValueAt(i, 0).toString()) ;
-            for(PhieuNhapHangDTO item : PhieuNhapHangBUS.dspn) {
+            for(ChiTietPhieuNhapHangDTO item : ChiTietPhieuNhapHangBUS.dsctpn) {
                 if(item.getMaPNH() == (ma)) {
-                    openForm(item);
-                    break;
+                    for(SanPhamDTO item2 : SanPhamBUS.dssp)
+                        if(item2.getMasanpham()==(item.getMaSP())){
+                        for(PhieuNhapHangDTO item3: PhieuNhapHangBUS.dspn){
+                            if(item3.getMaPNH() == (ma)){
+                            openForm(item3,item2);
+                            break;
+                            }
+                        }
+                        
+                    }
                 }
             }
         } else {

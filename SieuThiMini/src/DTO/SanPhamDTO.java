@@ -1,7 +1,7 @@
 package DTO;
 
 public class SanPhamDTO {
-    private  String masanpham;
+    private  int masanpham;
     private  String tensanpham;
     private int soluong;
     private int dongia;
@@ -10,7 +10,7 @@ public class SanPhamDTO {
     private String maHang;
     public SanPhamDTO(){}
 
-    public SanPhamDTO(String masanpham, String tensanpham, int soluong, int dongia, String donvitinh){
+    public SanPhamDTO(int masanpham, String tensanpham, int soluong, int dongia, String donvitinh){
         this.masanpham = masanpham;
         this.tensanpham = tensanpham;
         this.soluong = soluong;
@@ -20,8 +20,8 @@ public class SanPhamDTO {
         this.maHang = maHang;
     }
 
-    public String getMasanpham() { return masanpham; }
-    public void setMasanpham(String masanpham) { this.masanpham = masanpham; }
+    public int getMasanpham() { return masanpham; }
+    public void setMasanpham(int masanpham) { this.masanpham = masanpham; }
     public String getTensanpham() {return tensanpham;}
     public void setTensanpham(String tensanpham) {this.tensanpham = tensanpham;}
     public int getSoluong() {return soluong;}

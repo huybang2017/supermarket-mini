@@ -125,7 +125,7 @@ public class QuanLySanPhamGUI extends JPanel {
                 model.setRowCount(0);
                 if (SanPhamBUS.dssp != null) {
                     for (SanPhamDTO sp : SanPhamBUS.dssp) {
-                        if (sp.getMasanpham().toLowerCase().contains(keyword) || sp.getTensanpham().toLowerCase().contains(keyword)) {
+                        if (sp.getMasanpham()== Integer.parseInt(keyword) || sp.getTensanpham().toLowerCase().contains(keyword)) {
                             model.addRow(new Object[]{sp.getMasanpham(), sp.getTensanpham(), sp.getSoluong(), sp.getDongia(), sp.getDonvitinh(), "⚙ Sửa"});
                         }
                     }
@@ -145,7 +145,7 @@ public class QuanLySanPhamGUI extends JPanel {
                 if (e.getClickCount() == 2) {
                     int row = tblSanPham.getSelectedRow();
                     String id = tblSanPham.getValueAt(row, 0).toString();
-                    for (SanPhamDTO sp : SanPhamBUS.dssp) { if (sp.getMasanpham().equals(id)) { showForm(sp); break; } }
+                    for (SanPhamDTO sp : SanPhamBUS.dssp) { if (sp.getMasanpham()== Integer.parseInt(id)) { showForm(sp); break; } }
                 }
             }
         });
@@ -196,7 +196,7 @@ public class QuanLySanPhamGUI extends JPanel {
         pnlForm.setBorder(new EmptyBorder(30, 30, 30, 30));
         pnlForm.setBackground(Color.WHITE);
 
-        JTextField txtID = new JTextField(sp != null ? sp.getMasanpham() : "");
+        JTextField txtID = new JTextField(sp != null ? String.valueOf(sp.getMasanpham()) : "");
         JTextField txtTen = new JTextField(sp != null ? sp.getTensanpham() : "");
         JTextField txtSoLuong = new JTextField(sp != null ? String.valueOf(sp.getSoluong()) : "");
         JTextField txtGia = new JTextField(sp != null ? String.valueOf(sp.getDongia()) : "");
@@ -248,7 +248,7 @@ public class QuanLySanPhamGUI extends JPanel {
                 }
 
                 SanPhamDTO newSp = new SanPhamDTO();
-                newSp.setMasanpham(txtID.getText());
+                newSp.setMasanpham(Integer.parseInt(txtID.getText()));
                 newSp.setTensanpham(txtTen.getText());
                 newSp.setMaLoai(cbLoai.getSelectedItem().toString().split(" - ")[0]);
                 newSp.setMaHang(cbHang.getSelectedItem().toString().split(" - ")[0]);

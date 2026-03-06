@@ -14,7 +14,7 @@ public class SanPhamDAO {
             ResultSet rs = st.executeQuery(qry);
             while (rs.next()) {
                 SanPhamDTO sp = new SanPhamDTO();
-                sp.setMasanpham(rs.getString("id"));
+                sp.setMasanpham(rs.getInt("id"));
                 sp.setMaLoai(rs.getString("loaiSanPhamId"));
                 sp.setMaHang(rs.getString("hangId"));
                 sp.setTensanpham(rs.getString("ten"));
