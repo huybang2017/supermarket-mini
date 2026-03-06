@@ -21,7 +21,7 @@ public ArrayList<ChiTietPhieuNhapHangDTO> docTheoMaPN(int maPN) { // Đổi sang
         while (rs.next()) {
             ChiTietPhieuNhapHangDTO ct = new ChiTietPhieuNhapHangDTO();
             ct.setMaPNH(rs.getInt(1)); // int
-            ct.setMaSP(rs.getString(2));  // int
+            ct.setMaSP(rs.getInt(2));  // int
             ct.setSoLuong(rs.getInt(3));
             ct.setDonGia(rs.getDouble(4));
             dsct.add(ct);

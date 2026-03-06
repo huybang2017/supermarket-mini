@@ -102,11 +102,11 @@ public class SieuThiMiniGUI extends JFrame {
         pnlMainContent.add(new JPanel(),"Loại Sản Phẩm");
         pnlMainContent.add(new QuanLySanPhamGUI(),"Quản Lý Sản Phẩm");
         pnlMainContent.add(new LoaiSanPhamGUI(), "Loại Sản Phẩm");
-        pnlMainContent.add(new KhachHangGUI(), "Quản Lý Khách Hàng");
-        pnlMainContent.add(new DonHangGUI(), "Quản Lý Đơn Hàng");
-        pnlMainContent.add(new GiaBanGUI(), "Quản Lý Giá Bán");        
-        pnlMainContent.add(new NhapHangGUI(), "Quản Lý Nhập Hàng");        
-        pnlMainContent.add(new ThongKeGUI(), "Thống Kê & Báo Cáo");
+        pnlMainContent.add(new QuanLyKhachHangGUI(), "Quản Lý Khách Hàng");
+        pnlMainContent.add(new QuanLyDonHangGUI(), "Quản Lý Đơn Hàng");
+        pnlMainContent.add(new QuanLyGiaBanGUI(), "Quản Lý Giá Bán");        
+        pnlMainContent.add(new QuanLyNhapHangGUI(), "Quản Lý Nhập Hàng");        
+        pnlMainContent.add(new ThongKeBaoCaoGUI(), "Thống Kê & Báo Cáo");
         add(pnlMainContent, BorderLayout.CENTER);
     }
     public static void main(String[] args) {
