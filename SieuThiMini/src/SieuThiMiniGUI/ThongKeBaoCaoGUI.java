@@ -5,13 +5,13 @@ import javax.swing.border.*;
 import javax.swing.table.*;
 import java.awt.*;
 
-public class ThongKeGUI extends JPanel {
+public class ThongKeBaoCaoGUI extends JPanel {
     
     private Color secondaryColor = new Color(108, 117, 125);
     private Color bgColor = new Color(244, 246, 249);
     private Font fontTitle = new Font("Segoe UI", Font.BOLD, 24);
 
-    public ThongKeGUI() {
+    public ThongKeBaoCaoGUI() {
         this.setLayout(new BorderLayout(20, 20));
         this.setBackground(bgColor);
         this.setBorder(new EmptyBorder(20, 25, 20, 25));

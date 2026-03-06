@@ -20,11 +20,11 @@ public class HangSanXuatBUS {
         data.themHSX(hsx);
         dshsx.add(hsx);
     }
-    public void xoa(String ma) {
+    public void xoa(int  ma) {
         HangSanXuatDAO data = new HangSanXuatDAO();
         data.xoaHSX(ma);
         for(int i = 0; i < dshsx.size(); i++){
-            if(dshsx.get(i).getMaHang().equals(ma)){
+            if(dshsx.get(i).getMaHang() == (ma)){
                 dshsx.remove(i);
             }
         }
@@ -33,7 +33,7 @@ public class HangSanXuatBUS {
         HangSanXuatDAO data = new HangSanXuatDAO();
         data.suaHSX(hsx);
         for(int i = 0; i < dshsx.size(); i++){
-            if(dshsx.get(i).getMaHang().equals(hsx.getMaHang())){
+            if(dshsx.get(i).getMaHang() == (hsx.getMaHang())){
                 dshsx.set(i,hsx);
             }
         }

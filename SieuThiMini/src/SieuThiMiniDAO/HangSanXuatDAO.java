@@ -21,7 +21,7 @@ public class HangSanXuatDAO {
             ResultSet rs = st.executeQuery(qry);
             while (rs.next()) {
                 HangSanXuatDTO hxs = new HangSanXuatDTO();
-                hxs.setMaHang(rs.getString("id"));
+                hxs.setMaHang(rs.getInt("id"));
                 hxs.setTenHang(rs.getString("ten"));
                 hxs.setDiaChi(rs.getString("diaChi"));
                 hxs.setSdt(rs.getString("phone"));
@@ -52,7 +52,7 @@ public class HangSanXuatDAO {
         }
     }
 
-    public void xoaHSX(String maHang) {
+    public void xoaHSX(int maHang) {
         Connection cnn = data.getConnection();
 
         try {

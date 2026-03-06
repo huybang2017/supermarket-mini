@@ -21,9 +21,9 @@ public class LoaiSanPhamDAO {
             ResultSet rs = st.executeQuery(qry);
             while (rs.next()) {
                 LoaiSanPhamDTO lsp = new LoaiSanPhamDTO();
-                lsp.setMaLoai(rs.getString("id"));
+                lsp.setMaLoai(rs.getInt("id"));
                 lsp.setTenLoai(rs.getString("name"));
-                lsp.setHang(rs.getString("hangId"));
+                lsp.setHang(rs.getInt("hangId"));
                 dslsp.add(lsp);
             }
         } catch (SQLException e) {
@@ -50,7 +50,7 @@ public class LoaiSanPhamDAO {
         }
     }
 
-    public void xoaLSP(String maLoai) {
+    public void xoaLSP(int maLoai) {
         Connection cnn = data.getConnection();
 
         try {

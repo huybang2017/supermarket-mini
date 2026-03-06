@@ -3,7 +3,7 @@ import DTO.SanPhamDTO;
 import javax.swing.*;
 import java.sql.*;
 import java.util.ArrayList;
-public class SanPhamDAO {
+public class SanPhamDAO { 
     MyConnection data = new MyConnection();
     public ArrayList<SanPhamDTO> docDSSP() {
         ArrayList<SanPhamDTO> dssp = new ArrayList<>();
@@ -14,9 +14,9 @@ public class SanPhamDAO {
             ResultSet rs = st.executeQuery(qry);
             while (rs.next()) {
                 SanPhamDTO sp = new SanPhamDTO();
-                sp.setMasanpham(rs.getString("id"));
-                sp.setMaLoai(rs.getString("loaiSanPhamId"));
-                sp.setMaHang(rs.getString("hangId"));
+                sp.setMasanpham(rs.getInt("id"));
+                sp.setMaLoai(rs.getInt("loaiSanPhamId"));
+                sp.setMaHang(rs.getInt("hangId"));
                 sp.setTensanpham(rs.getString("ten"));
                 sp.setSoluong(rs.getInt("soLuong"));
                 sp.setDongia(rs.getInt("donGia"));
@@ -53,7 +53,7 @@ public class SanPhamDAO {
         }
     }
 
-    public void xoaSP(String maSP) {
+    public void xoaSP(int maSP) {
         Connection cnn = data.getConnection();
 
         try {

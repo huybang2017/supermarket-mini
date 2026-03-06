@@ -18,11 +18,11 @@ public class SanPhamBUS {
         data.themSP(sp);
         dssp.add(sp);
     }
-    public void xoa(String ma) {
+    public void xoa(int ma) {
         SanPhamDAO data = new SanPhamDAO();
         data.xoaSP(ma);
         for(int i = 0; i < dssp.size(); i++){
-            if(dssp.get(i).getMasanpham().equals(ma)){
+            if(dssp.get(i).getMasanpham() == (ma)){
                 dssp.remove(i);
             }
         }
@@ -31,9 +31,9 @@ public class SanPhamBUS {
         SanPhamDAO data = new SanPhamDAO();
         data.suaSP(sp);
         for(int i = 0; i < dssp.size(); i++){
-            if(dssp.get(i).getMasanpham().equals(sp.getMasanpham())){
+            if(dssp.get(i).getMasanpham() == (sp.getMasanpham())){
                 dssp.set(i,sp);
             }
         }
     }
- }
+}

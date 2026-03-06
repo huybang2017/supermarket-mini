@@ -125,7 +125,7 @@ public class QuanLySanPhamGUI extends JPanel {
                 model.setRowCount(0);
                 if (SanPhamBUS.dssp != null) {
                     for (SanPhamDTO sp : SanPhamBUS.dssp) {
-                        if (sp.getMasanpham().toLowerCase().contains(keyword) || sp.getTensanpham().toLowerCase().contains(keyword)) {
+                        if (sp.getMasanpham()== Integer.parseInt(keyword) || sp.getTensanpham().toLowerCase().contains(keyword)) {
                             model.addRow(new Object[]{sp.getMasanpham(), sp.getTensanpham(), sp.getSoluong(), sp.getDongia(), sp.getDonvitinh(), "⚙ Sửa"});
                         }
                     }
@@ -145,7 +145,7 @@ public class QuanLySanPhamGUI extends JPanel {
                 if (e.getClickCount() == 2) {
                     int row = tblSanPham.getSelectedRow();
                     String id = tblSanPham.getValueAt(row, 0).toString();
-                    for (SanPhamDTO sp : SanPhamBUS.dssp) { if (sp.getMasanpham().equals(id)) { showForm(sp); break; } }
+                    for (SanPhamDTO sp : SanPhamBUS.dssp) { if (sp.getMasanpham()==Integer.parseInt(id)) { showForm(sp); break; } }
                 }
             }
         });
@@ -173,7 +173,7 @@ public class QuanLySanPhamGUI extends JPanel {
     private void deleteSelectedProduct() {
         int row = tblSanPham.getSelectedRow();
         if (row != -1) {
-            String id = tblSanPham.getValueAt(row, 0).toString();
+            int id = Integer.parseInt(tblSanPham.getValueAt(row, 0).toString());
             // Chú ý: Component truyền vào JOptionPane.showConfirmDialog đổi thành 'this'
             if (JOptionPane.showConfirmDialog(this, "Xóa sản phẩm " + id + "?") == JOptionPane.YES_OPTION) {
                 new SanPhamBUS().xoa(id);
@@ -183,9 +183,6 @@ public class QuanLySanPhamGUI extends JPanel {
     }
 
     private void showForm(SanPhamDTO sp) {
-        // ... (Copy nguyên hàm showForm của bạn vào đây) ...
-        // Chú ý: Tham số thứ nhất của JDialog đổi từ 'this' (vì this đang là JPanel) 
-        // sang SwingUtilities.getWindowAncestor(this) để lấy ra cái Frame gốc chứa nó.
         Window parentWindow = SwingUtilities.getWindowAncestor(this);
         JDialog dialog = new JDialog((Frame)parentWindow, sp == null ? "Thêm Sản Phẩm" : "Sửa Sản Phẩm", true);
         dialog.setSize(500, 550);
@@ -196,8 +193,8 @@ public class QuanLySanPhamGUI extends JPanel {
         pnlForm.setBorder(new EmptyBorder(30, 30, 30, 30));
         pnlForm.setBackground(Color.WHITE);
 
-        JTextField txtID = new JTextField(sp != null ? sp.getMasanpham() : "");
-        JTextField txtTen = new JTextField(sp != null ? sp.getTensanpham() : "");
+        JTextField txtID = new JTextField(sp != null ? String.valueOf(sp.getMasanpham()) : "");
+        JTextField txtTen = new JTextField(sp != null ? String.valueOf(sp.getTensanpham()) : "");
         JTextField txtSoLuong = new JTextField(sp != null ? String.valueOf(sp.getSoluong()) : "");
         JTextField txtGia = new JTextField(sp != null ? String.valueOf(sp.getDongia()) : "");
         JTextField txtDVT = new JTextField(sp != null ? sp.getDonvitinh() : "");
@@ -221,12 +218,24 @@ public class QuanLySanPhamGUI extends JPanel {
 
         if (sp != null) {
             txtID.setEditable(false);
-            for (int i = 0; i < cbLoai.getItemCount(); i++)
-                if (cbLoai.getItemAt(i).startsWith(sp.getMaLoai())) cbLoai.setSelectedIndex(i);
-            for (int i = 0; i < cbHang.getItemCount(); i++)
-                if (cbHang.getItemAt(i).startsWith(sp.getMaHang())) cbHang.setSelectedIndex(i);
+            
+            // Cập nhật ComboBox Loại Sản Phẩm
+            for (int i = 0; i < cbLoai.getItemCount(); i++) {
+                // Chuyển int thành String trước khi so sánh
+                if (cbLoai.getItemAt(i).startsWith(String.valueOf(sp.getMaLoai()))) {
+                    cbLoai.setSelectedIndex(i);
+                    break; // Thêm break để dừng vòng lặp ngay khi tìm thấy, giúp tối ưu hiệu suất
+                }
+            }
+            
+            // Cập nhật ComboBox Hãng Sản Xuất
+            for (int i = 0; i < cbHang.getItemCount(); i++) {
+                if (cbHang.getItemAt(i).startsWith(String.valueOf(sp.getMaHang()))) {
+                    cbHang.setSelectedIndex(i);
+                    break;
+                }
+            }
         }
-
         pnlForm.add(new JLabel("Mã Sản Phẩm:")); pnlForm.add(txtID);
         pnlForm.add(new JLabel("Tên Sản Phẩm:")); pnlForm.add(txtTen);
         pnlForm.add(new JLabel("Loại SP:")); pnlForm.add(cbLoai);
@@ -248,10 +257,10 @@ public class QuanLySanPhamGUI extends JPanel {
                 }
 
                 SanPhamDTO newSp = new SanPhamDTO();
-                newSp.setMasanpham(txtID.getText());
+                newSp.setMasanpham(Integer.parseInt(txtID.getText()));
                 newSp.setTensanpham(txtTen.getText());
-                newSp.setMaLoai(cbLoai.getSelectedItem().toString().split(" - ")[0]);
-                newSp.setMaHang(cbHang.getSelectedItem().toString().split(" - ")[0]);
+                newSp.setMaLoai(Integer.parseInt(cbLoai.getSelectedItem().toString().split(" - ")[0]));
+                newSp.setMaHang(Integer.parseInt(cbHang.getSelectedItem().toString().split(" - ")[0]));
                 newSp.setSoluong(Integer.parseInt(txtSoLuong.getText()));
                 newSp.setDongia(Integer.parseInt(txtGia.getText()));
                 newSp.setDonvitinh(txtDVT.getText());

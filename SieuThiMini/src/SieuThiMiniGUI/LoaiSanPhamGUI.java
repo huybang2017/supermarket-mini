@@ -3,6 +3,12 @@ package SieuThiMiniGUI;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.*;
+
+import DTO.LoaiSanPhamDTO;
+import DTO.SanPhamDTO;
+import SieuThiMiniBUS.LoaiSanPhamBUS;
+import SieuThiMiniBUS.SanPhamBUS;
+
 import java.awt.*;
 import java.awt.event.*;
 
@@ -16,7 +22,10 @@ public class LoaiSanPhamGUI extends JPanel {
     private Font fontTitle = new Font("Segoe UI", Font.BOLD, 24);
     private Font fontPlain = new Font("Segoe UI", Font.PLAIN, 14);
 
-    public LoaiSanPhamGUI() { initComponents(); }
+    public LoaiSanPhamGUI() { 
+        initComponents(); 
+        docDSLSP();
+    }
 
     private void initComponents() {
         this.setLayout(new BorderLayout(20, 20));
@@ -56,7 +65,7 @@ public class LoaiSanPhamGUI extends JPanel {
 
         card.add(pnlHeader, BorderLayout.NORTH);
 
-        String[] headers = {"Mã Loại", "Tên Loại", "Mô Tả", "Hành Động"};
+        String[] headers = {"Mã Loại", "Tên Loại", "Hành Động"};
         model = new DefaultTableModel(headers, 0) { @Override public boolean isCellEditable(int r, int c) { return false; } };
         tblLoaiSP = new JTable(model);
         styleTable(tblLoaiSP);
@@ -69,6 +78,15 @@ public class LoaiSanPhamGUI extends JPanel {
         this.add(card, BorderLayout.CENTER);
     }
 
+        private void docDSLSP() {
+        new LoaiSanPhamBUS().docDSLSP();
+        model.setRowCount(0);
+        if(LoaiSanPhamBUS.dslsp != null) {
+            for (LoaiSanPhamDTO lsp : LoaiSanPhamBUS.dslsp) {
+                model.addRow(new Object[]{lsp.getMaLoai(), lsp.getTenLoai(), "⚙ Sửa"});
+            }
+        }
+    }
     // --- 2 HÀM NÀY QUYẾT ĐỊNH STYLE CỦA BẢNG VÀ NÚT ---
     private void styleTable(JTable t) {
         t.setRowHeight(45);

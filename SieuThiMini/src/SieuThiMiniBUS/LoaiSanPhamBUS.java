@@ -4,7 +4,6 @@ import DTO.LoaiSanPhamDTO;
 import DTO.SanPhamDTO;
 import SieuThiMiniDAO.LoaiSanPhamDAO;
 import SieuThiMiniDAO.SanPhamDAO;
-
 import java.lang.classfile.Label;
 import java.util.ArrayList;
 
@@ -21,11 +20,11 @@ public class LoaiSanPhamBUS {
         data.themLSP(lsp);
         dslsp.add(lsp);
     }
-    public void xoa(String ma) {
+    public void xoa(int ma) {
         LoaiSanPhamDAO data = new LoaiSanPhamDAO();
         data.xoaLSP(ma);
         for(int i = 0; i < dslsp.size(); i++){
-            if(dslsp.get(i).getMaLoai().equals(ma)){
+            if(dslsp.get(i).getMaLoai() == (ma)){
                 dslsp.remove(i);
             }
         }
@@ -34,7 +33,7 @@ public class LoaiSanPhamBUS {
         LoaiSanPhamDAO data = new LoaiSanPhamDAO();
         data.suaLSP(lsp);
         for(int i = 0; i < dslsp.size(); i++){
-            if(dslsp.get(i).getMaLoai().equals(lsp.getMaLoai())){
+            if(dslsp.get(i).getMaLoai() == (lsp.getMaLoai())){
                 dslsp.set(i,lsp);
             }
         }

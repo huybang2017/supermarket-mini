@@ -6,7 +6,7 @@ import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class GiaBanGUI extends JPanel {
+public class QuanLyGiaBanGUI extends JPanel {
     private DefaultTableModel model;
     private JTable tblGiaBan;
     
@@ -15,7 +15,7 @@ public class GiaBanGUI extends JPanel {
     private Font fontTitle = new Font("Segoe UI", Font.BOLD, 24);
     private Font fontPlain = new Font("Segoe UI", Font.PLAIN, 14);
 
-    public GiaBanGUI() { initComponents(); }
+    public QuanLyGiaBanGUI() { initComponents(); }
 
     private void initComponents() {
         this.setLayout(new BorderLayout(20, 20));
