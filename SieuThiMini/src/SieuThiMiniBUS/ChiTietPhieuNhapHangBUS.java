@@ -10,8 +10,9 @@ public class ChiTietPhieuNhapHangBUS {
 
     public ChiTietPhieuNhapHangBUS() {}
 
-    public ArrayList<ChiTietPhieuNhapHangDTO> timTheoMaPN(String maPN) {
+    public ArrayList<ChiTietPhieuNhapHangDTO> timTheoMaPN(int maPN) {
         ChiTietPhieuNhapHangDAO data = new ChiTietPhieuNhapHangDAO();
+        if (dsctpn == null) dsctpn = new ArrayList<ChiTietPhieuNhapHangDTO>();
         return data.docTheoMaPN(maPN);
     }
 
@@ -20,11 +21,11 @@ public class ChiTietPhieuNhapHangBUS {
         data.themCTPNH(ct);
     }
 
-    public void xoa(String ma) {
+    public void xoa(int ma) {
         ChiTietPhieuNhapHangDAO data = new ChiTietPhieuNhapHangDAO();
         data.xoaCTPNH(ma);
         for(int i = 0; i < dsctpn.size(); i++){
-            if(dsctpn.get(i).getMaPNH().equals(ma)){
+            if(dsctpn.get(i).getMaPNH() == (ma)){
                 dsctpn.remove(i);
             }
         }
@@ -34,7 +35,7 @@ public class ChiTietPhieuNhapHangBUS {
         ChiTietPhieuNhapHangDAO data = new ChiTietPhieuNhapHangDAO();
         data.suaCTPNH(ct);
         for(int i = 0; i < dsctpn.size(); i++){
-            if(dsctpn.get(i).getMaPNH().equals(ct.getMaPNH())){
+            if(dsctpn.get(i).getMaPNH()==(ct.getMaPNH())){
                 dsctpn.set(i,ct);
             }
         }

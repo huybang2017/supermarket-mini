@@ -20,6 +20,9 @@ public class NhaCungCapBUS {
     public void them(NhaCungCapDTO ncc) {
         NhaCungCapDAO data = new NhaCungCapDAO();
         data.themNCC(ncc);
+        if (dsncc == null) {
+            dsncc = new ArrayList<>();
+        }
         dsncc.add(ncc);
     }
 

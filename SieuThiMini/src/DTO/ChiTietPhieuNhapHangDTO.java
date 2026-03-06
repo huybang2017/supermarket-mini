@@ -1,7 +1,7 @@
 package DTO;
 
 public class ChiTietPhieuNhapHangDTO {
-    private String maphieunhaphang;
+    private int maphieunhaphang;
     private String masanpham;
     private double dongia;
     private int soluong;
@@ -10,7 +10,7 @@ public class ChiTietPhieuNhapHangDTO {
     public ChiTietPhieuNhapHangDTO() {
     }
 
-    public ChiTietPhieuNhapHangDTO(String maphieunhaphang, String masanpham, double dongia, int soluong, double thanhtien) {
+    public ChiTietPhieuNhapHangDTO(int maphieunhaphang, String masanpham, double dongia, int soluong, double thanhtien) {
         this.maphieunhaphang = maphieunhaphang;
         this.masanpham = masanpham;
         this.dongia = dongia;
@@ -18,8 +18,8 @@ public class ChiTietPhieuNhapHangDTO {
         this.thanhtien = thanhtien;
     }
 
-    public String getMaPNH() { return maphieunhaphang; }
-    public void setMaPNH(String maphieunhaphang) { this.maphieunhaphang = maphieunhaphang; }
+    public int getMaPNH() { return maphieunhaphang; }
+    public void setMaPNH(int maphieunhaphang) { this.maphieunhaphang = maphieunhaphang; }
     public String getMaSP() { return masanpham; }
     public void setMaSP(String masanpham) { this.masanpham = masanpham; }
     public double getDonGia() { return dongia; }

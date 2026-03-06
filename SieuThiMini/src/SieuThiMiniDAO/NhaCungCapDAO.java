@@ -53,19 +53,21 @@ public class NhaCungCapDAO {
         } catch (SQLException e) { System.out.println("Sai chỗ xóa"); }
     }
 
+
     public void suaNCC(NhaCungCapDTO ncc) {
         Connection cnn = data.getConnection();
         try {
+            // Thêm dấu = ở diaChi và xóa dấu phẩy trước WHERE
             String qry = "UPDATE nhacungcap SET "
                     + "ten = '" + ncc.getTenNCC() + "', "
-                    + "diaChi '" + ncc.getDiaChi() + "', "
-                    + "phone = '" + ncc.getSdt() + "', "
+                    + "diaChi = '" + ncc.getDiaChi() + "', "
+                    + "phone = '" + ncc.getSdt() + "' "
                     + "WHERE id = '" + ncc.getMaNCC() + "'";
             Statement st = cnn.createStatement();
             st.executeUpdate(qry);
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Lỗi sửa: " + e.getMessage());
-        }finally {
+        } finally {
             data.closeConnection(); 
         }
     }
