@@ -25,11 +25,11 @@ public class PhieuNhapHangBUS {
         }
     }
 
-    public void xoa(String ma) {
+    public void xoa(int ma) {
         PhieuNhapHangDAO data = new PhieuNhapHangDAO();
         data.xoaPNH(ma);
         for(int i = 0; i < dspn.size(); i++){
-            if(dspn.get(i).getMaPNH().equals(ma)){
+            if(dspn.get(i).getMaPNH() == ma){
                 dspn.remove(i);
             }
         }
@@ -39,7 +39,7 @@ public class PhieuNhapHangBUS {
         PhieuNhapHangDAO data = new PhieuNhapHangDAO();
         data.suaPNH(pn);
         for(int i = 0; i < dspn.size(); i++){
-            if(dspn.get(i).getMaPNH().equals(pn.getMaPNH())){
+            if(dspn.get(i).getMaPNH() ==(pn.getMaPNH())){
                 dspn.set(i,pn);
             }
         }

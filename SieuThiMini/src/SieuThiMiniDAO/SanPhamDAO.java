@@ -14,9 +14,9 @@ public class SanPhamDAO {
             ResultSet rs = st.executeQuery(qry);
             while (rs.next()) {
                 SanPhamDTO sp = new SanPhamDTO();
-                sp.setMasanpham(rs.getInt("id"));
-                sp.setMaLoai(rs.getInt("loaiSanPhamId"));
-                sp.setMaHang(rs.getInt("hangId"));
+                sp.setMasanpham(rs.getString("id"));
+                sp.setMaLoai(rs.getString("loaiSanPhamId"));
+                sp.setMaHang(rs.getString("hangId"));
                 sp.setTensanpham(rs.getString("ten"));
                 sp.setSoluong(rs.getInt("soLuong"));
                 sp.setDongia(rs.getInt("donGia"));

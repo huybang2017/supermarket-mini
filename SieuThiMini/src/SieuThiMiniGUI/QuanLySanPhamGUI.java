@@ -145,7 +145,7 @@ public class QuanLySanPhamGUI extends JPanel {
                 if (e.getClickCount() == 2) {
                     int row = tblSanPham.getSelectedRow();
                     String id = tblSanPham.getValueAt(row, 0).toString();
-                    for (SanPhamDTO sp : SanPhamBUS.dssp) { if (sp.getMasanpham()==Integer.parseInt(id)) { showForm(sp); break; } }
+                    for (SanPhamDTO sp : SanPhamBUS.dssp) { if (sp.getMasanpham().equals(id)) { showForm(sp); break; } }
                 }
             }
         });
@@ -193,8 +193,8 @@ public class QuanLySanPhamGUI extends JPanel {
         pnlForm.setBorder(new EmptyBorder(30, 30, 30, 30));
         pnlForm.setBackground(Color.WHITE);
 
-        JTextField txtID = new JTextField(sp != null ? String.valueOf(sp.getMasanpham()) : "");
-        JTextField txtTen = new JTextField(sp != null ? String.valueOf(sp.getTensanpham()) : "");
+        JTextField txtID = new JTextField(sp != null ? sp.getMasanpham() : "");
+        JTextField txtTen = new JTextField(sp != null ? sp.getTensanpham() : "");
         JTextField txtSoLuong = new JTextField(sp != null ? String.valueOf(sp.getSoluong()) : "");
         JTextField txtGia = new JTextField(sp != null ? String.valueOf(sp.getDongia()) : "");
         JTextField txtDVT = new JTextField(sp != null ? sp.getDonvitinh() : "");

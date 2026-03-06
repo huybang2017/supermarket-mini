@@ -1,8 +1,8 @@
 package DTO;
 
 public class ChiTietPhieuNhapHangDTO {
-    private String maphieunhaphang;
-    private String masanpham;
+    private int maphieunhaphang;
+    private int masanpham;
     private double dongia;
     private int soluong;
     private double thanhtien;
@@ -10,7 +10,7 @@ public class ChiTietPhieuNhapHangDTO {
     public ChiTietPhieuNhapHangDTO() {
     }
 
-    public ChiTietPhieuNhapHangDTO(String maphieunhaphang, String masanpham, double dongia, int soluong, double thanhtien) {
+    public ChiTietPhieuNhapHangDTO(int maphieunhaphang, int masanpham, double dongia, int soluong, double thanhtien) {
         this.maphieunhaphang = maphieunhaphang;
         this.masanpham = masanpham;
         this.dongia = dongia;
@@ -18,10 +18,10 @@ public class ChiTietPhieuNhapHangDTO {
         this.thanhtien = thanhtien;
     }
 
-    public String getMaPNH() { return maphieunhaphang; }
-    public void setMaPNH(String maphieunhaphang) { this.maphieunhaphang = maphieunhaphang; }
-    public String getMaSP() { return masanpham; }
-    public void setMaSP(String masanpham) { this.masanpham = masanpham; }
+    public int getMaPNH() { return maphieunhaphang; }
+    public void setMaPNH(int maphieunhaphang) { this.maphieunhaphang = maphieunhaphang; }
+    public int getMaSP() { return masanpham; }
+    public void setMaSP(int masanpham) { this.masanpham = masanpham; }
     public double getDonGia() { return dongia; }
     public void setDonGia(double dongia) { this.dongia = dongia; }
     public int getSoLuong() { return soluong; }

@@ -3,19 +3,36 @@ package SieuThiMiniGUI;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.*;
+
+import DTO.ChiTietPhieuNhapHangDTO;
+import DTO.NhaCungCapDTO;
+import DTO.PhieuNhapHangDTO;
+import DTO.SanPhamDTO;
+import SieuThiMiniBUS.ChiTietPhieuNhapHangBUS;
+import SieuThiMiniBUS.NhaCungCapBUS;
+import SieuThiMiniBUS.PhieuNhapHangBUS;
+import SieuThiMiniBUS.SanPhamBUS;
+
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Vector;
 
 public class QuanLyNhapHangGUI extends JPanel {
     private DefaultTableModel model;
     private JTable tblNhapHang;
     
+    private PhieuNhapHangBUS pnBUS = new PhieuNhapHangBUS();
+    private NhaCungCapBUS nccBUS = new NhaCungCapBUS();
+    private ChiTietPhieuNhapHangBUS ctBUS = new ChiTietPhieuNhapHangBUS();
+    private SanPhamBUS spBUS = new SanPhamBUS();
+
     private Color secondaryColor = new Color(108, 117, 125);
     private Color bgColor = new Color(244, 246, 249);
     private Font fontTitle = new Font("Segoe UI", Font.BOLD, 24);
     private Font fontPlain = new Font("Segoe UI", Font.PLAIN, 14);
 
-    public QuanLyNhapHangGUI() { initComponents(); }
+    public NhapHangGUI() { initComponents(); }
 
     private void initComponents() {
         this.setLayout(new BorderLayout(20, 20));
@@ -56,8 +73,21 @@ public class QuanLyNhapHangGUI extends JPanel {
 
         JPanel pnlButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         pnlButtons.setOpaque(false);
-        pnlButtons.add(createActionBtn("+ Tạo Phiếu Nhập"));
         topToolBar.add(pnlButtons, BorderLayout.EAST);
+
+        JButton btnThem = createActionBtn("Tạo Phiếu Mới");
+        btnThem.addActionListener(e -> openForm(null,null));
+
+        JButton btnXoa = createActionBtn("Xóa Phiếu");
+        btnXoa.addActionListener(e -> deletePhieu());
+        
+        JButton btnSua = createActionBtn("Sửa Phiếu");
+        btnSua.addActionListener(e -> editPhieu());
+
+        pnlButtons.add(btnThem);
+        pnlButtons.add(btnSua);
+        pnlButtons.add(btnXoa);
+
 
         JPanel pnlAdvSearch = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
         pnlAdvSearch.setBackground(new Color(248, 250, 252));
@@ -95,12 +125,22 @@ public class QuanLyNhapHangGUI extends JPanel {
         card.add(scrollPane, BorderLayout.CENTER);
 
         this.add(card, BorderLayout.CENTER);
+
+        tblNhapHang.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    showDetail();
+                }
+            }
+        });
+
     }
 
     // --- 2 HÀM NÀY QUYẾT ĐỊNH STYLE CỦA BẢNG VÀ NÚT ---
     private void styleTable(JTable t) {
         t.setRowHeight(45);
-        t.setFont(new Font("Segoe UI", Font.PLAIN, 14)); // Font thân bảng
+        t.setFont(new Font("Segoe UI", Font.PLAIN, 14)); 
         t.setGridColor(new Color(245, 245, 245));
         t.setShowVerticalLines(false); 
         t.setSelectionBackground(new Color(240, 247, 255));
@@ -110,7 +150,7 @@ public class QuanLyNhapHangGUI extends JPanel {
         JTableHeader header = t.getTableHeader();
         header.setPreferredSize(new Dimension(0, 45));
         header.setBackground(new Color(250, 251, 252));
-        header.setFont(new Font("Segoe UI", Font.BOLD, 13)); // Font Header bảng
+        header.setFont(new Font("Segoe UI", Font.BOLD, 13)); 
         header.setForeground(secondaryColor);
         ((DefaultTableCellRenderer)header.getDefaultRenderer()).setHorizontalAlignment(JLabel.LEFT);
     }
@@ -118,11 +158,199 @@ public class QuanLyNhapHangGUI extends JPanel {
     private JButton createActionBtn(String text) {
         JButton btn = new JButton(text);
         btn.setPreferredSize(new Dimension(140, 38));
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 13)); // Font của Nút
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 13)); 
         btn.setFocusPainted(false);
         btn.setBackground(new Color(226, 232, 240)); 
         btn.setForeground(Color.BLACK); 
         btn.setBorder(new LineBorder(new Color(203, 213, 225), 1)); 
         return btn;
+    }
+    
+
+    // --- CÁC HÀM XỬ LÝ LOGIC ---
+
+    public void docDSPN() {
+        pnBUS.docDSPN();
+        model.setRowCount(0);
+        for (PhieuNhapHangDTO pn : PhieuNhapHangBUS.dspn) {
+            Vector<Object> row = new Vector<>();
+            row.add(pn.getMaPNH());
+            row.add(pn.getMaNV());
+            row.add(pn.getMaNCC());
+            row.add(pn.getNgayNhap());
+            row.add(pn.getTongTien());
+            model.addRow(row);
+        }
+    }
+
+    
+
+    private void showDetail() {
+        int i = tblNhapHang.getSelectedRow();
+        if (i >= 0) {
+            int maPN = Integer.parseInt(model.getValueAt(i, 0).toString());
+            ArrayList<ChiTietPhieuNhapHangDTO> dsct = ctBUS.timTheoMaPN(maPN);
+            
+            JDialog detailDlg = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Chi Tiết Phiếu Nhập: " + maPN, true);
+            detailDlg.setSize(600, 400);
+            detailDlg.setLayout(new BorderLayout());
+
+            String[] ctHeaders = {"Mã SP", "Số Lượng", "Đơn Giá", "Thành Tiền"};
+            DefaultTableModel ctModel = new DefaultTableModel(ctHeaders, 0);
+            for (ChiTietPhieuNhapHangDTO ct : dsct) {
+                ctModel.addRow(new Object[]{ct.getMaSP(), ct.getSoLuong(), ct.getDonGia(), (ct.getSoLuong() * ct.getDonGia())});
+            }
+            
+            JTable tblCT = new JTable(ctModel);
+            styleTable(tblCT);
+            detailDlg.add(new JScrollPane(tblCT), BorderLayout.CENTER);
+            detailDlg.setLocationRelativeTo(this);
+            detailDlg.setVisible(true);
+        }
+    }
+
+    private void openForm(PhieuNhapHangDTO pn, SanPhamDTO sp) {
+        Window parentWindow = SwingUtilities.getWindowAncestor(this);
+        JDialog dialog = new JDialog((Frame) parentWindow, pn == null ? "Thêm Phiếu Nhập" : "Sửa Phiếu Nhập", true);
+        dialog.setSize(500, 450);
+        dialog.setLocationRelativeTo(this);
+        dialog.setLayout(new BorderLayout());
+    
+        JPanel pnlForm = new JPanel(new GridLayout(8, 2, 10, 25));
+        pnlForm.setBorder(new EmptyBorder(30, 30, 30, 30));
+        pnlForm.setBackground(Color.WHITE);
+    
+        
+
+        JTextField txtID = new JTextField(pn != null ? String.valueOf(pn.getMaPNH()) : "1"); 
+        JTextField txtMaNV = new JTextField(pn != null ? String.valueOf(pn.getMaNV()) : "1");
+        JTextField txtNgay = new JTextField(pn != null ? pn.getNgayNhap().toString() : new java.sql.Date(System.currentTimeMillis()).toString());
+        JTextField txtTongTien = new JTextField(pn != null ? String.valueOf(pn.getTongTien()) : "0");
+        JTextField txtDonGia = new JTextField (pn != null ? String.valueOf(sp.getDongia()) : "0");
+        JTextField txtSoLuong = new JTextField (pn!= null ? sp.getSoluong() : 0 );
+        
+        nccBUS.docDSNCC();
+        JComboBox<String> cbNCC = new JComboBox<>();
+        cbNCC.addItem("-- Chọn Nhà Cung Cấp --");
+        for (NhaCungCapDTO ncc : NhaCungCapBUS.dsncc) {
+            cbNCC.addItem(ncc.getMaNCC() + " - " + ncc.getTenNCC());
+        }
+
+        spBUS.docDSSP();
+        JComboBox<String> cbSP = new JComboBox<>();
+        cbSP.addItem("-- Chọn Sản Phẩm --");
+        for (SanPhamDTO spt : SanPhamBUS.dssp) {
+            cbSP.addItem(spt.getMasanpham() + " - " + spt.getTensanpham());
+        }
+    
+        if (pn != null) {
+            txtID.setEditable(false);
+            txtID.setText(String.valueOf(pn.getMaPNH())); 
+            
+            for (int i = 0; i < cbNCC.getItemCount(); i++) {
+                String maNCCStr = String.valueOf(pn.getMaNCC());
+                
+                if (cbNCC.getItemAt(i).startsWith(maNCCStr + " -")) { 
+                    cbNCC.setSelectedIndex(i);
+                    break; 
+                }
+            }
+        }
+    
+        pnlForm.add(new JLabel("Mã Phiếu Nhập:")); pnlForm.add(txtID);
+        pnlForm.add(new JLabel("Nhà Cung Cấp:")); pnlForm.add(cbNCC);
+        pnlForm.add(new JLabel("Mã Nhân Viên:")); pnlForm.add(txtMaNV);
+        pnlForm.add(new JLabel("Chọn Sản Phẩm:")); pnlForm.add(cbSP);
+        pnlForm.add(new JLabel("Ngày Nhập (yyyy-mm-dd):")); pnlForm.add(txtNgay);
+        pnlForm.add(new JLabel("Tổng Tiền:")); pnlForm.add(txtTongTien);
+        pnlForm.add(new JLabel("Đơn Giá:")); pnlForm.add(txtDonGia);
+        pnlForm.add(new JLabel("Số Lượng:")); pnlForm.add(txtSoLuong);
+
+    
+        JButton btnSave = new JButton(pn == null ? "Thêm Phiếu" : "Lưu Thay Đổi");
+        btnSave.setBackground(new Color(40, 167, 69)); 
+        btnSave.setForeground(Color.WHITE);
+        btnSave.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        
+        btnSave.addActionListener(e -> {
+            try {
+                if (cbNCC.getSelectedIndex() == 0) {
+                    JOptionPane.showMessageDialog(dialog, "Vui lòng chọn Nhà cung cấp!");
+                    return;
+                }
+    
+                PhieuNhapHangDTO newPn = new PhieuNhapHangDTO();
+                newPn.setMaPNH(Integer.parseInt((txtID.getText())));
+                newPn.setMaNCC(Integer.parseInt(cbNCC.getSelectedItem().toString().split(" - ")[0]));
+                newPn.setMaNV(Integer.parseInt(txtMaNV.getText()));
+                newPn.setNgayNhap(java.sql.Date.valueOf(txtNgay.getText())); 
+                newPn.setTongTien(Double.parseDouble(txtTongTien.getText()));
+
+                ChiTietPhieuNhapHangDTO newCt = new ChiTietPhieuNhapHangDTO();
+                newCt.setMaPNH(Integer.parseInt((txtID.getText())));
+                newCt.setMaSP(Integer.parseInt(cbSP.getSelectedItem().toString().split(" - ")[0]));
+                newCt.setDonGia(Integer.parseInt(txtDonGia.getText()));
+                newCt.setSoLuong(Integer.parseInt(txtSoLuong.getText()));
+    
+                if (pn == null) {
+                    pnBUS.them(newPn);
+                    ctBUS.them(newCt);
+                    JOptionPane.showMessageDialog(dialog, "Thêm phiếu nhập thành công!");
+                } else {
+                    pnBUS.sua(newPn);
+                    ctBUS.sua(newCt);
+                    JOptionPane.showMessageDialog(dialog, "Cập nhật thành công!");
+                }
+                
+                docDSPN(); 
+                dialog.dispose();
+                
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(dialog, "Lỗi dữ liệu: Kiểm tra định dạng ngày (yyyy-mm-dd) và tiền!");
+                ex.printStackTrace();
+            }
+        });
+    
+        dialog.add(pnlForm, BorderLayout.CENTER);
+        dialog.add(btnSave, BorderLayout.SOUTH);
+        dialog.setVisible(true);
+    }
+
+    private void deletePhieu() {
+        int i = tblNhapHang.getSelectedRow();
+        if (i >= 0) {
+            int res = JOptionPane.showConfirmDialog(this, "Bạn có chắc muốn xóa phiếu này và toàn bộ chi tiết?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+            if (res == JOptionPane.YES_OPTION) {
+                int maPN = Integer.parseInt(model.getValueAt(i, 0).toString());
+                ctBUS.xoa(maPN);
+                pnBUS.xoa(maPN);
+                docDSPN();
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn phiếu cần xóa!");
+        }
+    }
+
+    private void editPhieu() {
+        int i = tblNhapHang.getSelectedRow();
+        if (i >= 0) {
+            int ma = Integer.parseInt(tblNhapHang.getValueAt(i, 0).toString()) ;
+            for(ChiTietPhieuNhapHangDTO item : ChiTietPhieuNhapHangBUS.dsctpn) {
+                if(item.getMaPNH() == (ma)) {
+                    for(SanPhamDTO item2 : SanPhamBUS.dssp)
+                        if(item2.getMasanpham()==(item.getMaSP())){
+                        for(PhieuNhapHangDTO item3: PhieuNhapHangBUS.dspn){
+                            if(item3.getMaPNH() == (ma)){
+                            openForm(item3,item2);
+                            break;
+                            }
+                        }
+                        
+                    }
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Chọn dòng cần sửa!");
+        }
     }
 }
