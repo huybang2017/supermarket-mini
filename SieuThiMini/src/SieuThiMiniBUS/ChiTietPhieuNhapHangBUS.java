@@ -31,13 +31,19 @@ public class ChiTietPhieuNhapHangBUS {
         }
     }
 
-    public void sua(ChiTietPhieuNhapHangDTO ct){
+    public void sua(int maPN, ArrayList<ChiTietPhieuNhapHangDTO> dsMoi) {
         ChiTietPhieuNhapHangDAO data = new ChiTietPhieuNhapHangDAO();
-        data.suaCTPNH(ct);
-        for(int i = 0; i < dsctpn.size(); i++){
-            if(dsctpn.get(i).getMaPNH()==(ct.getMaPNH())){
-                dsctpn.set(i,ct);
-            }
+        
+        data.xoaCTPNH(maPN);
+        for (ChiTietPhieuNhapHangDTO ct : dsMoi) {
+            data.themCTPNH(ct);
+        }
+        
+        ArrayList<ChiTietPhieuNhapHangDTO> dsSauKhiSua = data.docTheoMaPN(maPN);
+        
+        if (dsctpn != null) {
+            dsctpn.removeIf(ct -> ct.getMaPNH() == maPN);
+            dsctpn.addAll(dsSauKhiSua);
         }
     }
 }

@@ -8,7 +8,9 @@ import SieuThiMiniDAO.PhieuNhapHangDAO;
 public class PhieuNhapHangBUS {
     public static ArrayList<PhieuNhapHangDTO> dspn = null;
 
-    public PhieuNhapHangBUS() {}
+    public PhieuNhapHangBUS() {
+        dspn = new ArrayList<>();
+    }
 
     public void docDSPN() {
         PhieuNhapHangDAO data = new PhieuNhapHangDAO();
@@ -41,6 +43,7 @@ public class PhieuNhapHangBUS {
         for(int i = 0; i < dspn.size(); i++){
             if(dspn.get(i).getMaPNH() ==(pn.getMaPNH())){
                 dspn.set(i,pn);
+                break;
             }
         }
     }

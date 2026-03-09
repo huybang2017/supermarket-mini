@@ -31,7 +31,7 @@ public class QuanLyKhachHangGUI extends JPanel {
         // 1. STYLE TIÊU ĐỀ Y HỆT SẢN PHẨM
         JLabel lblTitle = new JLabel("Quản Lý Khách Hàng");
         lblTitle.setFont(fontTitle);
-        lblTitle.setForeground(new Color(40, 40, 40)); // Màu chữ xám đen chuẩn
+        lblTitle.setForeground(new Color(40, 40, 40)); 
         this.add(lblTitle, BorderLayout.NORTH);
 
         JPanel card = new JPanel(new BorderLayout(15, 15));
@@ -52,7 +52,7 @@ public class QuanLyKhachHangGUI extends JPanel {
         
         JTextField txtSearch = new JTextField(" Tìm SDT hoặc Tên KH...");
         txtSearch.setPreferredSize(new Dimension(220, 38));
-        txtSearch.setFont(fontPlain); // Set font cho thanh tìm kiếm
+        txtSearch.setFont(fontPlain); 
         txtSearch.setForeground(Color.GRAY);
         
         // Sự kiện tạo Placeholder giống trang Sản phẩm
@@ -107,7 +107,7 @@ public class QuanLyKhachHangGUI extends JPanel {
         });
 
         pnlHeader.add(topToolBar); 
-        pnlHeader.add(Box.createVerticalStrut(10)); // Khoảng cách giữa 2 thanh
+        pnlHeader.add(Box.createVerticalStrut(10)); 
         pnlHeader.add(pnlAdvSearch);
         card.add(pnlHeader, BorderLayout.NORTH);
 

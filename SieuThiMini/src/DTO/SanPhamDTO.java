@@ -10,7 +10,7 @@ public class SanPhamDTO {
     private int maHang;
     public SanPhamDTO(){}
 
-    public SanPhamDTO(String masanpham, String tensanpham, int soluong, int dongia, String donvitinh){
+    public SanPhamDTO(int masanpham, String tensanpham, int soluong, int dongia, String donvitinh){
         this.masanpham = masanpham;
         this.tensanpham = tensanpham;
         this.soluong = soluong;

@@ -337,7 +337,7 @@ public class KhuyenMaiGUI extends JPanel {
             for (ChuongTrinhKhuyenMaiSpDTO kmsp : ChuongTrinhKhuyenMaiSpBUS.dskmsp) {
                 String tenSP = "";
                 for (SanPhamDTO sp : SanPhamBUS.dssp) {
-                    if (Integer.parseInt(sp.getMasanpham()) == kmsp.getSanPhamId()) {
+                    if (sp.getMasanpham() == kmsp.getSanPhamId()) {
                         tenSP = sp.getTensanpham();
                         break;
                     }

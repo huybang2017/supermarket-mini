@@ -17,10 +17,10 @@ public class PhieuNhapHangDAO {
             ResultSet rs = st.executeQuery(qry);
             while (rs.next()) {
                 PhieuNhapHangDTO pn = new PhieuNhapHangDTO();
-                pn.setMaPNH(rs.getInt(1)); // Đã chuyển thành int
-                pn.setMaNV(rs.getInt(2));  // Đã chuyển thành int
-                pn.setTongTien(rs.getDouble(3)); // Sửa lỗi double
-                pn.setMaNCC(rs.getInt(4)); // Đã chuyển thành int
+                pn.setMaPNH(rs.getInt(1)); 
+                pn.setMaNV(rs.getInt(2));  
+                pn.setTongTien(rs.getDouble(3)); 
+                pn.setMaNCC(rs.getInt(4)); 
                 pn.setNgayNhap(rs.getDate(5));
                 dspn.add(pn);
             }
@@ -31,7 +31,6 @@ public class PhieuNhapHangDAO {
     public void themPNH(PhieuNhapHangDTO pn) {
         Connection cnn = data.getConnection();
         try {
-            // Bỏ nháy đơn ở các ID (int) và tongTien (double)
             String qry = "INSERT INTO phieunhaphang VALUES ("
                     + pn.getMaPNH() + ","
                     + pn.getMaNV() + ","
@@ -43,10 +42,10 @@ public class PhieuNhapHangDAO {
         } catch (SQLException e) { System.out.println("Lỗi Thêm: " + e.getMessage()); }
     }
 
-    public void xoaPNH(int ma) { // Đổi sang int
+    public void xoaPNH(int ma) { 
         Connection cnn = data.getConnection();
         try {
-            String qry = "DELETE FROM phieunhaphang WHERE id=" + ma; // Bỏ nháy đơn
+            String qry = "DELETE FROM phieunhaphang WHERE id=" + ma;
             Statement st = cnn.createStatement();
             st.executeUpdate(qry);
         } catch (SQLException e) { System.out.println("Sai chỗ xóa"); }

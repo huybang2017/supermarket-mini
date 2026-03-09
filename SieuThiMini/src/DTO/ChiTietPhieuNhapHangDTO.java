@@ -26,6 +26,6 @@ public class ChiTietPhieuNhapHangDTO {
     public void setDonGia(double dongia) { this.dongia = dongia; }
     public int getSoLuong() { return soluong; }
     public void setSoLuong(int soluong) { this.soluong = soluong; }
-    public double getThanhTien() { return thanhtien; }
+    public double getThanhTien() {return this.soluong * this.dongia;}
     public void setThanhTien(double thanhtien) { this.thanhtien = thanhtien; }
 }
