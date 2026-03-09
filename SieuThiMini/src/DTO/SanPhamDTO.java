@@ -8,9 +8,11 @@ public class SanPhamDTO {
     private String donvitinh;
     private int maLoai;
     private int maHang;
+    private double giaNhap;
+    private double loiNhuan;
     public SanPhamDTO(){}
 
-    public SanPhamDTO(int masanpham, String tensanpham, int soluong, int dongia, String donvitinh){
+    public SanPhamDTO(int masanpham, String tensanpham, int soluong, int dongia,double giaNhap,double loiNhuan, String donvitinh,int maHang,int maLoai){
         this.masanpham = masanpham;
         this.tensanpham = tensanpham;
         this.soluong = soluong;
@@ -18,6 +20,8 @@ public class SanPhamDTO {
         this.donvitinh = donvitinh;
         this.maLoai = maLoai;
         this.maHang = maHang;
+        this.giaNhap = giaNhap;
+        this.loiNhuan = loiNhuan;
     }
 
     public int getMasanpham() { return masanpham; }
@@ -34,4 +38,9 @@ public class SanPhamDTO {
     public void setMaLoai(int maLoai) { this.maLoai = maLoai; }
     public int getMaHang() { return maHang; }
     public void setMaHang(int maHang) { this.maHang = maHang; }
+    public double getGiaNhap() { return giaNhap; }
+    public void setGiaNhap(double giaNhap) { this.giaNhap = giaNhap; }
+
+    public double getLoiNhuan() { return loiNhuan; }
+    public void setLoiNhuan(double loiNhuan) { this.loiNhuan = loiNhuan; }
 }

@@ -93,12 +93,12 @@ public class QuanLyDonHangGUI extends JPanel {
         txtSearch.setPreferredSize(new Dimension(180, 36));
         txtSearch.setToolTipText("Tìm theo mã hóa đơn...");
 
-        JButton btnSearch = createBtn("Tìm", primaryColor);
+        JButton btnSearch = createActionBtn("Tìm");
         btnSearch.setPreferredSize(new Dimension(80, 36));
         btnSearch.addActionListener(e -> timKiemHoaDon());
         txtSearch.addActionListener(e -> timKiemHoaDon());
 
-        JButton btnRefresh = createBtn("Làm Mới", secondaryColor);
+        JButton btnRefresh = createActionBtn("Làm Mới");
         btnRefresh.setPreferredSize(new Dimension(100, 36));
         btnRefresh.addActionListener(e -> { txtSearch.setText(""); loadHoaDon(); });
 
@@ -587,7 +587,16 @@ public class QuanLyDonHangGUI extends JPanel {
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return btn;
     }
-
+    private JButton createActionBtn(String text) {
+        JButton btn = new JButton(text);
+        btn.setPreferredSize(new Dimension(140, 38));
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btn.setFocusPainted(false);
+        btn.setBackground(new Color(226, 232, 240)); 
+        btn.setForeground(Color.BLACK); 
+        btn.setBorder(new LineBorder(new Color(203, 213, 225), 1)); 
+        return btn;
+    }
     private void msg(String text, String title, int type) {
         JOptionPane.showMessageDialog(this, text, title, type);
     }

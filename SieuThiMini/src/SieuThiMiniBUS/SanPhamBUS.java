@@ -36,4 +36,19 @@ public class SanPhamBUS {
             }
         }
     }
+    // Hàm cập nhật số lượng thông qua BUS
+    public void capNhatSoLuong(int masp, int soLuongMoi) {
+        SanPhamDAO data = new SanPhamDAO();
+        data.capNhatSoLuong(masp, soLuongMoi); // Gọi DAO để update DB
+        
+        // Cập nhật luôn trong ArrayList để trên giao diện thay đổi theo
+        if (dssp != null) {
+            for (int i = 0; i < dssp.size(); i++) {
+                if (dssp.get(i).getMasanpham() == masp) {
+                    dssp.get(i).setSoluong(soLuongMoi);
+                    break;
+                }
+            }
+        }
+    }
 }

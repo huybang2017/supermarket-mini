@@ -7,16 +7,15 @@ import DTO.ChiTietHoaDonDTO;
 
 public class ChiTietHoaDonDAO {
 
-    // Constants cho SQL queries
+    // Đã sửa lại toàn bộ tên cột: hoaDonId, sanPhamId, soLuong, donGia, thanhTien
     private static final String SELECT_ALL = "SELECT * FROM chitiethoadon";
-    private static final String SELECT_BY_MAHD = "SELECT * FROM chitiethoadon WHERE mahoadon = ?";
-    private static final String INSERT = "INSERT INTO chitiethoadon (mahoadon, masanpham, soluong, dongia, thanhtien) VALUES (?, ?, ?, ?, ?)";
-    private static final String UPDATE = "UPDATE chitiethoadon SET soluong = ?, dongia = ?, thanhtien = ? WHERE mahoadon = ? AND masanpham = ?";
-    private static final String DELETE = "DELETE FROM chitiethoadon WHERE mahoadon = ? AND masanpham = ?";
+    private static final String SELECT_BY_MAHD = "SELECT * FROM chitiethoadon WHERE hoaDonId = ?";
+    private static final String INSERT = "INSERT INTO chitiethoadon (hoaDonId, sanPhamId, soLuong, donGia, thanhTien) VALUES (?, ?, ?, ?, ?)";
+    private static final String UPDATE = "UPDATE chitiethoadon SET soLuong = ?, donGia = ?, thanhTien = ? WHERE hoaDonId = ? AND sanPhamId = ?";
+    private static final String DELETE = "DELETE FROM chitiethoadon WHERE hoaDonId = ? AND sanPhamId = ?";
 
     private final MyConnection dataSource;
 
-    // Constructor với dependency injection
     public ChiTietHoaDonDAO() {
         this.dataSource = new MyConnection();
     }
@@ -25,9 +24,6 @@ public class ChiTietHoaDonDAO {
         this.dataSource = dataSource;
     }
 
-    /**
-     * Lấy toàn bộ chi tiết hóa đơn
-     */
     public List<ChiTietHoaDonDTO> getAllChiTietHoaDon() {
         List<ChiTietHoaDonDTO> list = new ArrayList<>();
 
@@ -47,9 +43,7 @@ public class ChiTietHoaDonDAO {
         return list;
     }
 
-    /**
-     * Lấy chi tiết hóa đơn theo mã hóa đơn
-     */
+    // Hàm này được BUS gọi để lấy danh sách chi tiết đổ lên GUI
     public List<ChiTietHoaDonDTO> getByMaHD(int maHD) {
         List<ChiTietHoaDonDTO> list = new ArrayList<>();
 
@@ -72,9 +66,6 @@ public class ChiTietHoaDonDAO {
         return list;
     }
 
-    /**
-     * Thêm chi tiết hóa đơn
-     */
     public boolean addChiTietHoaDon(ChiTietHoaDonDTO ct) {
         if (ct == null) {
             return false;
@@ -94,9 +85,6 @@ public class ChiTietHoaDonDAO {
         return false;
     }
 
-    /**
-     * Cập nhật chi tiết hóa đơn
-     */
     public boolean updateChiTietHoaDon(ChiTietHoaDonDTO ct) {
         if (ct == null) {
             return false;
@@ -116,11 +104,7 @@ public class ChiTietHoaDonDAO {
         return false;
     }
 
-    /**
-     * Xóa chi tiết hóa đơn
-     */
     public boolean deleteChiTietHoaDon(int maHD, int maSP) {
-
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(DELETE)) {
 
@@ -138,37 +122,30 @@ public class ChiTietHoaDonDAO {
     }
 
     /**
-     * Helper: Convert ResultSet -> DTO
+     * Helper: Cập nhật đọc đúng tên cột DB
      */
     private ChiTietHoaDonDTO mapResultSetToDTO(ResultSet rs) throws SQLException {
-
         ChiTietHoaDonDTO ct = new ChiTietHoaDonDTO();
 
-        ct.setMaHD(rs.getInt("mahoadon"));
-        ct.setMaSP(rs.getInt("masanpham"));
-        ct.setSoLuong(rs.getInt("soluong"));
-        ct.setDonGia(rs.getDouble("dongia"));
-        ct.setThanhTien(rs.getDouble("thanhtien"));
+        ct.setMaHD(rs.getInt("hoaDonId"));
+        ct.setMaSP(rs.getInt("sanPhamId"));
+        ct.setSoLuong(rs.getInt("soLuong"));
+        ct.setDonGia(rs.getDouble("donGia"));
+        ct.setThanhTien(rs.getDouble("thanhTien"));
 
         return ct;
     }
 
-    /**
-     * Helper: Set parameters cho PreparedStatement
-     */
     private void setChiTietParameters(PreparedStatement ps, ChiTietHoaDonDTO ct, boolean isInsert)
             throws SQLException {
 
         if (isInsert) {
-
             ps.setInt(1, ct.getMaHD());
             ps.setInt(2, ct.getMaSP());
             ps.setInt(3, ct.getSoLuong());
             ps.setDouble(4, ct.getDonGia());
             ps.setDouble(5, ct.getThanhTien());
-
         } else {
-
             ps.setInt(1, ct.getSoLuong());
             ps.setDouble(2, ct.getDonGia());
             ps.setDouble(3, ct.getThanhTien());

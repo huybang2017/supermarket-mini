@@ -3,9 +3,13 @@ package SieuThiMiniGUI;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.*;
+
+import SieuThiMiniBUS.ThongKeBaoCaoBUS;
+
 import java.awt.*;
 
 public class ThongKeBaoCaoGUI extends JPanel {
+    private ThongKeBaoCaoBUS tKeBaoCaoBUS = new ThongKeBaoCaoBUS();
     
     // Bootstrap-inspired colors
     private final Color primaryColor   = new Color(0, 123, 255);      // Blue
@@ -47,7 +51,7 @@ public class ThongKeBaoCaoGUI extends JPanel {
         JPanel root = new JPanel(new BorderLayout(0, 14));
         root.setBackground(bgColor);
         root.setBorder(new EmptyBorder(14, 0, 0, 0));
-
+        
         // --- Filter bar ---
         JPanel filterCard = buildCard();
         filterCard.setLayout(new FlowLayout(FlowLayout.LEFT, 12, 10));
@@ -98,21 +102,22 @@ public class ThongKeBaoCaoGUI extends JPanel {
         JPanel center = new JPanel(new BorderLayout(0, 14));
         center.setBackground(bgColor);
 
+        // Lấy dữ liệu từ BUS
+        long doanhThu = tKeBaoCaoBUS.tongDoanhThu();
+        long phiNhap = tKeBaoCaoBUS.tongPhiNhap();
+        long loiNhuan = tKeBaoCaoBUS.loiNhuanUocTinh();
+
         // Summary cards
         JPanel pnlCards = new JPanel(new GridLayout(1, 3, 14, 0));
         pnlCards.setOpaque(false);
-        pnlCards.add(createSummaryCard("Tổng Doanh Thu Bán", "350,500,000 đ", successColor,
-                "Từ đơn hàng bán ra"));
-        pnlCards.add(createSummaryCard("Tổng Chi Phí Nhập", "198,200,000 đ", dangerColor,
-                "Từ phiếu nhập hàng"));
-        pnlCards.add(createSummaryCard("Lợi Nhuận Ước Tính", "152,300,000 đ", purpleColor,
-                "Doanh thu - Chi phí"));
+        pnlCards.add(createSummaryCard("Tổng Doanh Thu Bán", String.format("%,d đ", doanhThu), successColor, "Từ đơn hàng bán ra"));
+        pnlCards.add(createSummaryCard("Tổng Chi Phí Nhập", String.format("%,d đ", phiNhap), dangerColor, "Từ phiếu nhập hàng"));
+        pnlCards.add(createSummaryCard("Lợi Nhuận Ước Tính", String.format("%,d đ", loiNhuan), purpleColor, "Doanh thu - Chi phí"));
         center.add(pnlCards, BorderLayout.NORTH);
 
         // Table
         JPanel tableCard = buildCard();
         tableCard.setLayout(new BorderLayout(0, 10));
-
         JLabel lblSub = sectionLabel("Chi Tiết Theo Kỳ");
         tableCard.add(lblSub, BorderLayout.NORTH);
 
@@ -120,26 +125,28 @@ public class ThongKeBaoCaoGUI extends JPanel {
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
-        model.addRow(new Object[]{"Tháng 1/2026", "42,000,000",  "24,000,000", "18,000,000", "+5.2%"});
-        model.addRow(new Object[]{"Tháng 2/2026", "38,500,000",  "21,500,000", "17,000,000", "-8.3%"});
-        model.addRow(new Object[]{"Tháng 3/2026", "51,000,000",  "29,000,000", "22,000,000", "+32.5%"});
-        model.addRow(new Object[]{"Tháng 4/2026", "47,800,000",  "26,800,000", "21,000,000", "-6.3%"});
-        model.addRow(new Object[]{"Tháng 5/2026", "55,200,000",  "31,200,000", "24,000,000", "+15.5%"});
-        model.addRow(new Object[]{"Tháng 6/2026", "62,000,000",  "35,000,000", "27,000,000", "+12.3%"});
 
+        // LẤY DỮ LIỆU THẬT TỪ BUS (Mặc định năm 2026 theo hình ảnh của bạn)
+        java.util.List<Object[]> dsChiTiet = tKeBaoCaoBUS.getChiTietThang(2026); 
+        for (Object[] row : dsChiTiet) {
+            model.addRow(new Object[]{
+                row[0],
+                String.format("%,d", (long)row[1]),
+                String.format("%,d", (long)row[2]),
+                String.format("%,d", (long)row[3]),
+                row[4]
+            });
+        }        
         JTable tbl = new JTable(model);
         styleTable(tbl);
 
-        // right-align numeric columns
         DefaultTableCellRenderer rightAlign = new DefaultTableCellRenderer();
         rightAlign.setHorizontalAlignment(JLabel.RIGHT);
         for (int c = 1; c <= 3; c++) tbl.getColumnModel().getColumn(c).setCellRenderer(rightAlign);
 
-        // color "Tăng Trưởng" column
         tbl.getColumnModel().getColumn(4).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
-            public Component getTableCellRendererComponent(JTable t, Object val,
-                    boolean sel, boolean foc, int row, int col) {
+            public Component getTableCellRendererComponent(JTable t, Object val, boolean sel, boolean foc, int row, int col) {
                 super.getTableCellRendererComponent(t, val, sel, foc, row, col);
                 setHorizontalAlignment(JLabel.CENTER);
                 String v = val == null ? "" : val.toString();
@@ -149,12 +156,8 @@ public class ThongKeBaoCaoGUI extends JPanel {
             }
         });
 
-        JScrollPane scroll = buildScroll(tbl);
-
-        // summary bar
-        JPanel sumBar = buildSumBar("Tổng doanh thu:", "296,500,000 đ", successColor);
-        tableCard.add(scroll, BorderLayout.CENTER);
-        tableCard.add(sumBar, BorderLayout.SOUTH);
+        tableCard.add(buildScroll(tbl), BorderLayout.CENTER);
+        tableCard.add(buildSumBar("Tổng doanh thu:", String.format("%,d đ", doanhThu), successColor), BorderLayout.SOUTH);
         center.add(tableCard, BorderLayout.CENTER);
 
         root.add(center, BorderLayout.CENTER);
@@ -176,8 +179,7 @@ public class ThongKeBaoCaoGUI extends JPanel {
         JComboBox<String> cboNam = new JComboBox<>(new String[]{"2026","2025","2024"});
         styleCombo(cboNam); filterCard.add(cboNam);
         filterCard.add(label("Tháng:"));
-        JComboBox<String> cboThang = new JComboBox<>(new String[]{
-            "Tất cả","1","2","3","4","5","6","7","8","9","10","11","12"});
+        JComboBox<String> cboThang = new JComboBox<>(new String[]{"Tất cả","1","2","3","4","5","6","7","8","9","10","11","12"});
         styleCombo(cboThang); filterCard.add(cboThang);
         filterCard.add(label("Tìm KH:"));
         JTextField txtSearch = styledField(14);
@@ -188,18 +190,22 @@ public class ThongKeBaoCaoGUI extends JPanel {
         filterCard.add(btn);
         root.add(filterCard, BorderLayout.NORTH);
 
-        // Summary cards
+        // --- SUMMARY CARDS (Đã cập nhật dữ liệu thật) ---
         JPanel center = new JPanel(new BorderLayout(0, 14));
         center.setBackground(bgColor);
 
+        int tongKH = tKeBaoCaoBUS.tongSoKhachHang();
+        int khDaMua = tKeBaoCaoBUS.tongKhachHangDaMua();
+        long tongDoanhThu = tKeBaoCaoBUS.tongDoanhThu();
+
         JPanel cards = new JPanel(new GridLayout(1, 3, 14, 0));
         cards.setOpaque(false);
-        cards.add(createSummaryCard("Tổng Khách Hàng",   "1,240 KH",       primaryColor, "Đã mua hàng"));
-        cards.add(createSummaryCard("Khách Hàng Mới",     "87 KH",          successColor, "Trong kỳ"));
-        cards.add(createSummaryCard("Doanh Thu Từ KH",    "350,500,000 đ",  warningColor, "Tổng cộng"));
+        cards.add(createSummaryCard("Tổng Khách Hàng", tongKH + " KH", primaryColor, "Có trong hệ thống"));
+        cards.add(createSummaryCard("Khách Đã Mua", khDaMua + " KH", successColor, "Có phát sinh giao dịch"));
+        cards.add(createSummaryCard("Tổng Doanh Thu", String.format("%,d đ", tongDoanhThu), warningColor, "Tất cả khách hàng"));
         center.add(cards, BorderLayout.NORTH);
 
-        // Table
+        // --- TABLE (Đã cập nhật dữ liệu thật) ---
         JPanel tableCard = buildCard();
         tableCard.setLayout(new BorderLayout(0, 10));
         tableCard.add(sectionLabel("Danh Sách Khách Hàng Theo Doanh Thu"), BorderLayout.NORTH);
@@ -208,11 +214,16 @@ public class ThongKeBaoCaoGUI extends JPanel {
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
-        model.addRow(new Object[]{"#1", "KH012", "Nguyễn Thị Lan",   "28", "15,400,000", "550,000"});
-        model.addRow(new Object[]{"#2", "KH034", "Trần Minh Đức",    "22", "12,100,000", "550,000"});
-        model.addRow(new Object[]{"#3", "KH007", "Lê Thị Hoa",       "19", "10,450,000", "550,000"});
-        model.addRow(new Object[]{"#4", "KH091", "Phạm Văn Khoa",    "15",  "8,250,000", "550,000"});
-        model.addRow(new Object[]{"#5", "KH055", "Hoàng Thị Mai",    "12",  "6,600,000", "550,000"});
+
+        // Lấy danh sách từ DB và đổ vào bảng
+        java.util.List<Object[]> topKH = tKeBaoCaoBUS.getTopKhachHang();
+        for(Object[] row : topKH) {
+            long chiTieu = (long) row[4];
+            long trungBinh = (long) row[5];
+            model.addRow(new Object[]{
+                row[0], row[1], row[2], row[3], String.format("%,d", chiTieu), String.format("%,d", trungBinh)
+            });
+        }
 
         JTable tbl = new JTable(model);
         styleTable(tbl);
@@ -226,9 +237,10 @@ public class ThongKeBaoCaoGUI extends JPanel {
         tbl.getColumnModel().getColumn(5).setCellRenderer(right);
 
         tableCard.add(buildScroll(tbl), BorderLayout.CENTER);
-        tableCard.add(buildSumBar("Tổng doanh thu từ KH:", "350,500,000 đ", warningColor), BorderLayout.SOUTH);
+        tableCard.add(buildSumBar("Tổng doanh thu:", String.format("%,d đ", tongDoanhThu), warningColor), BorderLayout.SOUTH);
         center.add(tableCard, BorderLayout.CENTER);
         root.add(center, BorderLayout.CENTER);
+        
         return root;
     }
 
@@ -247,8 +259,7 @@ public class ThongKeBaoCaoGUI extends JPanel {
         JComboBox<String> cboNam = new JComboBox<>(new String[]{"2026","2025","2024"});
         styleCombo(cboNam); filterCard.add(cboNam);
         filterCard.add(label("Tháng:"));
-        JComboBox<String> cboThang = new JComboBox<>(new String[]{
-            "Tất cả","1","2","3","4","5","6","7","8","9","10","11","12"});
+        JComboBox<String> cboThang = new JComboBox<>(new String[]{"Tất cả","1","2","3","4","5","6","7","8","9","10","11","12"});
         styleCombo(cboThang); filterCard.add(cboThang);
         filterCard.add(label("Tìm NV:"));
         JTextField txtSearch = styledField(14);
@@ -263,13 +274,19 @@ public class ThongKeBaoCaoGUI extends JPanel {
         JPanel center = new JPanel(new BorderLayout(0, 14));
         center.setBackground(bgColor);
 
+        // Lấy dữ liệu thật từ BUS
+        int tongNV = tKeBaoCaoBUS.tongNhanVien();
+        String nvXuatSac = tKeBaoCaoBUS.nhanVienXuatSac();
+        long dtTrungBinh = tKeBaoCaoBUS.doanhThuTrungBinhNhanVien();
+
         JPanel cards = new JPanel(new GridLayout(1, 3, 14, 0));
         cards.setOpaque(false);
-        cards.add(createSummaryCard("Tổng Nhân Viên",       "24 NV",          primaryColor,  "Đang hoạt động"));
-        cards.add(createSummaryCard("NV Xuất Sắc",          "Nguyễn Văn An",  successColor,  "Doanh thu cao nhất"));
-        cards.add(createSummaryCard("Doanh Thu Trung Bình", "14,600,000 đ",   purpleColor,   "Mỗi nhân viên/tháng"));
+        // Thay "24 NV" bằng (tongNV + " NV")
+        cards.add(createSummaryCard("Tổng Nhân Viên", tongNV + " NV", primaryColor,  "Đang hoạt động"));
+        cards.add(createSummaryCard("NV Xuất Sắc", nvXuatSac, successColor,  "Doanh thu cao nhất"));
+        cards.add(createSummaryCard("Doanh Thu Trung Bình", String.format("%,d đ", dtTrungBinh), purpleColor,   "Trung bình/Nhân viên"));
+        
         center.add(cards, BorderLayout.NORTH);
-
         // Table
         JPanel tableCard = buildCard();
         tableCard.setLayout(new BorderLayout(0, 10));
@@ -279,14 +296,23 @@ public class ThongKeBaoCaoGUI extends JPanel {
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
-        model.addRow(new Object[]{"#1", "NV001", "Nguyễn Văn An",   "Thu Ngân",  "156", "85,800,000", "24.5%"});
-        model.addRow(new Object[]{"#2", "NV003", "Trần Thị Bình",   "Thu Ngân",  "142", "78,100,000", "22.3%"});
-        model.addRow(new Object[]{"#3", "NV007", "Lê Văn Cường",    "Bán Hàng",  "128", "70,400,000", "20.1%"});
-        model.addRow(new Object[]{"#4", "NV012", "Phạm Thị Dung",   "Bán Hàng",  "105", "57,750,000", "16.5%"});
-        model.addRow(new Object[]{"#5", "NV018", "Hoàng Văn Em",    "Kho",        "89", "48,950,000", "14.0%"});
 
+        // --- ĐỔ DỮ LIỆU THẬT TỪ DATABASE ---
+        long tongDoanhThuAll = tKeBaoCaoBUS.tongDoanhThu();
+        java.util.List<Object[]> topNV = tKeBaoCaoBUS.getTopNhanVien();
+        
+        for(Object[] row : topNV) {
+            long dt = (long) row[5];
+            // Tính phần trăm đóng góp của nhân viên so với tổng doanh thu
+            String tyLe = tongDoanhThuAll > 0 ? String.format("%.1f%%", (double)dt / tongDoanhThuAll * 100) : "0%";
+            model.addRow(new Object[]{
+                row[0], row[1], row[2], row[3], row[4], String.format("%,d", dt), tyLe
+            });
+        }
+        // -----------------------------------
+        
         JTable tbl = new JTable(model);
-        styleTable(tbl);
+        styleTable(tbl);        
         DefaultTableCellRenderer centerR = new DefaultTableCellRenderer();
         centerR.setHorizontalAlignment(JLabel.CENTER);
         DefaultTableCellRenderer rightR = new DefaultTableCellRenderer();
@@ -297,7 +323,7 @@ public class ThongKeBaoCaoGUI extends JPanel {
         tbl.getColumnModel().getColumn(6).setCellRenderer(centerR);
 
         tableCard.add(buildScroll(tbl), BorderLayout.CENTER);
-        tableCard.add(buildSumBar("Tổng doanh thu nhân viên:", "341,000,000 đ", purpleColor), BorderLayout.SOUTH);
+        tableCard.add(buildSumBar("Tổng doanh thu:", String.format("%,d đ", tKeBaoCaoBUS.tongDoanhThu()), purpleColor), BorderLayout.SOUTH);
         center.add(tableCard, BorderLayout.CENTER);
         root.add(center, BorderLayout.CENTER);
         return root;
@@ -318,12 +344,10 @@ public class ThongKeBaoCaoGUI extends JPanel {
         JComboBox<String> cboNam = new JComboBox<>(new String[]{"2026","2025","2024"});
         styleCombo(cboNam); filterCard.add(cboNam);
         filterCard.add(label("Tháng:"));
-        JComboBox<String> cboThang = new JComboBox<>(new String[]{
-            "Tất cả","1","2","3","4","5","6","7","8","9","10","11","12"});
+        JComboBox<String> cboThang = new JComboBox<>(new String[]{"Tất cả","1","2","3","4","5","6","7","8","9","10","11","12"});
         styleCombo(cboThang); filterCard.add(cboThang);
         filterCard.add(label("Danh mục:"));
-        JComboBox<String> cboDM = new JComboBox<>(new String[]{
-            "Tất cả","Thực Phẩm","Đồ Uống","Hóa Mỹ Phẩm","Gia Dụng"});
+        JComboBox<String> cboDM = new JComboBox<>(new String[]{"Tất cả","Thực Phẩm","Đồ Uống","Hóa Mỹ Phẩm","Gia Dụng"});
         styleCombo(cboDM); filterCard.add(cboDM);
         filterCard.add(label("Tìm SP:"));
         JTextField txtSearch = styledField(14);
@@ -334,19 +358,24 @@ public class ThongKeBaoCaoGUI extends JPanel {
         filterCard.add(btn);
         root.add(filterCard, BorderLayout.NORTH);
 
-        // Summary cards
+        // --- SUMMARY CARDS (Đã gọi data thật) ---
         JPanel center = new JPanel(new BorderLayout(0, 14));
         center.setBackground(bgColor);
 
+        int tongSP = tKeBaoCaoBUS.tongSanPham();
+        String spBanChay = tKeBaoCaoBUS.sanPhamBanChay();
+        int spSapHet = tKeBaoCaoBUS.spSapHetHang();
+        long tongDoanhThu = tKeBaoCaoBUS.tongDoanhThu();
+
         JPanel cards = new JPanel(new GridLayout(1, 4, 14, 0));
         cards.setOpaque(false);
-        cards.add(createSummaryCard("Tổng Sản Phẩm",    "342 SP",         primaryColor,  "Đang kinh doanh"));
-        cards.add(createSummaryCard("SP Bán Chạy Nhất", "Dầu Gội Sunsilk",successColor,  "120 SP / tháng"));
-        cards.add(createSummaryCard("SP Sắp Hết Hàng",  "15 SP",          dangerColor,   "Dưới mức tối thiểu"));
-        cards.add(createSummaryCard("Doanh Thu SP",      "350,500,000 đ",  warningColor,  "Tổng cộng"));
+        cards.add(createSummaryCard("Tổng Sản Phẩm", tongSP + " SP", primaryColor,  "Có trong kho"));
+        cards.add(createSummaryCard("SP Bán Chạy", spBanChay, successColor,  "Nhiều nhất"));
+        cards.add(createSummaryCard("Sắp Hết Hàng", spSapHet + " SP", dangerColor,   "Dưới 15 sản phẩm"));
+        cards.add(createSummaryCard("Tổng Doanh Thu", String.format("%,d đ", tongDoanhThu), warningColor,  "Từ tất cả SP"));
         center.add(cards, BorderLayout.NORTH);
 
-        // Table
+        // --- TABLE (Đã gọi data thật) ---
         JPanel tableCard = buildCard();
         tableCard.setLayout(new BorderLayout(0, 10));
         tableCard.add(sectionLabel("Top Sản Phẩm Theo Doanh Thu"), BorderLayout.NORTH);
@@ -355,13 +384,17 @@ public class ThongKeBaoCaoGUI extends JPanel {
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
-        model.addRow(new Object[]{"#1", "SP002", "Dầu Gội Sunsilk",       "Hóa Mỹ Phẩm", "120", "55,000",  "6,600,000"});
-        model.addRow(new Object[]{"#2", "SP015", "Nước Ngọt Pepsi 330ml", "Đồ Uống",      "310", "12,000",  "3,720,000"});
-        model.addRow(new Object[]{"#3", "SP005", "Bánh Cosy",              "Thực Phẩm",    "95",  "45,000",  "4,275,000"});
-        model.addRow(new Object[]{"#4", "SP031", "Sữa Vinamilk 1L",       "Đồ Uống",      "88",  "35,000",  "3,080,000"});
-        model.addRow(new Object[]{"#5", "SP008", "Kem Đánh Răng P/S",     "Hóa Mỹ Phẩm", "76",  "30,000",  "2,280,000"});
-        model.addRow(new Object[]{"#6", "SP022", "Gạo ST25 5kg",          "Thực Phẩm",    "60", "125,000",  "7,500,000"});
-        model.addRow(new Object[]{"#7", "SP040", "Nước Mắm Chinsu",       "Thực Phẩm",    "55",  "28,000",  "1,540,000"});
+
+        // Đổ dữ liệu thật vào bảng
+        java.util.List<Object[]> topSP = tKeBaoCaoBUS.getTopSanPham();
+        for(Object[] row : topSP) {
+            long donGia = (long) row[5];
+            long dt = (long) row[6];
+            model.addRow(new Object[]{
+                row[0], row[1], row[2], row[3], row[4], 
+                String.format("%,d", donGia), String.format("%,d", dt)
+            });
+        }
 
         JTable tbl = new JTable(model);
         styleTable(tbl);
@@ -369,15 +402,21 @@ public class ThongKeBaoCaoGUI extends JPanel {
         centerR.setHorizontalAlignment(JLabel.CENTER);
         DefaultTableCellRenderer rightR = new DefaultTableCellRenderer();
         rightR.setHorizontalAlignment(JLabel.RIGHT);
+        
         tbl.getColumnModel().getColumn(0).setCellRenderer(centerR);
         tbl.getColumnModel().getColumn(4).setCellRenderer(centerR);
         tbl.getColumnModel().getColumn(5).setCellRenderer(rightR);
         tbl.getColumnModel().getColumn(6).setCellRenderer(rightR);
 
+        // Chỉnh lại độ rộng các cột cho đẹp mắt hơn
+        tbl.getColumnModel().getColumn(2).setPreferredWidth(180); 
+        tbl.getColumnModel().getColumn(3).setPreferredWidth(120);
+
         tableCard.add(buildScroll(tbl), BorderLayout.CENTER);
-        tableCard.add(buildSumBar("Tổng doanh thu sản phẩm:", "350,500,000 đ", warningColor), BorderLayout.SOUTH);
+        tableCard.add(buildSumBar("Tổng doanh thu sản phẩm:", String.format("%,d đ", tongDoanhThu), warningColor), BorderLayout.SOUTH);
         center.add(tableCard, BorderLayout.CENTER);
         root.add(center, BorderLayout.CENTER);
+        
         return root;
     }
 
@@ -385,7 +424,6 @@ public class ThongKeBaoCaoGUI extends JPanel {
     //  SHARED UI HELPERS
     // =========================================================================
 
-    /** Card tổng quan với tiêu đề phụ */
     private JPanel createSummaryCard(String title, String value, Color valueColor, String subtitle) {
         JPanel card = new JPanel(new BorderLayout(4, 4));
         card.setBackground(Color.WHITE);
@@ -415,7 +453,6 @@ public class ThongKeBaoCaoGUI extends JPanel {
         return card;
     }
 
-    /** White card panel with border */
     private JPanel buildCard() {
         JPanel card = new JPanel();
         card.setBackground(Color.WHITE);
@@ -425,7 +462,6 @@ public class ThongKeBaoCaoGUI extends JPanel {
         return card;
     }
 
-    /** Summary bar at bottom of table */
     private JPanel buildSumBar(String labelText, String value, Color valueColor) {
         JPanel bar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 14, 6));
         bar.setBackground(new Color(248, 249, 250));

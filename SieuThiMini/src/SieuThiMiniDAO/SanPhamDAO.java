@@ -20,6 +20,8 @@ public class SanPhamDAO {
                 sp.setTensanpham(rs.getString("ten"));
                 sp.setSoluong(rs.getInt("soLuong"));
                 sp.setDongia(rs.getInt("donGia"));
+                sp.setGiaNhap(rs.getDouble("giaNhap"));
+                sp.setLoiNhuan(rs.getDouble("loiNhuan"));
                 sp.setDonvitinh(rs.getString("donViTinh"));
                 dssp.add(sp);
             }
@@ -30,29 +32,6 @@ public class SanPhamDAO {
         }
         return dssp;
     }
-
-    public void themSP(SanPhamDTO sp) {
-        Connection cnn = data.getConnection();
-        try {
-            // Bao quanh các giá trị String bằng dấu nháy đơn ''
-            String qry = "INSERT INTO sanpham VALUES ('"
-                    + sp.getMasanpham() + "','"
-                    + sp.getMaLoai() + "','"
-                    + sp.getMaHang() + "',N'"
-                    + sp.getTensanpham() + "','"
-                    + sp.getSoluong() + "','"
-                    + sp.getDongia() + "',N'"
-                    + sp.getDonvitinh() + "')";
-            Statement st = cnn.createStatement();
-            st.executeUpdate(qry);
-            JOptionPane.showMessageDialog(null, "Thêm thành công!");
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, "Lỗi thêm: " + ex.getMessage());
-        }finally {
-            data.closeConnection(); // ĐÓNG KẾT NỐI
-        }
-    }
-
     public void xoaSP(int maSP) {
         Connection cnn = data.getConnection();
 
@@ -68,23 +47,86 @@ public class SanPhamDAO {
         }
     }
 
+    // --- 1. THÊM SẢN PHẨM ---
+    public void themSP(SanPhamDTO sp) {
+        Connection cnn = data.getConnection();
+        try {
+            // Dùng dấu ? đại diện cho các giá trị cần truyền vào
+            String sql = "INSERT INTO sanpham (id, loaiSanPhamId, hangId, ten, soLuong, donGia, giaNhap, loiNhuan, donViTinh) "
+                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            
+            PreparedStatement pst = cnn.prepareStatement(sql);
+            
+            // Truyền giá trị vào các dấu ? theo đúng thứ tự (từ 1 đến 9)
+            pst.setInt(1, sp.getMasanpham());
+            pst.setInt(2, sp.getMaLoai());
+            pst.setInt(3, sp.getMaHang());
+            pst.setString(4, sp.getTensanpham()); // Tự động xử lý chữ có dấu nháy như Lay's
+            pst.setInt(5, sp.getSoluong());
+            pst.setInt(6, sp.getDongia());
+            pst.setDouble(7, sp.getGiaNhap());
+            pst.setDouble(8, sp.getLoiNhuan());
+            pst.setString(9, sp.getDonvitinh());
+
+            pst.executeUpdate();
+            JOptionPane.showMessageDialog(null, "Thêm thành công!");
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Lỗi thêm: " + ex.getMessage());
+        } finally {
+            data.closeConnection(); 
+        }
+    }
+
+    // --- 2. SỬA SẢN PHẨM ---
     public void suaSP(SanPhamDTO sp) {
         Connection cnn = data.getConnection();
         try {
-            String qry = "UPDATE sanpham SET "
-                    + "loaiSanPhamId = '" + sp.getMaLoai() + "', "
-                    + "hangId = '" + sp.getMaHang() + "', "
-                    + "ten = N'" + sp.getTensanpham() + "', "
-                    + "soLuong = " + sp.getSoluong() + ", "
-                    + "donGia = " + sp.getDongia() + ", "
-                    + "donViTinh = N'" + sp.getDonvitinh() + "' "
-                    + "WHERE id = '" + sp.getMasanpham() + "'";
-            Statement st = cnn.createStatement();
-            st.executeUpdate(qry);
+            String sql = "UPDATE sanpham SET "
+                    + "loaiSanPhamId = ?, "
+                    + "hangId = ?, "
+                    + "ten = ?, "
+                    + "soLuong = ?, "
+                    + "donGia = ?, "
+                    + "giaNhap = ?, "
+                    + "loiNhuan = ?, "
+                    + "donViTinh = ? "
+                    + "WHERE id = ?";
+            
+            PreparedStatement pst = cnn.prepareStatement(sql);
+            
+            pst.setInt(1, sp.getMaLoai());
+            pst.setInt(2, sp.getMaHang());
+            pst.setString(3, sp.getTensanpham());   
+            pst.setInt(4, sp.getSoluong());
+            pst.setInt(5, sp.getDongia());
+            pst.setDouble(6, sp.getGiaNhap());
+            pst.setDouble(7, sp.getLoiNhuan());
+            pst.setString(8, sp.getDonvitinh());
+            pst.setInt(9, sp.getMasanpham()); 
+
+            pst.executeUpdate();
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Lỗi sửa: " + e.getMessage());
-        }finally {
-            data.closeConnection(); // ĐÓNG KẾT NỐI
+        } finally {
+            data.closeConnection(); 
+        }
+    }
+
+    // --- 3. CẬP NHẬT SỐ LƯỢNG ---
+    public void capNhatSoLuong(int masp, int soLuongMoi) {
+        Connection cnn = data.getConnection();
+        try {
+            String sql = "UPDATE sanpham SET soLuong = ? WHERE id = ?"; 
+            
+            PreparedStatement pst = cnn.prepareStatement(sql);
+            pst.setInt(1, soLuongMoi);
+            pst.setInt(2, masp);
+            
+            pst.executeUpdate();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Lỗi cập nhật số lượng: " + e.getMessage());
+        } finally {
+            data.closeConnection();
         }
     }
 }
