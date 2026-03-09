@@ -35,6 +35,7 @@ public void themCTPNH(ChiTietPhieuNhapHangDTO ct) {
         Statement st = cnn.createStatement();
         st.executeUpdate(qry);
     } catch (SQLException e) { System.out.println("Lỗi thêm chi tiết"); }
+    finally { data.closeConnection(); }
 }
 
 public void xoaCTPNH(int ma){
@@ -45,7 +46,7 @@ public void xoaCTPNH(int ma){
         st.executeUpdate(qry);
     } catch (SQLException e) {
          System.out.println("Lỗi xóa: " + e.getMessage());
-    } 
+    } finally { data.closeConnection(); }
 }
 
 public void suaCTPNH(ChiTietPhieuNhapHangDTO ct) {

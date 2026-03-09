@@ -40,6 +40,7 @@ public class PhieuNhapHangDAO {
             Statement st = cnn.createStatement();
             st.executeUpdate(qry);
         } catch (SQLException e) { System.out.println("Lỗi Thêm: " + e.getMessage()); }
+        finally { data.closeConnection(); }
     }
 
     public void xoaPNH(int ma) { 
@@ -49,6 +50,7 @@ public class PhieuNhapHangDAO {
             Statement st = cnn.createStatement();
             st.executeUpdate(qry);
         } catch (SQLException e) { System.out.println("Sai chỗ xóa"); }
+        finally { data.closeConnection(); }
     }
 
     public void suaPNH(PhieuNhapHangDTO pn) {
@@ -67,5 +69,21 @@ public class PhieuNhapHangDAO {
         } finally {
             data.closeConnection(); 
         }
+    }
+
+    public int getNextID() {
+        Connection cnn = data.getConnection();
+        int nextID = 1; 
+        try {
+            String querry = "SELECT MAX(maPNH) FROM phieunhaphang";
+            Statement st =cnn.createStatement();
+            ResultSet rs = st.executeQuery(querry);
+            if (rs.next()) {
+                nextID = rs.getInt(1) + 1;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }finally { data.closeConnection(); }
+        return nextID;
     }
 }
