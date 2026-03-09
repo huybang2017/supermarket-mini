@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th3 06, 2026 lúc 10:34 AM
+-- Thời gian đã tạo: Th3 09, 2026 lúc 08:19 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -175,6 +175,32 @@ CREATE TABLE `khachhang` (
   `diaChi` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `khachhang`
+--
+
+INSERT INTO `khachhang` (`id`, `ho`, `ten`, `phone`, `diaChi`) VALUES
+(1, 'Nguyễn Văn', 'An', '0901234567', 'Quận 1, TP.HCM'),
+(2, 'Trần Thị', 'Bảo', '0912345678', 'Quận 2, TP.HCM'),
+(3, 'Lê Hoàng', 'Cường', '0923456789', 'Quận 3, TP.HCM'),
+(4, 'Phạm', 'Dung', '0934567890', 'Quận 4, TP.HCM'),
+(5, 'Hoàng Tuấn', 'Em', '0945678901', 'Quận 5, TP.HCM'),
+(6, 'Vũ Bích', 'Phượng', '0956789012', 'Quận 6, TP.HCM'),
+(7, 'Đặng Kim', 'Giao', '0967890123', 'Quận 7, TP.HCM'),
+(8, 'Bùi Xuân', 'Hiếu', '0978901234', 'Quận 8, TP.HCM'),
+(9, 'Đỗ Minh', 'Inh', '0989012345', 'Quận 9, TP.HCM'),
+(10, 'Hồ Thanh', 'Kiệt', '0990123456', 'Quận 10, TP.HCM'),
+(11, 'Ngô Đình', 'Long', '0809876543', 'Quận 11, TP.HCM'),
+(12, 'Dương Ngọc', 'Mai', '0818765432', 'Quận 12, TP.HCM'),
+(13, 'Lý Tiểu', 'Nam', '0827654321', 'Bình Thạnh, TP.HCM'),
+(14, 'Vương Tuấn', 'Oanh', '0836543210', 'Phú Nhuận, TP.HCM'),
+(15, 'Trịnh Trọng', 'Phúc', '0845432109', 'Gò Vấp, TP.HCM'),
+(16, 'Mai Quỳnh', 'Quân', '0854321098', 'Tân Bình, TP.HCM'),
+(17, 'Đào Huy', 'Rô', '0863210987', 'Tân Phú, TP.HCM'),
+(18, 'Đoàn Văn', 'Sáng', '0872109876', 'Bình Tân, TP.HCM'),
+(19, 'Lâm Tài', 'Tâm', '0881098765', 'Thủ Đức, TP.HCM'),
+(20, 'Phùng Thị', 'Uyên', '0890987654', 'Bình Chánh, TP.HCM');
+
 -- --------------------------------------------------------
 
 --
@@ -228,6 +254,14 @@ CREATE TABLE `nhanvien` (
   `ngaySinh` datetime DEFAULT NULL,
   `Luong` decimal(10,0) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `nhanvien`
+--
+
+INSERT INTO `nhanvien` (`id`, `ho`, `ten`, `phone`, `diaChi`, `ngaySinh`, `Luong`) VALUES
+(1, 'Nguyễn Ngọc Phương', 'Duy', '0354271956', 'abc', '2006-08-30 00:00:00', 50000000),
+(2, 'Đặng Thanh', 'Tuấn', '0972139443', 'abc', '2006-07-09 00:00:00', 100000);
 
 -- --------------------------------------------------------
 
@@ -407,7 +441,7 @@ ALTER TABLE `ai_dexuat_sanpham`
 -- AUTO_INCREMENT cho bảng `chuongtrinhkhuyenmai`
 --
 ALTER TABLE `chuongtrinhkhuyenmai`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT cho bảng `hangsanxuat`
@@ -425,7 +459,7 @@ ALTER TABLE `hoadon`
 -- AUTO_INCREMENT cho bảng `khachhang`
 --
 ALTER TABLE `khachhang`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT cho bảng `loaisanpham`
@@ -443,7 +477,7 @@ ALTER TABLE `nhacungcap`
 -- AUTO_INCREMENT cho bảng `nhanvien`
 --
 ALTER TABLE `nhanvien`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT cho bảng `phieunhaphang`
