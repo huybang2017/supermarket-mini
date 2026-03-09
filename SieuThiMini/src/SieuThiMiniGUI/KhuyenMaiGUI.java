@@ -18,7 +18,7 @@ public class KhuyenMaiGUI extends JPanel {
     
     private DefaultTableModel model;
     private JTable tblKhuyenMai;
-    
+
     private Color primaryColor = new Color(0, 123, 255);
     private Color secondaryColor = new Color(108, 117, 125);
     private Color bgColor = new Color(244, 246, 249);
@@ -245,7 +245,7 @@ public class KhuyenMaiGUI extends JPanel {
         pnlForm.setBorder(new EmptyBorder(30, 30, 30, 30));
         pnlForm.setBackground(Color.WHITE);
 
-        JTextField txtID = new JTextField(km != null ? String.valueOf(km.getId()) : "");
+        // JTextField txtID = new JTextField(km != null ? String.valueOf(km.getId()) : "");
         JTextField txtTen = new JTextField(km != null ? km.getTen() : "");
         JTextArea txtGhiChu = new JTextArea(km != null ? km.getGhiChu() : "");
         txtGhiChu.setRows(3);
@@ -271,7 +271,9 @@ public class KhuyenMaiGUI extends JPanel {
         JCheckBox cbTrangThai = new JCheckBox("Đang hoạt động");
         if (km != null) cbTrangThai.setSelected(km.isTrangThai());
 
-        pnlForm.add(new JLabel("ID (Tự tăng):")); pnlForm.add(txtID); txtID.setEditable(false);
+        // if (km != null) txtID.setEditable(false);
+
+        // pnlForm.add(new JLabel("ID:")); pnlForm.add(txtID);
         pnlForm.add(new JLabel("Tên CT Khuyến Mãi:")); pnlForm.add(txtTen);
         pnlForm.add(new JLabel("Ghi Chú:")); pnlForm.add(scrollGhiChu);
         pnlForm.add(new JLabel("Ngày Bắt Đầu:")); pnlForm.add(txtNgayBD);
@@ -282,7 +284,7 @@ public class KhuyenMaiGUI extends JPanel {
         btnSave.addActionListener(e -> {
             try {
                 ChuongTrinhKhuyenMaiDTO newKM = new ChuongTrinhKhuyenMaiDTO();
-                if (km != null) newKM.setId(Integer.parseInt(txtID.getText()));
+                // if (km != null) newKM.setId(Integer.parseInt(txtID.getText()));
                 newKM.setTen(txtTen.getText());
                 newKM.setGhiChu(txtGhiChu.getText());
                 
@@ -391,7 +393,7 @@ public class KhuyenMaiGUI extends JPanel {
         btnDeleteSP.addActionListener(e -> {
             int row = tblSP.getSelectedRow();
             if (row != -1) {
-                int spId = Integer.parseInt(tblSP.getValueAt(row, 0).toString());
+                int spId = (int) tblSP.getValueAt(row, 0);
                 new ChuongTrinhKhuyenMaiSpBUS().xoa(kmId, spId);
                 modelSP.removeRow(row);
             }
@@ -453,63 +455,572 @@ public class KhuyenMaiGUI extends JPanel {
     }
 
     private void showAddProductToKM(int kmId, DefaultTableModel modelSP) {
+        // Tạo dialog đẹp
+        Window parentWindow = SwingUtilities.getWindowAncestor(this);
+        JDialog dialog = new JDialog((Frame)parentWindow, "Thêm Sản Phẩm Vào Khuyến Mãi", true);
+        dialog.setSize(650, 500);
+        dialog.setLocationRelativeTo(this);
+        dialog.setLayout(new BorderLayout(10, 10));
+
+        // Panel chính
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        mainPanel.setBackground(Color.WHITE);
+
+        // Header
+        JLabel lblTitle = new JLabel("🎁 Chọn Sản Phẩm Áp Dụng Khuyến Mãi");
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblTitle.setForeground(primaryColor);
+        mainPanel.add(lblTitle, BorderLayout.NORTH);
+
+        // Form panel
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBackground(Color.WHITE);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(8, 5, 8, 5);
+
+        // Load danh sách sản phẩm
         new SanPhamBUS().docDSSP();
         JComboBox<String> cbSP = new JComboBox<>();
+        cbSP.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         for (SanPhamDTO sp : SanPhamBUS.dssp) {
-            cbSP.addItem(sp.getMasanpham() + " - " + sp.getTensanpham());
+            cbSP.addItem(sp.getMasanpham() + " - " + sp.getTensanpham() + " | Giá: " + String.format("%,d", sp.getDongia()) + " VNĐ");
         }
 
+        // Label hiển thị giá gốc
+        JLabel lblGiaGoc = new JLabel("Giá gốc: 0 VNĐ");
+        lblGiaGoc.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblGiaGoc.setForeground(new Color(220, 53, 69));
+
+        // TextField giá trị giảm
         JTextField txtGiamGia = new JTextField();
+        txtGiamGia.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtGiamGia.setPreferredSize(new Dimension(200, 35));
 
-        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
-        panel.add(new JLabel("Sản Phẩm:"));
-        panel.add(cbSP);
-        panel.add(new JLabel("Giá Trị Giảm (VNĐ):"));
-        panel.add(txtGiamGia);
+        // Label hiển thị giá sau giảm
+        JLabel lblGiaSauGiam = new JLabel("Giá sau giảm: 0 VNĐ");
+        lblGiaSauGiam.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblGiaSauGiam.setForeground(new Color(40, 167, 69));
 
-        int result = JOptionPane.showConfirmDialog(this, panel, "Thêm Sản Phẩm Vào Khuyến Mãi", JOptionPane.OK_CANCEL_OPTION);
-        if (result == JOptionPane.OK_OPTION) {
+        // Radio buttons: Giảm theo số tiền hoặc %
+        JRadioButton rbGiamTien = new JRadioButton("Giảm theo số tiền (VNĐ)", true);
+        JRadioButton rbGiamPhanTram = new JRadioButton("Giảm theo phần trăm (%)");
+        ButtonGroup bgLoaiGiam = new ButtonGroup();
+        bgLoaiGiam.add(rbGiamTien);
+        bgLoaiGiam.add(rbGiamPhanTram);
+        rbGiamTien.setBackground(Color.WHITE);
+        rbGiamPhanTram.setBackground(Color.WHITE);
+
+        // Event: Khi chọn sản phẩm khác
+        cbSP.addActionListener(e -> {
+            if (cbSP.getSelectedItem() != null) {
+                String selected = cbSP.getSelectedItem().toString();
+                String spId = selected.split(" - ")[0];
+                for (SanPhamDTO sp : SanPhamBUS.dssp) {
+                    if (sp.getMasanpham() == Integer.parseInt(spId)) {
+                        lblGiaGoc.setText("Giá gốc: " + String.format("%,d", sp.getDongia()) + " VNĐ");
+                        updateGiaSauGiam(sp.getDongia(), txtGiamGia.getText(), rbGiamPhanTram.isSelected(), lblGiaSauGiam);
+                        break;
+                    }
+                }
+            }
+        });
+
+        // Event: Khi nhập giá trị giảm
+        txtGiamGia.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (cbSP.getSelectedItem() != null) {
+                    String selected = cbSP.getSelectedItem().toString();
+                    String spId = selected.split(" - ")[0];
+                    for (SanPhamDTO sp : SanPhamBUS.dssp) {
+                        if (sp.getMasanpham() == Integer.parseInt(spId)) {
+                            updateGiaSauGiam(sp.getDongia(), txtGiamGia.getText(), rbGiamPhanTram.isSelected(), lblGiaSauGiam);
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+
+        // Event: Khi đổi loại giảm giá
+        ActionListener radioListener = e -> {
+            if (cbSP.getSelectedItem() != null) {
+                String selected = cbSP.getSelectedItem().toString();
+                String spId = selected.split(" - ")[0];
+                for (SanPhamDTO sp : SanPhamBUS.dssp) {
+                    if (sp.getMasanpham() == Integer.parseInt(spId)) {
+                        updateGiaSauGiam(sp.getDongia(), txtGiamGia.getText(), rbGiamPhanTram.isSelected(), lblGiaSauGiam);
+                        break;
+                    }
+                }
+            }
+        };
+        rbGiamTien.addActionListener(radioListener);
+        rbGiamPhanTram.addActionListener(radioListener);
+
+        // Trigger initial update
+        if (cbSP.getItemCount() > 0) {
+            cbSP.setSelectedIndex(0);
+        }
+
+        // Layout form
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
+        formPanel.add(new JLabel("Chọn Sản Phẩm:"), gbc);
+        
+        gbc.gridy = 1;
+        formPanel.add(cbSP, gbc);
+        
+        gbc.gridy = 2;
+        formPanel.add(lblGiaGoc, gbc);
+
+        gbc.gridy = 3; gbc.gridwidth = 1;
+        formPanel.add(rbGiamTien, gbc);
+        gbc.gridx = 1;
+        formPanel.add(rbGiamPhanTram, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
+        formPanel.add(new JLabel("Giá Trị Giảm:"), gbc);
+        
+        gbc.gridy = 5;
+        formPanel.add(txtGiamGia, gbc);
+        
+        gbc.gridy = 6;
+        JPanel previewPanel = new JPanel(new BorderLayout());
+        previewPanel.setBackground(new Color(240, 247, 255));
+        previewPanel.setBorder(new CompoundBorder(
+            new LineBorder(primaryColor, 2),
+            new EmptyBorder(10, 10, 10, 10)
+        ));
+        previewPanel.add(lblGiaSauGiam, BorderLayout.CENTER);
+        formPanel.add(previewPanel, gbc);
+
+        mainPanel.add(formPanel, BorderLayout.CENTER);
+
+        // Buttons
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        btnPanel.setBackground(Color.WHITE);
+        
+        JButton btnSave = new JButton("✓ Thêm Vào Khuyến Mãi");
+        btnSave.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnSave.setBackground(new Color(40, 167, 69));
+        btnSave.setForeground(Color.WHITE);
+        btnSave.setFocusPainted(false);
+        btnSave.setPreferredSize(new Dimension(180, 40));
+        
+        JButton btnCancel = new JButton("✗ Hủy");
+        btnCancel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        btnCancel.setBackground(new Color(108, 117, 125));
+        btnCancel.setForeground(Color.WHITE);
+        btnCancel.setFocusPainted(false);
+        btnCancel.setPreferredSize(new Dimension(100, 40));
+
+        btnSave.addActionListener(e -> {
             try {
-                int spId = Integer.parseInt(cbSP.getSelectedItem().toString().split(" - ")[0]);
-                int giaTriGiam = Integer.parseInt(txtGiamGia.getText());
+                // Validation
+                if (cbSP.getSelectedItem() == null) {
+                    JOptionPane.showMessageDialog(dialog, "Vui lòng chọn sản phẩm!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
 
-                ChuongTrinhKhuyenMaiSpDTO kmsp = new ChuongTrinhKhuyenMaiSpDTO(kmId, spId, giaTriGiam);
+                String giaTriText = txtGiamGia.getText().trim();
+                if (giaTriText.isEmpty()) {
+                    JOptionPane.showMessageDialog(dialog, "Vui lòng nhập giá trị giảm!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    txtGiamGia.requestFocus();
+                    return;
+                }
+
+                String spId = cbSP.getSelectedItem().toString().split(" - ")[0];
+                int giaTriNhap = Integer.parseInt(giaTriText);
+
+                if (giaTriNhap <= 0) {
+                    JOptionPane.showMessageDialog(dialog, "Giá trị giảm phải lớn hơn 0!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Tính giá trị giảm thực tế (VNĐ)
+                int giaTriGiam = giaTriNhap;
+                int giaGoc = 0;
+                for (SanPhamDTO sp : SanPhamBUS.dssp) {
+                    if (sp.getMasanpham() == Integer.parseInt(spId)) {
+                        giaGoc = sp.getDongia();
+                        break;
+                    }
+                }
+
+                if (rbGiamPhanTram.isSelected()) {
+                    if (giaTriNhap > 100) {
+                        JOptionPane.showMessageDialog(dialog, "Phần trăm giảm không được vượt quá 100%!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    giaTriGiam = (giaGoc * giaTriNhap) / 100;
+                }
+
+                if (giaTriGiam >= giaGoc) {
+                    JOptionPane.showMessageDialog(dialog, "Giá trị giảm không được lớn hơn hoặc bằng giá gốc!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Kiểm tra trùng
+                new ChuongTrinhKhuyenMaiSpBUS().docDSKMSP(kmId);
+                for (ChuongTrinhKhuyenMaiSpDTO existing : ChuongTrinhKhuyenMaiSpBUS.dskmsp) {
+                    if (existing.getSanPhamId() == Integer.parseInt(spId)) {
+                        int choice = JOptionPane.showConfirmDialog(dialog, 
+                            "Sản phẩm này đã có trong chương trình!\nBạn có muốn cập nhật giá trị giảm?",
+                            "Xác nhận", 
+                            JOptionPane.YES_NO_OPTION);
+                        if (choice == JOptionPane.YES_OPTION) {
+                            existing.setGiaTriGiam(giaTriGiam);
+                            new ChuongTrinhKhuyenMaiSpBUS().sua(existing);
+                            
+                            // Update table
+                            for (int i = 0; i < modelSP.getRowCount(); i++) {
+                                if (modelSP.getValueAt(i, 0).toString().equals(spId)) {
+                                    modelSP.setValueAt(giaTriGiam, i, 2);
+                                    break;
+                                }
+                            }
+                            JOptionPane.showMessageDialog(dialog, "Cập nhật giá trị giảm thành công!");
+                            dialog.dispose();
+                        }
+                        return;
+                    }
+                }
+
+                // Thêm mới
+                ChuongTrinhKhuyenMaiSpDTO kmsp = new ChuongTrinhKhuyenMaiSpDTO(kmId, Integer.parseInt(spId), giaTriGiam);
                 new ChuongTrinhKhuyenMaiSpBUS().them(kmsp);
 
-                String tenSP = cbSP.getSelectedItem().toString().split(" - ")[1];
-                modelSP.addRow(new Object[]{spId, tenSP, giaTriGiam});
-                JOptionPane.showMessageDialog(this, "Thêm sản phẩm thành công!");
+                String tenSP = cbSP.getSelectedItem().toString().split(" - ")[1].split(" \\| ")[0];
+                modelSP.addRow(new Object[]{spId, tenSP, String.format("%,d", giaTriGiam)});
+                
+                JOptionPane.showMessageDialog(dialog, 
+                    "✓ Thêm sản phẩm vào khuyến mãi thành công!\n" +
+                    "Sản phẩm: " + tenSP + "\n" +
+                    "Giá trị giảm: " + String.format("%,d", giaTriGiam) + " VNĐ",
+                    "Thành công", 
+                    JOptionPane.INFORMATION_MESSAGE);
+                dialog.dispose();
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(dialog, "Vui lòng nhập số hợp lệ!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Lỗi: " + ex.getMessage());
+                JOptionPane.showMessageDialog(dialog, "Lỗi: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
+        });
+
+        btnCancel.addActionListener(e -> dialog.dispose());
+
+        btnPanel.add(btnCancel);
+        btnPanel.add(btnSave);
+        mainPanel.add(btnPanel, BorderLayout.SOUTH);
+
+        dialog.add(mainPanel);
+        dialog.setVisible(true);
+    }
+
+    private void updateGiaSauGiam(int giaGoc, String giaTriText, boolean isPhanTram, JLabel lblGiaSauGiam) {
+        try {
+            if (giaTriText.isEmpty()) {
+                lblGiaSauGiam.setText("Giá sau giảm: " + String.format("%,d", giaGoc) + " VNĐ");
+                return;
+            }
+            
+            int giaTriNhap = Integer.parseInt(giaTriText.trim());
+            int giaTriGiam = giaTriNhap;
+            
+            if (isPhanTram) {
+                giaTriGiam = (giaGoc * giaTriNhap) / 100;
+            }
+            
+            int giaSauGiam = giaGoc - giaTriGiam;
+            if (giaSauGiam < 0) giaSauGiam = 0;
+            
+            lblGiaSauGiam.setText("Giá sau giảm: " + String.format("%,d", giaSauGiam) + " VNĐ" + 
+                (isPhanTram ? " (-" + giaTriNhap + "%)" : ""));
+        } catch (NumberFormatException e) {
+            lblGiaSauGiam.setText("Giá sau giảm: Nhập số hợp lệ");
         }
     }
 
     private void showAddInvoiceCondition(int kmId, DefaultTableModel modelHD) {
+        // Tạo dialog đẹp
+        Window parentWindow = SwingUtilities.getWindowAncestor(this);
+        JDialog dialog = new JDialog((Frame)parentWindow, "Thêm Điều Kiện Giảm Giá Hóa Đơn", true);
+        dialog.setSize(600, 550);
+        dialog.setLocationRelativeTo(this);
+        dialog.setLayout(new BorderLayout(10, 10));
+
+        // Panel chính
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        mainPanel.setBackground(Color.WHITE);
+
+        // Header
+        JLabel lblTitle = new JLabel("💳 Thiết Lập Điều Kiện Giảm Giá Hóa Đơn");
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblTitle.setForeground(primaryColor);
+        mainPanel.add(lblTitle, BorderLayout.NORTH);
+
+        // Form panel
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBackground(Color.WHITE);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(10, 5, 10, 5);
+
+        // TextField điều kiện
         JTextField txtSoTien = new JTextField();
+        txtSoTien.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtSoTien.setPreferredSize(new Dimension(200, 35));
+
+        // TextField giá trị giảm
         JTextField txtGiamGia = new JTextField();
+        txtGiamGia.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtGiamGia.setPreferredSize(new Dimension(200, 35));
 
-        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
-        panel.add(new JLabel("Điều Kiện (VNĐ):"));
-        panel.add(txtSoTien);
-        panel.add(new JLabel("Giá Trị Giảm (VNĐ):"));
-        panel.add(txtGiamGia);
+        // Radio buttons: Giảm theo số tiền hoặc %
+        JRadioButton rbGiamTien = new JRadioButton("Giảm theo số tiền (VNĐ)", true);
+        JRadioButton rbGiamPhanTram = new JRadioButton("Giảm theo phần trăm (%)");
+        ButtonGroup bgLoaiGiam = new ButtonGroup();
+        bgLoaiGiam.add(rbGiamTien);
+        bgLoaiGiam.add(rbGiamPhanTram);
+        rbGiamTien.setBackground(Color.WHITE);
+        rbGiamPhanTram.setBackground(Color.WHITE);
 
-        int result = JOptionPane.showConfirmDialog(this, panel, "Thêm Điều Kiện Hóa Đơn", JOptionPane.OK_CANCEL_OPTION);
-        if (result == JOptionPane.OK_OPTION) {
+        // Label preview
+        JLabel lblPreview = new JLabel("Ví dụ: Hóa đơn từ 0 VNĐ → Giảm 0 VNĐ");
+        lblPreview.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblPreview.setForeground(new Color(40, 167, 69));
+
+        // Event: Update preview khi nhập
+        KeyAdapter updatePreview = new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                try {
+                    String soTienText = txtSoTien.getText().trim();
+                    String giamGiaText = txtGiamGia.getText().trim();
+                    
+                    if (soTienText.isEmpty() || giamGiaText.isEmpty()) {
+                        lblPreview.setText("Ví dụ: Hóa đơn từ 0 VNĐ → Giảm 0 VNĐ");
+                        return;
+                    }
+                    
+                    int soTien = Integer.parseInt(soTienText);
+                    int giamGia = Integer.parseInt(giamGiaText);
+                    
+                    String preview;
+                    if (rbGiamPhanTram.isSelected()) {
+                        int giamThucTe = (soTien * giamGia) / 100;
+                        preview = String.format("Ví dụ: Hóa đơn từ %,d VNĐ → Giảm %,d VNĐ (-%d%%)", 
+                            soTien, giamThucTe, giamGia);
+                    } else {
+                        preview = String.format("Ví dụ: Hóa đơn từ %,d VNĐ → Giảm %,d VNĐ", 
+                            soTien, giamGia);
+                    }
+                    lblPreview.setText(preview);
+                } catch (NumberFormatException ex) {
+                    lblPreview.setText("Vui lòng nhập số hợp lệ!");
+                    lblPreview.setForeground(Color.RED);
+                    return;
+                }
+                lblPreview.setForeground(new Color(40, 167, 69));
+            }
+        };
+        
+        txtSoTien.addKeyListener(updatePreview);
+        txtGiamGia.addKeyListener(updatePreview);
+        
+        ActionListener radioListener = e -> {
+            updatePreview.keyReleased(null);
+        };
+        rbGiamTien.addActionListener(radioListener);
+        rbGiamPhanTram.addActionListener(radioListener);
+
+        // Layout form
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
+        JLabel lblHelp1 = new JLabel("💡 Điều kiện: Giá trị hóa đơn tối thiểu để được giảm");
+        lblHelp1.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        lblHelp1.setForeground(new Color(108, 117, 125));
+        formPanel.add(lblHelp1, gbc);
+
+        gbc.gridy = 1;
+        formPanel.add(new JLabel("Điều Kiện Hóa Đơn Tối Thiểu (VNĐ):"), gbc);
+        
+        gbc.gridy = 2;
+        formPanel.add(txtSoTien, gbc);
+
+        gbc.gridy = 3; gbc.gridwidth = 1;
+        formPanel.add(rbGiamTien, gbc);
+        gbc.gridx = 1;
+        formPanel.add(rbGiamPhanTram, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
+        JLabel lblHelp2 = new JLabel("💡 Giá trị giảm: Số tiền hoặc % sẽ được giảm");
+        lblHelp2.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        lblHelp2.setForeground(new Color(108, 117, 125));
+        formPanel.add(lblHelp2, gbc);
+
+        gbc.gridy = 5;
+        formPanel.add(new JLabel("Giá Trị Giảm:"), gbc);
+        
+        gbc.gridy = 6;
+        formPanel.add(txtGiamGia, gbc);
+
+        // Preview panel
+        gbc.gridy = 7;
+        JPanel previewPanel = new JPanel(new BorderLayout());
+        previewPanel.setBackground(new Color(240, 247, 255));
+        previewPanel.setBorder(new CompoundBorder(
+            new LineBorder(primaryColor, 2),
+            new EmptyBorder(15, 15, 15, 15)
+        ));
+        previewPanel.add(lblPreview, BorderLayout.CENTER);
+        formPanel.add(previewPanel, gbc);
+
+        // Các ví dụ mẫu
+        gbc.gridy = 8;
+        JPanel examplePanel = new JPanel();
+        examplePanel.setLayout(new BoxLayout(examplePanel, BoxLayout.Y_AXIS));
+        examplePanel.setBackground(new Color(255, 243, 205));
+        examplePanel.setBorder(new CompoundBorder(
+            new LineBorder(new Color(255, 193, 7), 1),
+            new EmptyBorder(10, 10, 10, 10)
+        ));
+        
+        JLabel lblEx = new JLabel("📝 Ví dụ các điều kiện phổ biến:");
+        lblEx.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        examplePanel.add(lblEx);
+        examplePanel.add(new JLabel("  • Hóa đơn từ 100,000đ → Giảm 10,000đ"));
+        examplePanel.add(new JLabel("  • Hóa đơn từ 500,000đ → Giảm 10%"));
+        examplePanel.add(new JLabel("  • Hóa đơn từ 1,000,000đ → Giảm 100,000đ"));
+        
+        formPanel.add(examplePanel, gbc);
+
+        mainPanel.add(formPanel, BorderLayout.CENTER);
+
+        // Buttons
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        btnPanel.setBackground(Color.WHITE);
+        
+        JButton btnSave = new JButton("✓ Thêm Điều Kiện");
+        btnSave.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnSave.setBackground(new Color(40, 167, 69));
+        btnSave.setForeground(Color.WHITE);
+        btnSave.setFocusPainted(false);
+        btnSave.setPreferredSize(new Dimension(160, 40));
+        
+        JButton btnCancel = new JButton("✗ Hủy");
+        btnCancel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        btnCancel.setBackground(new Color(108, 117, 125));
+        btnCancel.setForeground(Color.WHITE);
+        btnCancel.setFocusPainted(false);
+        btnCancel.setPreferredSize(new Dimension(100, 40));
+
+        btnSave.addActionListener(e -> {
             try {
-                int soTien = Integer.parseInt(txtSoTien.getText());
-                int giaTriGiam = Integer.parseInt(txtGiamGia.getText());
+                // Validation
+                String soTienText = txtSoTien.getText().trim();
+                String giamGiaText = txtGiamGia.getText().trim();
 
+                if (soTienText.isEmpty()) {
+                    JOptionPane.showMessageDialog(dialog, "Vui lòng nhập điều kiện hóa đơn!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    txtSoTien.requestFocus();
+                    return;
+                }
+
+                if (giamGiaText.isEmpty()) {
+                    JOptionPane.showMessageDialog(dialog, "Vui lòng nhập giá trị giảm!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    txtGiamGia.requestFocus();
+                    return;
+                }
+
+                int soTien = Integer.parseInt(soTienText);
+                int giaTriNhap = Integer.parseInt(giamGiaText);
+
+                if (soTien <= 0) {
+                    JOptionPane.showMessageDialog(dialog, "Điều kiện hóa đơn phải lớn hơn 0!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                if (giaTriNhap <= 0) {
+                    JOptionPane.showMessageDialog(dialog, "Giá trị giảm phải lớn hơn 0!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Tính giá trị giảm thực tế
+                int giaTriGiam = giaTriNhap;
+                if (rbGiamPhanTram.isSelected()) {
+                    if (giaTriNhap > 100) {
+                        JOptionPane.showMessageDialog(dialog, "Phần trăm giảm không được vượt quá 100%!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    giaTriGiam = (soTien * giaTriNhap) / 100;
+                }
+
+                if (giaTriGiam >= soTien) {
+                    JOptionPane.showMessageDialog(dialog, "Giá trị giảm không được lớn hơn hoặc bằng điều kiện hóa đơn!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Kiểm tra trùng
+                new ChuongTrinhKhuyenMaiHDBUS().docDSKMHD(kmId);
+                for (ChuongTrinhKhuyenMaiHDDTO existing : ChuongTrinhKhuyenMaiHDBUS.dskmhd) {
+                    if (existing.getSoTienHd() == soTien) {
+                        int choice = JOptionPane.showConfirmDialog(dialog, 
+                            "Điều kiện này đã tồn tại!\nBạn có muốn cập nhật giá trị giảm?",
+                            "Xác nhận", 
+                            JOptionPane.YES_NO_OPTION);
+                        if (choice == JOptionPane.YES_OPTION) {
+                            existing.setGiaTriGiam(giaTriGiam);
+                            new ChuongTrinhKhuyenMaiHDBUS().sua(existing);
+                            
+                            // Update table
+                            for (int i = 0; i < modelHD.getRowCount(); i++) {
+                                if (Integer.parseInt(modelHD.getValueAt(i, 0).toString()) == soTien) {
+                                    modelHD.setValueAt(String.format("%,d", giaTriGiam), i, 1);
+                                    break;
+                                }
+                            }
+                            JOptionPane.showMessageDialog(dialog, "Cập nhật điều kiện thành công!");
+                            dialog.dispose();
+                        }
+                        return;
+                    }
+                }
+
+                // Thêm mới
                 ChuongTrinhKhuyenMaiHDDTO kmhd = new ChuongTrinhKhuyenMaiHDDTO(kmId, soTien, giaTriGiam);
                 new ChuongTrinhKhuyenMaiHDBUS().them(kmhd);
 
-                modelHD.addRow(new Object[]{soTien, giaTriGiam});
-                JOptionPane.showMessageDialog(this, "Thêm điều kiện thành công!");
+                modelHD.addRow(new Object[]{String.format("%,d", soTien), String.format("%,d", giaTriGiam)});
+                
+                String message = String.format(
+                    "✓ Thêm điều kiện thành công!\n\n" +
+                    "Điều kiện: Hóa đơn từ %,d VNĐ\n" +
+                    "Giảm giá: %,d VNĐ%s",
+                    soTien, 
+                    giaTriGiam,
+                    rbGiamPhanTram.isSelected() ? " (-" + giaTriNhap + "%)" : ""
+                );
+                
+                JOptionPane.showMessageDialog(dialog, message, "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                dialog.dispose();
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(dialog, "Vui lòng nhập số hợp lệ!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Lỗi: " + ex.getMessage());
+                JOptionPane.showMessageDialog(dialog, "Lỗi: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
-        }
+        });
+
+        btnCancel.addActionListener(e -> dialog.dispose());
+
+        btnPanel.add(btnCancel);
+        btnPanel.add(btnSave);
+        mainPanel.add(btnPanel, BorderLayout.SOUTH);
+
+        dialog.add(mainPanel);
+        dialog.setVisible(true);
     }
 
     private void styleTable(JTable t) {
