@@ -42,6 +42,7 @@ public class NhaCungCapDAO {
             Statement st = cnn.createStatement();
             st.executeUpdate(qry);
         } catch (SQLException e) { System.out.println("Lỗi khúc thêm ấy"); }
+        finally { data.closeConnection(); }
     }
 
     public void xoaNCC(String ma) {
@@ -51,6 +52,7 @@ public class NhaCungCapDAO {
             Statement st = cnn.createStatement();
             st.executeUpdate(qry);
         } catch (SQLException e) { System.out.println("Sai chỗ xóa"); }
+        finally { data.closeConnection(); }
     }
 
 

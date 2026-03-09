@@ -48,4 +48,10 @@ public class PhieuNhapHangBUS {
         }
     }
 
+    public int getNextID(){
+        PhieuNhapHangDAO data = new PhieuNhapHangDAO();
+        int id = data.getNextID();
+        return id;
+    }
+
 }

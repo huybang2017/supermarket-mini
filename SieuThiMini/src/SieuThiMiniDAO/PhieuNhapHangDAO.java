@@ -101,4 +101,20 @@ public class PhieuNhapHangDAO {
             data.closeConnection(); 
         }
     }
+
+    public int getNextID() {
+        Connection cnn = data.getConnection();
+        int nextID = 1; 
+        try {
+            String querry = "SELECT MAX(maPNH) FROM phieunhaphang";
+            Statement st =cnn.createStatement();
+            ResultSet rs = st.executeQuery(querry);
+            if (rs.next()) {
+                nextID = rs.getInt(1) + 1;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }finally { data.closeConnection(); }
+        return nextID;
+    }
 }
