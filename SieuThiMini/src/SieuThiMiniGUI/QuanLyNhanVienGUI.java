@@ -1,7 +1,7 @@
 package SieuThiMiniGUI;
 
-import DTO.KhachHangDTO;
-import SieuThiMiniBUS.KhachHangBUS;
+import DTO.NhanVienDTO;
+import SieuThiMiniBUS.NhanVienBUS;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -9,18 +9,18 @@ import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class QuanLyKhachHangGUI extends JPanel {
+public class QuanLyNhanVienGUI extends JPanel {
     
     private DefaultTableModel model;
-    private JTable tblKhachHang;
+    private JTable tblNhanVien;
     
     private Color primaryColor = new Color(0, 123, 255);
     private Color secondaryColor = new Color(108, 117, 125);
     private Color bgColor = new Color(244, 246, 249);
 
-    public QuanLyKhachHangGUI() {
+    public QuanLyNhanVienGUI() {
         initComponents();
-        docDSKH(); 
+        docDSNV(); 
     }
 
     private void initComponents() {
@@ -28,7 +28,7 @@ public class QuanLyKhachHangGUI extends JPanel {
         this.setBackground(bgColor);
         this.setBorder(new EmptyBorder(20, 25, 20, 25));
 
-        JLabel lblTitle = new JLabel("Quản Lý Khách Hàng");
+        JLabel lblTitle = new JLabel("Quản Lý Nhân Viên");
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 24));
         lblTitle.setForeground(new Color(40, 40, 40));
         this.add(lblTitle, BorderLayout.NORTH);
@@ -37,7 +37,7 @@ public class QuanLyKhachHangGUI extends JPanel {
         card.setBackground(Color.WHITE);
         card.setBorder(new CompoundBorder(new LineBorder(new Color(230, 230, 230), 1), new EmptyBorder(15, 15, 15, 15)));
 
-        // 1. THANH CÔNG CỤ (HEADER)
+        // 1. THANH CÔNG CỤ
         JPanel pnlHeader = new JPanel();
         pnlHeader.setLayout(new BoxLayout(pnlHeader, BoxLayout.Y_AXIS));
         pnlHeader.setOpaque(false);
@@ -45,16 +45,15 @@ public class QuanLyKhachHangGUI extends JPanel {
         JPanel topToolBar = new JPanel(new BorderLayout());
         topToolBar.setOpaque(false);
 
-        // Bộ tìm kiếm
         JPanel pnlSearchGroup = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         pnlSearchGroup.setOpaque(false);
-        JTextField txtSearch = new JTextField(" Tìm kiếm khách hàng...");
+        JTextField txtSearch = new JTextField(" Tìm kiếm nhân viên...");
         txtSearch.setPreferredSize(new Dimension(220, 38));
         txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         txtSearch.setForeground(Color.GRAY);
         txtSearch.addFocusListener(new FocusAdapter() {
-            public void focusGained(FocusEvent e) { if (txtSearch.getText().trim().equals("Tìm kiếm khách hàng...")) { txtSearch.setText(""); txtSearch.setForeground(Color.BLACK); } }
-            public void focusLost(FocusEvent e) { if (txtSearch.getText().trim().isEmpty()) { txtSearch.setForeground(Color.GRAY); txtSearch.setText(" Tìm kiếm khách hàng..."); } }
+            public void focusGained(FocusEvent e) { if (txtSearch.getText().trim().equals("Tìm kiếm nhân viên...")) { txtSearch.setText(""); txtSearch.setForeground(Color.BLACK); } }
+            public void focusLost(FocusEvent e) { if (txtSearch.getText().trim().isEmpty()) { txtSearch.setForeground(Color.GRAY); txtSearch.setText(" Tìm kiếm nhân viên..."); } }
         });
         
         JButton btnAdvancedToggle = createActionBtn("▼");
@@ -63,37 +62,36 @@ public class QuanLyKhachHangGUI extends JPanel {
         pnlSearchGroup.add(btnAdvancedToggle);
         topToolBar.add(pnlSearchGroup, BorderLayout.WEST);
 
-        // Các nút bấm
         JPanel pnlButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         pnlButtons.setOpaque(false);
-        JButton btnAdd = createActionBtn("+ Thêm KH");
+        JButton btnAdd = createActionBtn("+ Thêm NV");
         btnAdd.addActionListener(e -> showForm(null)); 
-        JButton btnDelete = createActionBtn("- Xóa KH");
-        btnDelete.addActionListener(e -> deleteSelectedCustomer()); 
+        JButton btnDelete = createActionBtn("- Xóa NV");
+        btnDelete.addActionListener(e -> deleteSelectedEmployee()); 
         pnlButtons.add(btnAdd); 
         pnlButtons.add(btnDelete);
         topToolBar.add(pnlButtons, BorderLayout.EAST);
 
-        // Panel Lọc Nâng Cao (VD: Lọc theo mã KH)
+        // Panel Lọc Nâng Cao (VD: Theo lương)
         JPanel pnlAdvancedSearch = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
         pnlAdvancedSearch.setBackground(new Color(248, 250, 252));
         pnlAdvancedSearch.setBorder(new MatteBorder(1, 0, 0, 0, new Color(230, 230, 230)));
         pnlAdvancedSearch.setVisible(false);
         
-        pnlAdvancedSearch.add(new JLabel("Mã KH từ:"));
-        JTextField txtMaTu = new JTextField(8);
-        pnlAdvancedSearch.add(txtMaTu);
+        pnlAdvancedSearch.add(new JLabel("Lương từ:"));
+        JTextField txtLuongTu = new JTextField(8);
+        pnlAdvancedSearch.add(txtLuongTu);
         pnlAdvancedSearch.add(new JLabel("Đến:"));
-        JTextField txtMaDen = new JTextField(8);
-        pnlAdvancedSearch.add(txtMaDen);
+        JTextField txtLuongDen = new JTextField(8);
+        pnlAdvancedSearch.add(txtLuongDen);
         
         JButton btnApplyFilter = createActionBtn("Lọc");
         JButton btnResetFilter = createActionBtn("Làm Mới");
         btnResetFilter.addActionListener(e -> {
-            txtSearch.setText(" Tìm kiếm khách hàng...");
-            txtMaTu.setText("");
-            txtMaDen.setText("");
-            docDSKH();
+            txtSearch.setText(" Tìm kiếm nhân viên...");
+            txtLuongTu.setText("");
+            txtLuongDen.setText("");
+            docDSNV();
         });
         pnlAdvancedSearch.add(btnApplyFilter);
         pnlAdvancedSearch.add(btnResetFilter);
@@ -115,40 +113,40 @@ public class QuanLyKhachHangGUI extends JPanel {
             @Override
             public void keyReleased(KeyEvent e) {
                 String keyword = txtSearch.getText().toLowerCase().trim();
-                if (keyword.equals("tìm kiếm khách hàng...") || keyword.isEmpty()) { docDSKH(); return; }
+                if (keyword.equals("tìm kiếm nhân viên...") || keyword.isEmpty()) { docDSNV(); return; }
                 model.setRowCount(0);
-                KhachHangBUS bus = new KhachHangBUS();
-                if (bus.dskh != null) {
-                    for (KhachHangDTO kh : bus.dskh) {
-                        if (String.valueOf(kh.getMaKH()).contains(keyword) || 
-                            kh.getTenKH().toLowerCase().contains(keyword) ||
-                            kh.getSdt().contains(keyword)) {
-                            model.addRow(new Object[]{kh.getMaKH(), kh.getHoKH(), kh.getTenKH(), kh.getSdt(), kh.getDiaChi(), "⚙ Sửa"});
+                NhanVienBUS bus = new NhanVienBUS();
+                if (bus.dsnv != null) {
+                    for (NhanVienDTO nv : bus.dsnv) {
+                        if (String.valueOf(nv.getMaNV()).contains(keyword) || 
+                            nv.getTenNV().toLowerCase().contains(keyword) ||
+                            nv.getSdt().contains(keyword)) {
+                            model.addRow(new Object[]{nv.getMaNV(), nv.getHoNV(), nv.getTenNV(), nv.getSdt(), nv.getDiaChi(), nv.getNgaySinh(), nv.getLuong(), "⚙ Sửa"});
                         }
                     }
                 }
             }
         });
 
-        // 2. KHU VỰC BẢNG DỮ LIỆU
-        String[] headers = {"Mã KH", "Họ KH", "Tên KH", "Số Điện Thoại", "Địa Chỉ", "Hành Động"};
+        // 2. BẢNG DỮ LIỆU
+        String[] headers = {"Mã NV", "Họ NV", "Tên NV", "Số Điện Thoại", "Địa Chỉ", "Ngày Sinh", "Lương", "Hành Động"};
         model = new DefaultTableModel(headers, 0) { @Override public boolean isCellEditable(int r, int c) { return false; } };
-        tblKhachHang = new JTable(model);
-        styleTable(tblKhachHang);
+        tblNhanVien = new JTable(model);
+        styleTable(tblNhanVien);
 
-        tblKhachHang.addMouseListener(new MouseAdapter() {
+        tblNhanVien.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    int row = tblKhachHang.getSelectedRow();
-                    int id = Integer.parseInt(tblKhachHang.getValueAt(row, 0).toString());
-                    KhachHangBUS bus = new KhachHangBUS();
-                    for (KhachHangDTO kh : bus.dskh) { if (kh.getMaKH() == id) { showForm(kh); break; } }
+                    int row = tblNhanVien.getSelectedRow();
+                    int id = Integer.parseInt(tblNhanVien.getValueAt(row, 0).toString());
+                    NhanVienBUS bus = new NhanVienBUS();
+                    for (NhanVienDTO nv : bus.dsnv) { if (nv.getMaNV() == id) { showForm(nv); break; } }
                 }
             }
         });
 
-        JScrollPane scrollPane = new JScrollPane(tblKhachHang);
+        JScrollPane scrollPane = new JScrollPane(tblNhanVien);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getViewport().setBackground(Color.WHITE);
         card.add(scrollPane, BorderLayout.CENTER);
@@ -158,72 +156,78 @@ public class QuanLyKhachHangGUI extends JPanel {
 
     // --- CÁC HÀM XỬ LÝ LOGIC ---
     
-    private void docDSKH() {
-        KhachHangBUS bus = new KhachHangBUS();
-        bus.docDSKH();
+    private void docDSNV() {
+        NhanVienBUS bus = new NhanVienBUS();
+        bus.docDSNV();
         model.setRowCount(0);
-        if(bus.dskh != null) {
-            for (KhachHangDTO kh : bus.dskh) {
-                model.addRow(new Object[]{kh.getMaKH(), kh.getHoKH(), kh.getTenKH(), kh.getSdt(), kh.getDiaChi(), "⚙ Sửa"});
+        if(bus.dsnv != null) {
+            for (NhanVienDTO nv : bus.dsnv) {
+                model.addRow(new Object[]{nv.getMaNV(), nv.getHoNV(), nv.getTenNV(), nv.getSdt(), nv.getDiaChi(), nv.getNgaySinh(), nv.getLuong(), "⚙ Sửa"});
             }
         }
     }
 
-    private void deleteSelectedCustomer() {
-        int row = tblKhachHang.getSelectedRow();
+    private void deleteSelectedEmployee() {
+        int row = tblNhanVien.getSelectedRow();
         if (row != -1) {
-            int id = Integer.parseInt(tblKhachHang.getValueAt(row, 0).toString());
-            if (JOptionPane.showConfirmDialog(this, "Xóa khách hàng có mã " + id + "?", "Xác nhận", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                new KhachHangBUS().xoaKH(id);
-                docDSKH();
+            int id = Integer.parseInt(tblNhanVien.getValueAt(row, 0).toString());
+            if (JOptionPane.showConfirmDialog(this, "Xóa nhân viên có mã " + id + "?", "Xác nhận", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                new NhanVienBUS().xoaNV(id);
+                docDSNV();
             }
         } else {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn khách hàng cần xóa!");
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân viên cần xóa!");
         }
     }
 
-    private void showForm(KhachHangDTO kh) {
+    private void showForm(NhanVienDTO nv) {
         Window parentWindow = SwingUtilities.getWindowAncestor(this);
-        JDialog dialog = new JDialog((Frame)parentWindow, kh == null ? "Thêm Khách Hàng" : "Sửa Khách Hàng", true);
-        dialog.setSize(400, 450);
+        JDialog dialog = new JDialog((Frame)parentWindow, nv == null ? "Thêm Nhân Viên" : "Sửa Nhân Viên", true);
+        dialog.setSize(400, 550);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
 
-        JPanel pnlForm = new JPanel(new GridLayout(5, 2, 10, 20));
+        JPanel pnlForm = new JPanel(new GridLayout(7, 2, 10, 20));
         pnlForm.setBorder(new EmptyBorder(30, 30, 30, 30));
         pnlForm.setBackground(Color.WHITE);
 
-        JTextField txtID = new JTextField(kh != null ? String.valueOf(kh.getMaKH()) : "");
-        JTextField txtHo = new JTextField(kh != null ? kh.getHoKH() : "");
-        JTextField txtTen = new JTextField(kh != null ? kh.getTenKH() : "");
-        JTextField txtSdt = new JTextField(kh != null ? kh.getSdt() : "");
-        JTextField txtDiaChi = new JTextField(kh != null ? kh.getDiaChi() : "");
+        JTextField txtID = new JTextField(nv != null ? String.valueOf(nv.getMaNV()) : "");
+        JTextField txtHo = new JTextField(nv != null ? nv.getHoNV() : "");
+        JTextField txtTen = new JTextField(nv != null ? nv.getTenNV() : "");
+        JTextField txtSdt = new JTextField(nv != null ? nv.getSdt() : "");
+        JTextField txtDiaChi = new JTextField(nv != null ? nv.getDiaChi() : "");
+        JTextField txtNgaySinh = new JTextField(nv != null ? nv.getNgaySinh().toString() : "YYYY-MM-DD");
+        JTextField txtLuong = new JTextField(nv != null ? String.valueOf(nv.getLuong()) : "");
 
-        if (kh != null) {
+        if (nv != null) {
             txtID.setEditable(false);
         }
 
-        pnlForm.add(new JLabel("Mã KH (Tự tăng):")); pnlForm.add(txtID); txtID.setEditable(false); // Nếu DB tự tăng ID thì không cho sửa ID
-        pnlForm.add(new JLabel("Họ KH:")); pnlForm.add(txtHo);
-        pnlForm.add(new JLabel("Tên KH:")); pnlForm.add(txtTen);
+        pnlForm.add(new JLabel("Mã NV (Tự tăng):")); pnlForm.add(txtID); txtID.setEditable(false);
+        pnlForm.add(new JLabel("Họ NV:")); pnlForm.add(txtHo);
+        pnlForm.add(new JLabel("Tên NV:")); pnlForm.add(txtTen);
         pnlForm.add(new JLabel("Số Điện Thoại:")); pnlForm.add(txtSdt);
         pnlForm.add(new JLabel("Địa Chỉ:")); pnlForm.add(txtDiaChi);
+        pnlForm.add(new JLabel("Ngày Sinh:")); pnlForm.add(txtNgaySinh);
+        pnlForm.add(new JLabel("Lương:")); pnlForm.add(txtLuong);
 
-        JButton btnSave = createActionBtn(kh == null ? "Thêm Mới" : "Lưu Thay Đổi");
+        JButton btnSave = createActionBtn(nv == null ? "Thêm Mới" : "Lưu Thay Đổi");
         btnSave.addActionListener(e -> {
             try {
-                KhachHangDTO newKh = new KhachHangDTO();
-                if (kh != null) newKh.setMaKH(kh.getMaKH());
-                newKh.setHoKH(txtHo.getText());
-                newKh.setTenKH(txtTen.getText());
-                newKh.setSdt(txtSdt.getText());
-                newKh.setDiaChi(txtDiaChi.getText());
+                NhanVienDTO newNv = new NhanVienDTO();
+                if (nv != null) newNv.setMaNV(nv.getMaNV());
+                newNv.setHoNV(txtHo.getText());
+                newNv.setTenNV(txtTen.getText());
+                newNv.setSdt(txtSdt.getText());
+                newNv.setDiaChi(txtDiaChi.getText());
+                newNv.setNgaySinh(java.sql.Date.valueOf(txtNgaySinh.getText()));
+                newNv.setLuong(Double.parseDouble(txtLuong.getText()));
 
-                KhachHangBUS bus = new KhachHangBUS();
-                if (kh == null) bus.themKH(newKh); else bus.suaKH(newKh);
-                docDSKH();
+                NhanVienBUS bus = new NhanVienBUS();
+                if (nv == null) bus.themNV(newNv); else bus.suaNV(newNv);
+                docDSNV();
                 dialog.dispose();
-            } catch (Exception ex) { JOptionPane.showMessageDialog(dialog, "Lỗi dữ liệu: Vui lòng kiểm tra lại!"); }
+            } catch (Exception ex) { JOptionPane.showMessageDialog(dialog, "Lỗi dữ liệu: Ngày (YYYY-MM-DD) hoặc Lương không hợp lệ!"); }
         });
         dialog.add(pnlForm, BorderLayout.CENTER);
         dialog.add(btnSave, BorderLayout.SOUTH);

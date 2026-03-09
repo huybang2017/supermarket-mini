@@ -244,10 +244,7 @@ public class QuanLySanPhamGUI extends JPanel {
         pnlForm.add(new JLabel("Đơn Giá:")); pnlForm.add(txtGia);
         pnlForm.add(new JLabel("Đơn Vị Tính:")); pnlForm.add(txtDVT);
 
-        JButton btnSave = new JButton(sp == null ? "Thêm Mới" : "Lưu Thay Đổi");
-        btnSave.setBackground(primaryColor);
-        btnSave.setForeground(Color.WHITE);
-        btnSave.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        JButton btnSave = createActionBtn(sp == null ? "Thêm Mới" : "Lưu Thay Đổi");
         btnSave.addActionListener(e -> {
             try {
                 // Kiểm tra xem đã chọn Loại và Hãng chưa
@@ -295,7 +292,6 @@ public class QuanLySanPhamGUI extends JPanel {
 
 
     private JButton createActionBtn(String text) {
-        // ... (Copy nguyên hàm createActionBtn của bạn vào đây) ...
         JButton btn = new JButton(text);
         btn.setPreferredSize(new Dimension(140, 38));
         btn.setFont(new Font("Segoe UI", Font.BOLD, 13));

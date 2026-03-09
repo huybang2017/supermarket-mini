@@ -334,6 +334,7 @@ public class KhuyenMaiGUI extends JPanel {
         new ChuongTrinhKhuyenMaiSpBUS().docDSKMSP(kmId);
         new SanPhamBUS().docDSSP();
         if (ChuongTrinhKhuyenMaiSpBUS.dskmsp != null) {
+            
             for (ChuongTrinhKhuyenMaiSpDTO kmsp : ChuongTrinhKhuyenMaiSpBUS.dskmsp) {
                 String tenSP = "";
                 for (SanPhamDTO sp : SanPhamBUS.dssp) {

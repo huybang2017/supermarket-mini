@@ -380,10 +380,7 @@ public class QuanLyNhapHangGUI extends JPanel {
         pnlForm.add(new JLabel("Số Lượng:")); pnlForm.add(txtSoLuong);
 
     
-        JButton btnSave = new JButton(pn == null ? "Thêm Phiếu" : "Lưu Thay Đổi");
-        btnSave.setBackground(new Color(40, 167, 69)); 
-        btnSave.setForeground(Color.WHITE);
-        btnSave.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        JButton btnSave = createActionBtn(pn == null ? "Thêm Phiếu" : "Lưu Thay Đổi");
         
         btnSave.addActionListener(e -> {
             try {

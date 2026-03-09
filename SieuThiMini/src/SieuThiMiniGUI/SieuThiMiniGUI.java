@@ -45,7 +45,7 @@ public class SieuThiMiniGUI extends JFrame {
         lblLogo.setAlignmentX(Component.LEFT_ALIGNMENT);
         sidebar.add(lblLogo);
 
-        String[] menus = {"Trang Tổng Quan", "Loại Sản Phẩm", "Quản Lý Sản Phẩm", "Quản Lý Nhập Hàng", "Quản Lý Giá Bán", "Quản Lý Đơn Hàng", "Quản Lý Khách Hàng", "Thống Kê & Báo Cáo"};
+        String[] menus = {"Trang Tổng Quan", "Loại Sản Phẩm", "Quản Lý Sản Phẩm", "Quản Lý Nhập Hàng","Quản Lý Nhân Viên","Quản Lý Giá Bán", "Quản Lý Đơn Hàng", "Quản Lý Khách Hàng","Quản Lý Khuyến Mãi", "Thống Kê & Báo Cáo"};
 
         for (String m : menus) {
             JButton btn = createSidebarBtn(m);
@@ -103,9 +103,11 @@ public class SieuThiMiniGUI extends JFrame {
         pnlMainContent.add(new QuanLySanPhamGUI(),"Quản Lý Sản Phẩm");
         pnlMainContent.add(new LoaiSanPhamGUI(), "Loại Sản Phẩm");
         pnlMainContent.add(new QuanLyKhachHangGUI(), "Quản Lý Khách Hàng");
+        pnlMainContent.add(new QuanLyNhanVienGUI(), "Quản Lý Nhân Viên");
         pnlMainContent.add(new QuanLyDonHangGUI(), "Quản Lý Đơn Hàng");
         pnlMainContent.add(new QuanLyGiaBanGUI(), "Quản Lý Giá Bán");        
         pnlMainContent.add(new QuanLyNhapHangGUI(), "Quản Lý Nhập Hàng");        
+        pnlMainContent.add(new KhuyenMaiGUI(), "Quản Lý Khuyến Mãi");        
         pnlMainContent.add(new ThongKeBaoCaoGUI(), "Thống Kê & Báo Cáo");
         add(pnlMainContent, BorderLayout.CENTER);
     }
