@@ -31,11 +31,15 @@ public class ChuongTrinhKhuyenMaiSpBUS {
     public void xoa(int ctkm_id, int sp_id) {
         ChuongTrinhKhuyenMaiSpDAO data = new ChuongTrinhKhuyenMaiSpDAO();
         data.xoaKMSP(ctkm_id, sp_id);
-        for (int i = 0; i < dskmsp.size(); i++) {
-            if (dskmsp.get(i).getChuongTrinhKhuyenMaiId() == ctkm_id 
-                && dskmsp.get(i).getSanPhamId() == sp_id) {
-                dskmsp.remove(i);
-                break;
+        
+        // Thêm if (dskmsp != null) để chặn lỗi văng app
+        if (dskmsp != null) { 
+            for (int i = 0; i < dskmsp.size(); i++) {
+                if (dskmsp.get(i).getChuongTrinhKhuyenMaiId() == ctkm_id 
+                    && dskmsp.get(i).getSanPhamId() == sp_id) {
+                    dskmsp.remove(i);
+                    break;
+                }
             }
         }
     }
@@ -43,9 +47,12 @@ public class ChuongTrinhKhuyenMaiSpBUS {
     public void xoaTheoKM(int ctkm_id) {
         ChuongTrinhKhuyenMaiSpDAO data = new ChuongTrinhKhuyenMaiSpDAO();
         data.xoaTheoKM(ctkm_id);
-        dskmsp.removeIf(kmsp -> kmsp.getChuongTrinhKhuyenMaiId() == ctkm_id);
-    }
-    
+        
+        // Thêm if (dskmsp != null) để chặn lỗi văng app
+        if (dskmsp != null) {
+            dskmsp.removeIf(kmsp -> kmsp.getChuongTrinhKhuyenMaiId() == ctkm_id);
+        }
+    }    
     public void sua(ChuongTrinhKhuyenMaiSpDTO kmsp) {
         ChuongTrinhKhuyenMaiSpDAO data = new ChuongTrinhKhuyenMaiSpDAO();
         data.suaKMSP(kmsp);

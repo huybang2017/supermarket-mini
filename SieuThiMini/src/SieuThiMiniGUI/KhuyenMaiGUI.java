@@ -10,6 +10,10 @@ import java.awt.event.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+// Kéo thư viện LGoodDatePicker vào đây
+import com.github.lgooddatepicker.components.DatePicker;
+import java.time.LocalDate;
+
 public class KhuyenMaiGUI extends JPanel {
     
     private DefaultTableModel model;
@@ -227,10 +231,13 @@ public class KhuyenMaiGUI extends JPanel {
         }
     }
 
+    // ==========================================
+    // FORM ĐÃ ĐƯỢC NÂNG CẤP VỚI LGOODDATEPICKER
+    // ==========================================
     private void showForm(ChuongTrinhKhuyenMaiDTO km) {
         Window parentWindow = SwingUtilities.getWindowAncestor(this);
         JDialog dialog = new JDialog((Frame)parentWindow, km == null ? "Thêm Khuyến Mãi" : "Sửa Khuyến Mãi", true);
-        dialog.setSize(600, 400);
+        dialog.setSize(600, 450); // Tăng tí chiều cao để lịch bung ra thoải mái
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
 
@@ -244,24 +251,34 @@ public class KhuyenMaiGUI extends JPanel {
         txtGhiChu.setRows(3);
         JScrollPane scrollGhiChu = new JScrollPane(txtGhiChu);
         
-        JTextField txtNgayBD = new JTextField(km != null ? new SimpleDateFormat("yyyy-MM-dd").format(km.getNgayBatDau()) : "");
-        JTextField txtNgayKT = new JTextField(km != null ? new SimpleDateFormat("yyyy-MM-dd").format(km.getNgayKetThuc()) : "");
+        // Tạo DatePicker
+        DatePicker txtNgayBD = new DatePicker();
+        DatePicker txtNgayKT = new DatePicker();
+        
+        // Đổ dữ liệu cũ lên Lịch (nếu có)
+        if (km != null) {
+            if (km.getNgayBatDau() != null) {
+                java.sql.Date sqlDateBD = new java.sql.Date(km.getNgayBatDau().getTime());
+                txtNgayBD.setDate(sqlDateBD.toLocalDate());
+            }
+            if (km.getNgayKetThuc() != null) {
+                java.sql.Date sqlDateKT = new java.sql.Date(km.getNgayKetThuc().getTime());
+                txtNgayKT.setDate(sqlDateKT.toLocalDate());
+            }
+            txtID.setEditable(false);
+        }
+
         JCheckBox cbTrangThai = new JCheckBox("Đang hoạt động");
         if (km != null) cbTrangThai.setSelected(km.isTrangThai());
 
-        if (km != null) txtID.setEditable(false);
-
-        pnlForm.add(new JLabel("ID:")); pnlForm.add(txtID);
+        pnlForm.add(new JLabel("ID (Tự tăng):")); pnlForm.add(txtID); txtID.setEditable(false);
         pnlForm.add(new JLabel("Tên CT Khuyến Mãi:")); pnlForm.add(txtTen);
         pnlForm.add(new JLabel("Ghi Chú:")); pnlForm.add(scrollGhiChu);
-        pnlForm.add(new JLabel("Ngày Bắt Đầu (yyyy-MM-dd):")); pnlForm.add(txtNgayBD);
-        pnlForm.add(new JLabel("Ngày Kết Thúc (yyyy-MM-dd):")); pnlForm.add(txtNgayKT);
+        pnlForm.add(new JLabel("Ngày Bắt Đầu:")); pnlForm.add(txtNgayBD);
+        pnlForm.add(new JLabel("Ngày Kết Thúc:")); pnlForm.add(txtNgayKT);
         pnlForm.add(new JLabel("Trạng Thái:")); pnlForm.add(cbTrangThai);
 
-        JButton btnSave = new JButton(km == null ? "Thêm Mới" : "Lưu Thay Đổi");
-        btnSave.setBackground(primaryColor);
-        btnSave.setForeground(Color.WHITE);
-        btnSave.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        JButton btnSave = createActionBtn(km == null ? "Thêm Mới" : "Lưu Thay Đổi");
         btnSave.addActionListener(e -> {
             try {
                 ChuongTrinhKhuyenMaiDTO newKM = new ChuongTrinhKhuyenMaiDTO();
@@ -269,9 +286,25 @@ public class KhuyenMaiGUI extends JPanel {
                 newKM.setTen(txtTen.getText());
                 newKM.setGhiChu(txtGhiChu.getText());
                 
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                newKM.setNgayBatDau(sdf.parse(txtNgayBD.getText()));
-                newKM.setNgayKetThuc(sdf.parse(txtNgayKT.getText()));
+                // --- Xử lý Ngày bắt đầu và Ngày kết thúc ---
+                LocalDate dateBD = txtNgayBD.getDate();
+                LocalDate dateKT = txtNgayKT.getDate();
+
+                if (dateBD == null || dateKT == null) {
+                    JOptionPane.showMessageDialog(dialog, "Vui lòng chọn đầy đủ Ngày bắt đầu và Ngày kết thúc từ lịch!");
+                    return;
+                }
+                
+                if (dateKT.isBefore(dateBD)) {
+                    JOptionPane.showMessageDialog(dialog, "Lỗi: Ngày kết thúc không thể nhỏ hơn Ngày bắt đầu!");
+                    return;
+                }
+
+                // Chuyển LocalDate sang java.sql.Date để lưu
+                newKM.setNgayBatDau(java.sql.Date.valueOf(dateBD));
+                newKM.setNgayKetThuc(java.sql.Date.valueOf(dateKT));
+                // -------------------------------------------
+
                 newKM.setTrangThai(cbTrangThai.isSelected());
 
                 ChuongTrinhKhuyenMaiBUS bus = new ChuongTrinhKhuyenMaiBUS();
@@ -287,6 +320,8 @@ public class KhuyenMaiGUI extends JPanel {
         dialog.add(btnSave, BorderLayout.SOUTH);
         dialog.setVisible(true);
     }
+    // ==========================================
+
 
     private void showDetailDialog() {
         int row = tblKhuyenMai.getSelectedRow();

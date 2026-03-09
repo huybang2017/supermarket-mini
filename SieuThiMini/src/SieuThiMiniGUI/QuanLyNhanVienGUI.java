@@ -8,7 +8,8 @@ import javax.swing.border.*;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
-
+import com.github.lgooddatepicker.components.DatePicker;
+import java.time.LocalDate;
 public class QuanLyNhanVienGUI extends JPanel {
     
     private DefaultTableModel model;
@@ -196,8 +197,12 @@ public class QuanLyNhanVienGUI extends JPanel {
         JTextField txtTen = new JTextField(nv != null ? nv.getTenNV() : "");
         JTextField txtSdt = new JTextField(nv != null ? nv.getSdt() : "");
         JTextField txtDiaChi = new JTextField(nv != null ? nv.getDiaChi() : "");
-        JTextField txtNgaySinh = new JTextField(nv != null ? nv.getNgaySinh().toString() : "YYYY-MM-DD");
-        JTextField txtLuong = new JTextField(nv != null ? String.valueOf(nv.getLuong()) : "");
+        DatePicker txtNgaySinh = new DatePicker();
+
+        // Nếu là đang bấm Sửa (nv != null), thì đổ dữ liệu ngày sinh cũ lên Lịch
+        if (nv != null && nv.getNgaySinh() != null) {
+            txtNgaySinh.setDate(nv.getNgaySinh().toLocalDate());
+        }        JTextField txtLuong = new JTextField(nv != null ? String.valueOf(nv.getLuong()) : "");
 
         if (nv != null) {
             txtID.setEditable(false);
@@ -220,7 +225,15 @@ public class QuanLyNhanVienGUI extends JPanel {
                 newNv.setTenNV(txtTen.getText());
                 newNv.setSdt(txtSdt.getText());
                 newNv.setDiaChi(txtDiaChi.getText());
-                newNv.setNgaySinh(java.sql.Date.valueOf(txtNgaySinh.getText()));
+                LocalDate selectedDate = txtNgaySinh.getDate();
+
+                if (selectedDate == null) {
+                    JOptionPane.showMessageDialog(dialog, "Vui lòng chọn ngày sinh từ lịch!");
+                    return; // Dừng lại không lưu nếu chưa chọn
+                }
+                
+                // Chuyển sang kiểu java.sql.Date để lưu vào Database
+                newNv.setNgaySinh(java.sql.Date.valueOf(selectedDate));                
                 newNv.setLuong(Double.parseDouble(txtLuong.getText()));
 
                 NhanVienBUS bus = new NhanVienBUS();

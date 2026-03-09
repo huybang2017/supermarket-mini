@@ -31,11 +31,15 @@ public class ChuongTrinhKhuyenMaiHDBUS {
     public void xoa(int ctkm_id, int soTienHd) {
         ChuongTrinhKhuyenMaiHDDAO data = new ChuongTrinhKhuyenMaiHDDAO();
         data.xoaKMHD(ctkm_id, soTienHd);
-        for (int i = 0; i < dskmhd.size(); i++) {
-            if (dskmhd.get(i).getChuongTrinhKhuyenMaiId() == ctkm_id 
-                && dskmhd.get(i).getSoTienHd() == soTienHd) {
-                dskmhd.remove(i);
-                break;
+        
+        // Thêm if (dskmhd != null)
+        if (dskmhd != null) {
+            for (int i = 0; i < dskmhd.size(); i++) {
+                if (dskmhd.get(i).getChuongTrinhKhuyenMaiId() == ctkm_id 
+                    && dskmhd.get(i).getSoTienHd() == soTienHd) {
+                    dskmhd.remove(i);
+                    break;
+                }
             }
         }
     }
@@ -43,9 +47,12 @@ public class ChuongTrinhKhuyenMaiHDBUS {
     public void xoaTheoKM(int ctkm_id) {
         ChuongTrinhKhuyenMaiHDDAO data = new ChuongTrinhKhuyenMaiHDDAO();
         data.xoaTheoKM(ctkm_id);
-        dskmhd.removeIf(kmhd -> kmhd.getChuongTrinhKhuyenMaiId() == ctkm_id);
-    }
-    
+        
+        // Thêm if (dskmhd != null)
+        if (dskmhd != null) {
+            dskmhd.removeIf(kmhd -> kmhd.getChuongTrinhKhuyenMaiId() == ctkm_id);
+        }
+    }    
     public void sua(ChuongTrinhKhuyenMaiHDDTO kmhd) {
         ChuongTrinhKhuyenMaiHDDAO data = new ChuongTrinhKhuyenMaiHDDAO();
         data.suaKMHD(kmhd);
