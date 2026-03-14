@@ -3,45 +3,62 @@ package SieuThiMiniGUI;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.*;
-
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 import SieuThiMiniBUS.ThongKeBaoCaoBUS;
-
 import java.awt.*;
+import java.util.ArrayList;
 
 public class ThongKeBaoCaoGUI extends JPanel {
-    private ThongKeBaoCaoBUS tKeBaoCaoBUS = new ThongKeBaoCaoBUS();
+    private ThongKeBaoCaoBUS bus = new ThongKeBaoCaoBUS();
     
-    // Bootstrap-inspired colors
-    private final Color primaryColor   = new Color(0, 123, 255);      // Blue
-    private final Color dangerColor    = new Color(220, 53, 69);      // Red
-    private final Color successColor   = new Color(40, 167, 69);      // Green
-    private final Color warningColor   = new Color(255, 193, 7);      // Yellow/Orange
-    private final Color purpleColor    = new Color(111, 66, 193);     // Purple
-    private Color secondaryColor = new Color(108, 117, 125);
-    private Color bgColor = new Color(244, 246, 249);
-    private Font fontTitle = new Font("Segoe UI", Font.BOLD, 24);
+    private final Color primaryColor   = new Color(0, 123, 255);
+    private final Color dangerColor    = new Color(220, 53, 69);
+    private final Color successColor   = new Color(40, 167, 69);
+    private final Color warningColor   = new Color(255, 193, 7);
+    private final Color purpleColor    = new Color(111, 66, 193);
+    private Color secondaryColor       = new Color(108, 117, 125);
+    private Color bgColor              = new Color(244, 246, 249);
+    
+    private JTabbedPane tabs;
+    private boolean isRefreshing = false;
 
     public ThongKeBaoCaoGUI() {
         this.setLayout(new BorderLayout(20, 20));
         this.setBackground(bgColor);
         this.setBorder(new EmptyBorder(20, 25, 20, 25));
 
-        // Title
         JLabel lblTitle = new JLabel("Thống Kê & Báo Cáo");
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 24));
         lblTitle.setForeground(new Color(40, 40, 40));
         add(lblTitle, BorderLayout.NORTH);
 
-        // Tabbed pane
-        JTabbedPane tabs = new JTabbedPane(JTabbedPane.TOP);
+        tabs = new JTabbedPane(JTabbedPane.TOP);
         tabs.setFont(new Font("Segoe UI", Font.BOLD, 14));
         tabs.setBackground(bgColor);
+        
+        tabs.addChangeListener(e -> {
+            if (!isRefreshing && tabs.getSelectedIndex() != -1) refreshData();
+        });
+
+        refreshData();
+        add(tabs, BorderLayout.CENTER);
+    }
+
+    public void refreshData() {
+        isRefreshing = true;
+        int selectedIndex = tabs.getSelectedIndex();
+        tabs.removeAll();
+        
         tabs.addTab("  Doanh Thu & Chi Phí  ", buildDoanhThuTab());
         tabs.addTab("  Theo Khách Hàng  ",     buildKhachHangTab());
         tabs.addTab("  Theo Nhân Viên  ",       buildNhanVienTab());
         tabs.addTab("  Theo Sản Phẩm  ",        buildSanPhamTab());
-
-        add(tabs, BorderLayout.CENTER);
+        
+        if (selectedIndex >= 0 && selectedIndex < tabs.getTabCount()) {
+            tabs.setSelectedIndex(selectedIndex);
+        }
+        isRefreshing = false;
     }
 
     // =========================================================================
@@ -52,28 +69,21 @@ public class ThongKeBaoCaoGUI extends JPanel {
         root.setBackground(bgColor);
         root.setBorder(new EmptyBorder(14, 0, 0, 0));
         
-        // --- Filter bar ---
         JPanel filterCard = buildCard();
         filterCard.setLayout(new FlowLayout(FlowLayout.LEFT, 12, 10));
 
         filterCard.add(label("Kỳ thống kê:"));
-        JComboBox<String> cboLoaiKy = new JComboBox<>(new String[]{"Tháng", "Quý", "Năm"});
-        styleCombo(cboLoaiKy);
-        filterCard.add(cboLoaiKy);
+        JComboBox<String> cboLoaiKy = new JComboBox<>(new String[]{"Năm", "Quý", "Tháng"});
+        styleCombo(cboLoaiKy); filterCard.add(cboLoaiKy);
 
         filterCard.add(label("Năm:"));
         JComboBox<String> cboNam = new JComboBox<>(new String[]{"2026", "2025", "2024", "2023"});
-        styleCombo(cboNam);
-        filterCard.add(cboNam);
+        styleCombo(cboNam); filterCard.add(cboNam);
 
         filterCard.add(label("Tháng/Quý:"));
-        JComboBox<String> cboKy = new JComboBox<>(new String[]{
-            "1","2","3","4","5","6","7","8","9","10","11","12"
-        });
-        styleCombo(cboKy);
-        filterCard.add(cboKy);
+        JComboBox<String> cboKy = new JComboBox<>(new String[]{"1","2","3","4","5","6","7","8","9","10","11","12"});
+        styleCombo(cboKy); filterCard.add(cboKy);
 
-        // toggle ky combo khi đổi loại kỳ
         cboLoaiKy.addActionListener(e -> {
             String sel = (String) cboLoaiKy.getSelectedItem();
             if ("Quý".equals(sel)) {
@@ -82,61 +92,35 @@ public class ThongKeBaoCaoGUI extends JPanel {
             } else if ("Năm".equals(sel)) {
                 cboKy.setEnabled(false);
             } else {
-                cboKy.setModel(new DefaultComboBoxModel<>(new String[]{
-                    "1","2","3","4","5","6","7","8","9","10","11","12"}));
+                cboKy.setModel(new DefaultComboBoxModel<>(new String[]{"1","2","3","4","5","6","7","8","9","10","11","12"}));
                 cboKy.setEnabled(true);
             }
         });
-
+        cboKy.setEnabled(false);
         JButton btnFilter = createBtn("Thống Kê", primaryColor);
         btnFilter.setPreferredSize(new Dimension(120, 36));
         filterCard.add(btnFilter);
-
-        JButton btnExport = createBtn("Xuất Excel", successColor);
-        btnExport.setPreferredSize(new Dimension(120, 36));
-        filterCard.add(btnExport);
-
         root.add(filterCard, BorderLayout.NORTH);
 
-        // --- Center: summary cards + table ---
         JPanel center = new JPanel(new BorderLayout(0, 14));
         center.setBackground(bgColor);
 
-        // Lấy dữ liệu từ BUS
-        long doanhThu = tKeBaoCaoBUS.tongDoanhThu();
-        long phiNhap = tKeBaoCaoBUS.tongPhiNhap();
-        long loiNhuan = tKeBaoCaoBUS.loiNhuanUocTinh();
-
-        // Summary cards
         JPanel pnlCards = new JPanel(new GridLayout(1, 3, 14, 0));
         pnlCards.setOpaque(false);
-        pnlCards.add(createSummaryCard("Tổng Doanh Thu Bán", String.format("%,d đ", doanhThu), successColor, "Từ đơn hàng bán ra"));
-        pnlCards.add(createSummaryCard("Tổng Chi Phí Nhập", String.format("%,d đ", phiNhap), dangerColor, "Từ phiếu nhập hàng"));
-        pnlCards.add(createSummaryCard("Lợi Nhuận Ước Tính", String.format("%,d đ", loiNhuan), purpleColor, "Doanh thu - Chi phí"));
+        JLabel lblTopDT = new JLabel("0 đ"); lblTopDT.setFont(new Font("Segoe UI", Font.BOLD, 20)); lblTopDT.setForeground(successColor);
+        JLabel lblTopCP = new JLabel("0 đ"); lblTopCP.setFont(new Font("Segoe UI", Font.BOLD, 20)); lblTopCP.setForeground(dangerColor);
+        JLabel lblTopLN = new JLabel("0 đ"); lblTopLN.setFont(new Font("Segoe UI", Font.BOLD, 20)); lblTopLN.setForeground(purpleColor);
+        pnlCards.add(createCardTemplate("Tổng Doanh Thu Bán", lblTopDT, "Giai đoạn đang lọc"));
+        pnlCards.add(createCardTemplate("Tổng Chi Phí Nhập", lblTopCP, "Giai đoạn đang lọc"));
+        pnlCards.add(createCardTemplate("Lợi Nhuận Ước Tính", lblTopLN, "Doanh thu - Chi phí"));
         center.add(pnlCards, BorderLayout.NORTH);
 
-        // Table
         JPanel tableCard = buildCard();
         tableCard.setLayout(new BorderLayout(0, 10));
-        JLabel lblSub = sectionLabel("Chi Tiết Theo Kỳ");
-        tableCard.add(lblSub, BorderLayout.NORTH);
+        tableCard.add(sectionLabel("Chi Tiết Theo Kỳ"), BorderLayout.NORTH);
 
         String[] cols = {"Kỳ", "Doanh Thu Bán (đ)", "Chi Phí Nhập (đ)", "Lợi Nhuận (đ)", "Tăng Trưởng"};
-        DefaultTableModel model = new DefaultTableModel(cols, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
-        };
-
-        // LẤY DỮ LIỆU THẬT TỪ BUS (Mặc định năm 2026 theo hình ảnh của bạn)
-        java.util.List<Object[]> dsChiTiet = tKeBaoCaoBUS.getChiTietThang(2026); 
-        for (Object[] row : dsChiTiet) {
-            model.addRow(new Object[]{
-                row[0],
-                String.format("%,d", (long)row[1]),
-                String.format("%,d", (long)row[2]),
-                String.format("%,d", (long)row[3]),
-                row[4]
-            });
-        }        
+        DefaultTableModel model = new DefaultTableModel(cols, 0) { @Override public boolean isCellEditable(int r, int c) { return false; } };
         JTable tbl = new JTable(model);
         styleTable(tbl);
 
@@ -144,21 +128,74 @@ public class ThongKeBaoCaoGUI extends JPanel {
         rightAlign.setHorizontalAlignment(JLabel.RIGHT);
         for (int c = 1; c <= 3; c++) tbl.getColumnModel().getColumn(c).setCellRenderer(rightAlign);
 
-        tbl.getColumnModel().getColumn(4).setCellRenderer(new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable t, Object val, boolean sel, boolean foc, int row, int col) {
-                super.getTableCellRendererComponent(t, val, sel, foc, row, col);
-                setHorizontalAlignment(JLabel.CENTER);
-                String v = val == null ? "" : val.toString();
-                setForeground(v.startsWith("+") ? successColor : dangerColor);
-                setFont(getFont().deriveFont(Font.BOLD));
-                return this;
-            }
-        });
-
         tableCard.add(buildScroll(tbl), BorderLayout.CENTER);
-        tableCard.add(buildSumBar("Tổng doanh thu:", String.format("%,d đ", doanhThu), successColor), BorderLayout.SOUTH);
+        
+        JLabel lblSumFooter = new JLabel("0 đ"); lblSumFooter.setFont(new Font("Segoe UI", Font.BOLD, 16)); lblSumFooter.setForeground(successColor);
+        tableCard.add(buildSumBar("Tổng doanh thu hiển thị:", lblSumFooter), BorderLayout.SOUTH);
         center.add(tableCard, BorderLayout.CENTER);
+
+// -- Xử lý lọc dữ liệu Tab 1 (Đã làm lại logic hiển thị Ngày/Tháng/Năm) --
+Runnable loadTableData = () -> {
+    model.setRowCount(0);
+    try {
+        int nam = Integer.parseInt(cboNam.getSelectedItem().toString());
+        String loaiKy = cboLoaiKy.getSelectedItem().toString();
+        String kySelected = cboKy.getSelectedItem() != null ? cboKy.getSelectedItem().toString() : "1";
+
+        long sumDT = 0, sumCP = 0;
+
+        if (loaiKy.equals("Tháng")) {
+            // Nếu chọn Tháng -> Đổ dữ liệu từng NGÀY
+            int thang = Integer.parseInt(kySelected);
+            java.util.List<Object[]> ds = bus.getChiTietDoanhThu(loaiKy, nam, thang);
+            for (Object[] row : ds) {
+                model.addRow(new Object[]{ 
+                    row[0] + "/" + thang + "/" + nam, 
+                    String.format("%,d", (long)row[1]), 
+                    String.format("%,d", (long)row[2]), 
+                    String.format("%,d", (long)row[3]), 
+                    row[4] 
+                });
+                sumDT += (long)row[1];
+                sumCP += (long)row[2];
+            }
+        } else {
+            // Nếu chọn Năm hoặc Quý -> Đổ dữ liệu từng THÁNG
+            java.util.List<Object[]> ds = bus.getChiTietDoanhThu("Năm", nam, 0);
+            for (Object[] row : ds) {
+                int thangRow = Integer.parseInt(row[0].toString().replace("Tháng ", ""));
+                boolean match = false;
+
+                // Nếu chọn Năm thì lấy hết, nếu chọn Quý thì kiểm tra tháng đó thuộc quý nào
+                if (loaiKy.equals("Năm")) match = true;
+                else if (loaiKy.equals("Quý")) {
+                    int q = Integer.parseInt(kySelected.replace("Q", ""));
+                    if ((thangRow - 1) / 3 + 1 == q) match = true;
+                }
+
+                if (match) {
+                    model.addRow(new Object[]{ 
+                        row[0] + "/" + nam, 
+                        String.format("%,d", (long)row[1]), 
+                        String.format("%,d", (long)row[2]), 
+                        String.format("%,d", (long)row[3]), 
+                        row[4] 
+                    });
+                    sumDT += (long)row[1];
+                    sumCP += (long)row[2];
+                }
+            }
+        }
+        
+        // Cập nhật lại các Label Box ở phía trên để khớp với bảng
+        lblTopDT.setText(String.format("%,d đ", sumDT));
+        lblTopCP.setText(String.format("%,d đ", sumCP));
+        lblTopLN.setText(String.format("%,d đ", sumDT - sumCP));
+        lblSumFooter.setText(String.format("%,d đ", sumDT));
+    } catch (Exception ex) { ex.printStackTrace(); }
+};
+        loadTableData.run();
+        btnFilter.addActionListener(e -> loadTableData.run());
 
         root.add(center, BorderLayout.CENTER);
         return root;
@@ -172,74 +209,71 @@ public class ThongKeBaoCaoGUI extends JPanel {
         root.setBackground(bgColor);
         root.setBorder(new EmptyBorder(14, 0, 0, 0));
 
-        // Filter
         JPanel filterCard = buildCard();
         filterCard.setLayout(new FlowLayout(FlowLayout.LEFT, 12, 10));
-        filterCard.add(label("Năm:"));
-        JComboBox<String> cboNam = new JComboBox<>(new String[]{"2026","2025","2024"});
-        styleCombo(cboNam); filterCard.add(cboNam);
-        filterCard.add(label("Tháng:"));
-        JComboBox<String> cboThang = new JComboBox<>(new String[]{"Tất cả","1","2","3","4","5","6","7","8","9","10","11","12"});
-        styleCombo(cboThang); filterCard.add(cboThang);
-        filterCard.add(label("Tìm KH:"));
-        JTextField txtSearch = styledField(14);
-        txtSearch.setPreferredSize(new Dimension(160, 36));
-        filterCard.add(txtSearch);
-        JButton btn = createBtn("Thống Kê", primaryColor);
-        btn.setPreferredSize(new Dimension(110, 36));
-        filterCard.add(btn);
+        filterCard.add(label("Năm:")); JComboBox<String> cboNam = new JComboBox<>(new String[]{"Tất cả","2026","2025","2024"}); styleCombo(cboNam); filterCard.add(cboNam);
+        filterCard.add(label("Tháng:")); JComboBox<String> cboThang = new JComboBox<>(new String[]{"Tất cả","1","2","3","4","5","6","7","8","9","10","11","12"}); styleCombo(cboThang); filterCard.add(cboThang);
+        filterCard.add(label("Tìm KH:")); JTextField txtSearch = styledField(14); txtSearch.setPreferredSize(new Dimension(160, 36)); filterCard.add(txtSearch);
+        JButton btn = createBtn("Tìm Kiếm", primaryColor); btn.setPreferredSize(new Dimension(110, 36)); filterCard.add(btn);
         root.add(filterCard, BorderLayout.NORTH);
 
-        // --- SUMMARY CARDS (Đã cập nhật dữ liệu thật) ---
         JPanel center = new JPanel(new BorderLayout(0, 14));
         center.setBackground(bgColor);
 
-        int tongKH = tKeBaoCaoBUS.tongSoKhachHang();
-        int khDaMua = tKeBaoCaoBUS.tongKhachHangDaMua();
-        long tongDoanhThu = tKeBaoCaoBUS.tongDoanhThu();
-
         JPanel cards = new JPanel(new GridLayout(1, 3, 14, 0));
         cards.setOpaque(false);
-        cards.add(createSummaryCard("Tổng Khách Hàng", tongKH + " KH", primaryColor, "Có trong hệ thống"));
-        cards.add(createSummaryCard("Khách Đã Mua", khDaMua + " KH", successColor, "Có phát sinh giao dịch"));
-        cards.add(createSummaryCard("Tổng Doanh Thu", String.format("%,d đ", tongDoanhThu), warningColor, "Tất cả khách hàng"));
+        cards.add(createSummaryCard("Tổng Khách Hàng", bus.tongSoKhachHang() + " KH", primaryColor, "Có trong hệ thống"));
+        cards.add(createSummaryCard("Khách Đã Mua", bus.tongKhachHangDaMua() + " KH", successColor, "Có phát sinh giao dịch"));
+        JLabel lblTopDT = new JLabel("0 đ"); lblTopDT.setFont(new Font("Segoe UI", Font.BOLD, 20)); lblTopDT.setForeground(warningColor);
+        cards.add(createCardTemplate("Tổng Doanh Thu (Theo bảng)", lblTopDT, "Thay đổi theo thời gian"));
         center.add(cards, BorderLayout.NORTH);
 
-        // --- TABLE (Đã cập nhật dữ liệu thật) ---
         JPanel tableCard = buildCard();
         tableCard.setLayout(new BorderLayout(0, 10));
         tableCard.add(sectionLabel("Danh Sách Khách Hàng Theo Doanh Thu"), BorderLayout.NORTH);
 
         String[] cols = {"Xếp Hạng", "Mã KH", "Tên Khách Hàng", "Số Đơn Hàng", "Tổng Chi Tiêu (đ)", "Trung Bình/Đơn (đ)"};
-        DefaultTableModel model = new DefaultTableModel(cols, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
-        };
-
-        // Lấy danh sách từ DB và đổ vào bảng
-        java.util.List<Object[]> topKH = tKeBaoCaoBUS.getTopKhachHang();
-        for(Object[] row : topKH) {
-            long chiTieu = (long) row[4];
-            long trungBinh = (long) row[5];
-            model.addRow(new Object[]{
-                row[0], row[1], row[2], row[3], String.format("%,d", chiTieu), String.format("%,d", trungBinh)
-            });
-        }
-
+        DefaultTableModel model = new DefaultTableModel(cols, 0) { @Override public boolean isCellEditable(int r, int c) { return false; } };
         JTable tbl = new JTable(model);
         styleTable(tbl);
-        DefaultTableCellRenderer center1 = new DefaultTableCellRenderer();
-        center1.setHorizontalAlignment(JLabel.CENTER);
-        tbl.getColumnModel().getColumn(0).setCellRenderer(center1);
-        DefaultTableCellRenderer right = new DefaultTableCellRenderer();
-        right.setHorizontalAlignment(JLabel.RIGHT);
-        tbl.getColumnModel().getColumn(3).setCellRenderer(center1);
-        tbl.getColumnModel().getColumn(4).setCellRenderer(right);
-        tbl.getColumnModel().getColumn(5).setCellRenderer(right);
+        
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
+        tbl.setRowSorter(sorter);
+
+        DefaultTableCellRenderer center1 = new DefaultTableCellRenderer(); center1.setHorizontalAlignment(JLabel.CENTER);
+        DefaultTableCellRenderer right = new DefaultTableCellRenderer(); right.setHorizontalAlignment(JLabel.RIGHT);
+        tbl.getColumnModel().getColumn(0).setCellRenderer(center1); tbl.getColumnModel().getColumn(3).setCellRenderer(center1);
+        tbl.getColumnModel().getColumn(4).setCellRenderer(right); tbl.getColumnModel().getColumn(5).setCellRenderer(right);
 
         tableCard.add(buildScroll(tbl), BorderLayout.CENTER);
-        tableCard.add(buildSumBar("Tổng doanh thu:", String.format("%,d đ", tongDoanhThu), warningColor), BorderLayout.SOUTH);
+        
+        JLabel lblSumFooter = new JLabel("0 đ"); lblSumFooter.setFont(new Font("Segoe UI", Font.BOLD, 16)); lblSumFooter.setForeground(warningColor);
+        tableCard.add(buildSumBar("Tổng doanh thu hiển thị:", lblSumFooter), BorderLayout.SOUTH);
         center.add(tableCard, BorderLayout.CENTER);
         root.add(center, BorderLayout.CENTER);
+        
+        // -- Logic Load & Lọc Tab 2 --
+        Runnable loadData = () -> {
+            String n = cboNam.getSelectedItem().toString();
+            int nam = n.equals("Tất cả") ? 0 : Integer.parseInt(n);            String t = cboThang.getSelectedItem().toString();
+            int thang = t.equals("Tất cả") ? 0 : Integer.parseInt(t);
+
+            model.setRowCount(0);
+            long tongDT = 0;
+            for(Object[] row : bus.getTopKhachHangTheoThoiGian(nam, thang)) {
+                model.addRow(new Object[]{ row[0], row[1], row[2], row[3], String.format("%,d", (long)row[4]), String.format("%,d", (long)row[5]) });
+                tongDT += (long) row[4];
+            }
+            lblTopDT.setText(String.format("%,d đ", tongDT));
+            lblSumFooter.setText(String.format("%,d đ", tongDT));
+
+            String tuKhoa = txtSearch.getText().trim();
+            if (tuKhoa.isEmpty()) sorter.setRowFilter(null);
+            else sorter.setRowFilter(RowFilter.regexFilter("(?i)" + tuKhoa, 1, 2));
+        };
+
+        loadData.run();
+        btn.addActionListener(e -> loadData.run());
         
         return root;
     }
@@ -252,80 +286,72 @@ public class ThongKeBaoCaoGUI extends JPanel {
         root.setBackground(bgColor);
         root.setBorder(new EmptyBorder(14, 0, 0, 0));
 
-        // Filter
         JPanel filterCard = buildCard();
         filterCard.setLayout(new FlowLayout(FlowLayout.LEFT, 12, 10));
-        filterCard.add(label("Năm:"));
-        JComboBox<String> cboNam = new JComboBox<>(new String[]{"2026","2025","2024"});
-        styleCombo(cboNam); filterCard.add(cboNam);
-        filterCard.add(label("Tháng:"));
-        JComboBox<String> cboThang = new JComboBox<>(new String[]{"Tất cả","1","2","3","4","5","6","7","8","9","10","11","12"});
-        styleCombo(cboThang); filterCard.add(cboThang);
-        filterCard.add(label("Tìm NV:"));
-        JTextField txtSearch = styledField(14);
-        txtSearch.setPreferredSize(new Dimension(160, 36));
-        filterCard.add(txtSearch);
-        JButton btn = createBtn("Thống Kê", primaryColor);
-        btn.setPreferredSize(new Dimension(110, 36));
-        filterCard.add(btn);
+        filterCard.add(label("Năm:")); JComboBox<String> cboNam = new JComboBox<>(new String[]{"Tất cả","2026","2025","2024"}); styleCombo(cboNam); filterCard.add(cboNam);
+        filterCard.add(label("Tháng:")); JComboBox<String> cboThang = new JComboBox<>(new String[]{"Tất cả","1","2","3","4","5","6","7","8","9","10","11","12"}); styleCombo(cboThang); filterCard.add(cboThang);
+        filterCard.add(label("Tìm NV:")); JTextField txtSearch = styledField(14); txtSearch.setPreferredSize(new Dimension(160, 36)); filterCard.add(txtSearch);
+        JButton btn = createBtn("Tìm Kiếm", primaryColor); btn.setPreferredSize(new Dimension(110, 36)); filterCard.add(btn);
         root.add(filterCard, BorderLayout.NORTH);
 
-        // Summary cards
         JPanel center = new JPanel(new BorderLayout(0, 14));
         center.setBackground(bgColor);
 
-        // Lấy dữ liệu thật từ BUS
-        int tongNV = tKeBaoCaoBUS.tongNhanVien();
-        String nvXuatSac = tKeBaoCaoBUS.nhanVienXuatSac();
-        long dtTrungBinh = tKeBaoCaoBUS.doanhThuTrungBinhNhanVien();
-
         JPanel cards = new JPanel(new GridLayout(1, 3, 14, 0));
         cards.setOpaque(false);
-        // Thay "24 NV" bằng (tongNV + " NV")
-        cards.add(createSummaryCard("Tổng Nhân Viên", tongNV + " NV", primaryColor,  "Đang hoạt động"));
-        cards.add(createSummaryCard("NV Xuất Sắc", nvXuatSac, successColor,  "Doanh thu cao nhất"));
-        cards.add(createSummaryCard("Doanh Thu Trung Bình", String.format("%,d đ", dtTrungBinh), purpleColor,   "Trung bình/Nhân viên"));
-        
+        cards.add(createSummaryCard("Tổng Nhân Viên", bus.tongNhanVien() + " NV", primaryColor, "Đang hoạt động"));
+        cards.add(createSummaryCard("NV Xuất Sắc", bus.nhanVienXuatSac(), successColor, "Doanh thu cao nhất toàn TG"));
+        JLabel lblTopDT = new JLabel("0 đ"); lblTopDT.setFont(new Font("Segoe UI", Font.BOLD, 20)); lblTopDT.setForeground(purpleColor);
+        cards.add(createCardTemplate("Tổng DT (Theo bảng)", lblTopDT, "Thay đổi theo thời gian"));
         center.add(cards, BorderLayout.NORTH);
-        // Table
+
         JPanel tableCard = buildCard();
         tableCard.setLayout(new BorderLayout(0, 10));
         tableCard.add(sectionLabel("Hiệu Suất Nhân Viên"), BorderLayout.NORTH);
 
         String[] cols = {"Xếp Hạng", "Mã NV", "Tên Nhân Viên", "Vị Trí", "Số Đơn Phụ Trách", "Doanh Thu (đ)", "Tỷ Lệ %"};
-        DefaultTableModel model = new DefaultTableModel(cols, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
-        };
+        DefaultTableModel model = new DefaultTableModel(cols, 0) { @Override public boolean isCellEditable(int r, int c) { return false; } };
+        JTable tbl = new JTable(model); styleTable(tbl);        
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model); tbl.setRowSorter(sorter);
 
-        // --- ĐỔ DỮ LIỆU THẬT TỪ DATABASE ---
-        long tongDoanhThuAll = tKeBaoCaoBUS.tongDoanhThu();
-        java.util.List<Object[]> topNV = tKeBaoCaoBUS.getTopNhanVien();
-        
-        for(Object[] row : topNV) {
-            long dt = (long) row[5];
-            // Tính phần trăm đóng góp của nhân viên so với tổng doanh thu
-            String tyLe = tongDoanhThuAll > 0 ? String.format("%.1f%%", (double)dt / tongDoanhThuAll * 100) : "0%";
-            model.addRow(new Object[]{
-                row[0], row[1], row[2], row[3], row[4], String.format("%,d", dt), tyLe
-            });
-        }
-        // -----------------------------------
-        
-        JTable tbl = new JTable(model);
-        styleTable(tbl);        
-        DefaultTableCellRenderer centerR = new DefaultTableCellRenderer();
-        centerR.setHorizontalAlignment(JLabel.CENTER);
-        DefaultTableCellRenderer rightR = new DefaultTableCellRenderer();
-        rightR.setHorizontalAlignment(JLabel.RIGHT);
-        tbl.getColumnModel().getColumn(0).setCellRenderer(centerR);
-        tbl.getColumnModel().getColumn(4).setCellRenderer(centerR);
-        tbl.getColumnModel().getColumn(5).setCellRenderer(rightR);
-        tbl.getColumnModel().getColumn(6).setCellRenderer(centerR);
+        DefaultTableCellRenderer centerR = new DefaultTableCellRenderer(); centerR.setHorizontalAlignment(JLabel.CENTER);
+        DefaultTableCellRenderer rightR = new DefaultTableCellRenderer(); rightR.setHorizontalAlignment(JLabel.RIGHT);
+        tbl.getColumnModel().getColumn(0).setCellRenderer(centerR); tbl.getColumnModel().getColumn(4).setCellRenderer(centerR);
+        tbl.getColumnModel().getColumn(5).setCellRenderer(rightR); tbl.getColumnModel().getColumn(6).setCellRenderer(centerR);
 
         tableCard.add(buildScroll(tbl), BorderLayout.CENTER);
-        tableCard.add(buildSumBar("Tổng doanh thu:", String.format("%,d đ", tKeBaoCaoBUS.tongDoanhThu()), purpleColor), BorderLayout.SOUTH);
+        
+        JLabel lblSumFooter = new JLabel("0 đ"); lblSumFooter.setFont(new Font("Segoe UI", Font.BOLD, 16)); lblSumFooter.setForeground(purpleColor);
+        tableCard.add(buildSumBar("Tổng doanh thu hiển thị:", lblSumFooter), BorderLayout.SOUTH);
         center.add(tableCard, BorderLayout.CENTER);
         root.add(center, BorderLayout.CENTER);
+        
+        Runnable loadData = () -> {
+            String n = cboNam.getSelectedItem().toString();
+            int nam = n.equals("Tất cả") ? 0 : Integer.parseInt(n);            String t = cboThang.getSelectedItem().toString();
+            int thang = t.equals("Tất cả") ? 0 : Integer.parseInt(t);
+
+            model.setRowCount(0);
+            long tongDT = 0;
+            java.util.List<Object[]> listNV = bus.getTopNhanVienTheoThoiGian(nam, thang);
+            for(Object[] row : listNV) { tongDT += (long) row[5]; }
+
+            for(Object[] row : listNV) {
+                long dt = (long) row[5];
+                String tyLe = tongDT > 0 ? String.format("%.1f%%", (double)dt / tongDT * 100) : "0%";
+                model.addRow(new Object[]{ row[0], row[1], row[2], row[3], row[4], String.format("%,d", dt), tyLe });
+            }
+            lblTopDT.setText(String.format("%,d đ", tongDT));
+            lblSumFooter.setText(String.format("%,d đ", tongDT));
+
+            String tuKhoa = txtSearch.getText().trim();
+            if (tuKhoa.isEmpty()) sorter.setRowFilter(null);
+            else sorter.setRowFilter(RowFilter.regexFilter("(?i)" + tuKhoa, 1, 2));
+        };
+
+        loadData.run();
+        btn.addActionListener(e -> loadData.run());
+        
         return root;
     }
 
@@ -337,86 +363,76 @@ public class ThongKeBaoCaoGUI extends JPanel {
         root.setBackground(bgColor);
         root.setBorder(new EmptyBorder(14, 0, 0, 0));
 
-        // Filter
         JPanel filterCard = buildCard();
         filterCard.setLayout(new FlowLayout(FlowLayout.LEFT, 12, 10));
-        filterCard.add(label("Năm:"));
-        JComboBox<String> cboNam = new JComboBox<>(new String[]{"2026","2025","2024"});
-        styleCombo(cboNam); filterCard.add(cboNam);
-        filterCard.add(label("Tháng:"));
-        JComboBox<String> cboThang = new JComboBox<>(new String[]{"Tất cả","1","2","3","4","5","6","7","8","9","10","11","12"});
-        styleCombo(cboThang); filterCard.add(cboThang);
-        filterCard.add(label("Danh mục:"));
-        JComboBox<String> cboDM = new JComboBox<>(new String[]{"Tất cả","Thực Phẩm","Đồ Uống","Hóa Mỹ Phẩm","Gia Dụng"});
-        styleCombo(cboDM); filterCard.add(cboDM);
-        filterCard.add(label("Tìm SP:"));
-        JTextField txtSearch = styledField(14);
-        txtSearch.setPreferredSize(new Dimension(150, 36));
-        filterCard.add(txtSearch);
-        JButton btn = createBtn("Thống Kê", primaryColor);
-        btn.setPreferredSize(new Dimension(110, 36));
-        filterCard.add(btn);
+        filterCard.add(label("Năm:")); JComboBox<String> cboNam = new JComboBox<>(new String[]{"Tất cả","2026","2025","2024"}); styleCombo(cboNam); filterCard.add(cboNam);
+        filterCard.add(label("Tháng:")); JComboBox<String> cboThang = new JComboBox<>(new String[]{"Tất cả","1","2","3","4","5","6","7","8","9","10","11","12"}); styleCombo(cboThang); filterCard.add(cboThang);
+        filterCard.add(label("Danh mục:")); JComboBox<String> cboDM = new JComboBox<>(new String[]{"Tất cả","Thực Phẩm","Đồ Uống","Hóa Mỹ Phẩm","Gia Dụng"}); styleCombo(cboDM); filterCard.add(cboDM);
+        filterCard.add(label("Tìm SP:")); JTextField txtSearch = styledField(14); txtSearch.setPreferredSize(new Dimension(150, 36)); filterCard.add(txtSearch);
+        JButton btn = createBtn("Tìm Lọc", primaryColor); btn.setPreferredSize(new Dimension(110, 36)); filterCard.add(btn);
         root.add(filterCard, BorderLayout.NORTH);
 
-        // --- SUMMARY CARDS (Đã gọi data thật) ---
         JPanel center = new JPanel(new BorderLayout(0, 14));
         center.setBackground(bgColor);
-
-        int tongSP = tKeBaoCaoBUS.tongSanPham();
-        String spBanChay = tKeBaoCaoBUS.sanPhamBanChay();
-        int spSapHet = tKeBaoCaoBUS.spSapHetHang();
-        long tongDoanhThu = tKeBaoCaoBUS.tongDoanhThu();
+        root.add(center, BorderLayout.CENTER);
 
         JPanel cards = new JPanel(new GridLayout(1, 4, 14, 0));
         cards.setOpaque(false);
-        cards.add(createSummaryCard("Tổng Sản Phẩm", tongSP + " SP", primaryColor,  "Có trong kho"));
-        cards.add(createSummaryCard("SP Bán Chạy", spBanChay, successColor,  "Nhiều nhất"));
-        cards.add(createSummaryCard("Sắp Hết Hàng", spSapHet + " SP", dangerColor,   "Dưới 15 sản phẩm"));
-        cards.add(createSummaryCard("Tổng Doanh Thu", String.format("%,d đ", tongDoanhThu), warningColor,  "Từ tất cả SP"));
+        cards.add(createSummaryCard("Tổng Sản Phẩm", bus.tongSanPham() + " SP", primaryColor, "Có trong kho"));
+        cards.add(createSummaryCard("SP Bán Chạy", bus.sanPhamBanChay(), successColor, "Nhiều nhất toàn TG"));
+        cards.add(createSummaryCard("Sắp Hết Hàng", bus.spSapHetHang() + " SP", dangerColor, "Dưới 15 sản phẩm"));
+        JLabel lblTopDT = new JLabel("0 đ"); lblTopDT.setFont(new Font("Segoe UI", Font.BOLD, 20)); lblTopDT.setForeground(warningColor);
+        cards.add(createCardTemplate("Tổng DT (Theo bảng)", lblTopDT, "Thay đổi theo thời gian"));
         center.add(cards, BorderLayout.NORTH);
 
-        // --- TABLE (Đã gọi data thật) ---
         JPanel tableCard = buildCard();
         tableCard.setLayout(new BorderLayout(0, 10));
         tableCard.add(sectionLabel("Top Sản Phẩm Theo Doanh Thu"), BorderLayout.NORTH);
 
         String[] cols = {"Xếp Hạng", "Mã SP", "Tên Sản Phẩm", "Danh Mục", "SL Bán Ra", "Đơn Giá (đ)", "Doanh Thu (đ)"};
-        DefaultTableModel model = new DefaultTableModel(cols, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
-        };
+        DefaultTableModel model = new DefaultTableModel(cols, 0) { @Override public boolean isCellEditable(int r, int c) { return false; } };
+        JTable tbl = new JTable(model); styleTable(tbl);
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model); tbl.setRowSorter(sorter);
 
-        // Đổ dữ liệu thật vào bảng
-        java.util.List<Object[]> topSP = tKeBaoCaoBUS.getTopSanPham();
-        for(Object[] row : topSP) {
-            long donGia = (long) row[5];
-            long dt = (long) row[6];
-            model.addRow(new Object[]{
-                row[0], row[1], row[2], row[3], row[4], 
-                String.format("%,d", donGia), String.format("%,d", dt)
-            });
-        }
-
-        JTable tbl = new JTable(model);
-        styleTable(tbl);
-        DefaultTableCellRenderer centerR = new DefaultTableCellRenderer();
-        centerR.setHorizontalAlignment(JLabel.CENTER);
-        DefaultTableCellRenderer rightR = new DefaultTableCellRenderer();
-        rightR.setHorizontalAlignment(JLabel.RIGHT);
-        
-        tbl.getColumnModel().getColumn(0).setCellRenderer(centerR);
-        tbl.getColumnModel().getColumn(4).setCellRenderer(centerR);
-        tbl.getColumnModel().getColumn(5).setCellRenderer(rightR);
-        tbl.getColumnModel().getColumn(6).setCellRenderer(rightR);
-
-        // Chỉnh lại độ rộng các cột cho đẹp mắt hơn
-        tbl.getColumnModel().getColumn(2).setPreferredWidth(180); 
-        tbl.getColumnModel().getColumn(3).setPreferredWidth(120);
+        DefaultTableCellRenderer centerR = new DefaultTableCellRenderer(); centerR.setHorizontalAlignment(JLabel.CENTER);
+        DefaultTableCellRenderer rightR = new DefaultTableCellRenderer(); rightR.setHorizontalAlignment(JLabel.RIGHT);
+        tbl.getColumnModel().getColumn(0).setCellRenderer(centerR); tbl.getColumnModel().getColumn(4).setCellRenderer(centerR);
+        tbl.getColumnModel().getColumn(5).setCellRenderer(rightR); tbl.getColumnModel().getColumn(6).setCellRenderer(rightR);
 
         tableCard.add(buildScroll(tbl), BorderLayout.CENTER);
-        tableCard.add(buildSumBar("Tổng doanh thu sản phẩm:", String.format("%,d đ", tongDoanhThu), warningColor), BorderLayout.SOUTH);
+        JLabel lblSumFooter = new JLabel("0 đ"); lblSumFooter.setFont(new Font("Segoe UI", Font.BOLD, 16)); lblSumFooter.setForeground(warningColor);
+        tableCard.add(buildSumBar("Tổng doanh thu sản phẩm hiển thị:", lblSumFooter), BorderLayout.SOUTH);
         center.add(tableCard, BorderLayout.CENTER);
-        root.add(center, BorderLayout.CENTER);
-        
+
+        Runnable loadData = () -> {
+            String n = cboNam.getSelectedItem().toString();
+            int nam = n.equals("Tất cả") ? 0 : Integer.parseInt(n);            String t = cboThang.getSelectedItem().toString();
+            int thang = t.equals("Tất cả") ? 0 : Integer.parseInt(t);
+
+            model.setRowCount(0); 
+            long tongDT = 0;
+            for(Object[] row : bus.getTopSanPhamTheoThoiGian(nam, thang)) {
+                long donGia = (long) row[5];
+                long dt = (long) row[6];
+                model.addRow(new Object[]{ row[0], row[1], row[2], row[3], row[4], String.format("%,d", donGia), String.format("%,d", dt) });
+                tongDT += dt;
+            }
+            lblTopDT.setText(String.format("%,d đ", tongDT));
+            lblSumFooter.setText(String.format("%,d đ", tongDT));
+
+            String tuKhoa = txtSearch.getText().trim();
+            String danhMuc = cboDM.getSelectedItem().toString();
+            java.util.List<RowFilter<Object,Object>> filters = new ArrayList<>();
+            if (!tuKhoa.isEmpty()) filters.add(RowFilter.regexFilter("(?i)" + tuKhoa, 1, 2));
+            if (!"Tất cả".equals(danhMuc)) filters.add(RowFilter.regexFilter("(?i)" + danhMuc, 3));
+            
+            if (filters.isEmpty()) sorter.setRowFilter(null);
+            else sorter.setRowFilter(RowFilter.andFilter(filters));
+        };
+
+        loadData.run();
+        btn.addActionListener(e -> loadData.run());
+
         return root;
     }
 
@@ -425,19 +441,20 @@ public class ThongKeBaoCaoGUI extends JPanel {
     // =========================================================================
 
     private JPanel createSummaryCard(String title, String value, Color valueColor, String subtitle) {
+        JLabel lblVal = new JLabel(value);
+        lblVal.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        lblVal.setForeground(valueColor);
+        return createCardTemplate(title, lblVal, subtitle);
+    }
+
+    private JPanel createCardTemplate(String title, JLabel valueLabel, String subtitle) {
         JPanel card = new JPanel(new BorderLayout(4, 4));
         card.setBackground(Color.WHITE);
-        card.setBorder(new CompoundBorder(
-                new LineBorder(new Color(230, 230, 230), 1),
-                new EmptyBorder(16, 16, 16, 16)));
+        card.setBorder(new CompoundBorder(new LineBorder(new Color(230, 230, 230), 1), new EmptyBorder(16, 16, 16, 16)));
 
         JLabel lblTitle = new JLabel(title);
         lblTitle.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         lblTitle.setForeground(secondaryColor);
-
-        JLabel lblValue = new JLabel(value);
-        lblValue.setFont(new Font("Segoe UI", Font.BOLD, 20));
-        lblValue.setForeground(valueColor);
 
         JLabel lblSub = new JLabel(subtitle);
         lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 12));
@@ -445,7 +462,7 @@ public class ThongKeBaoCaoGUI extends JPanel {
 
         JPanel valPanel = new JPanel(new BorderLayout(2, 2));
         valPanel.setOpaque(false);
-        valPanel.add(lblValue, BorderLayout.NORTH);
+        valPanel.add(valueLabel, BorderLayout.NORTH);
         valPanel.add(lblSub, BorderLayout.CENTER);
 
         card.add(lblTitle, BorderLayout.NORTH);
@@ -456,22 +473,17 @@ public class ThongKeBaoCaoGUI extends JPanel {
     private JPanel buildCard() {
         JPanel card = new JPanel();
         card.setBackground(Color.WHITE);
-        card.setBorder(new CompoundBorder(
-                new LineBorder(new Color(230, 230, 230), 1),
-                new EmptyBorder(14, 14, 14, 14)));
+        card.setBorder(new CompoundBorder(new LineBorder(new Color(230, 230, 230), 1), new EmptyBorder(14, 14, 14, 14)));
         return card;
     }
 
-    private JPanel buildSumBar(String labelText, String value, Color valueColor) {
+    private JPanel buildSumBar(String labelText, JLabel valueLabel) {
         JPanel bar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 14, 6));
         bar.setBackground(new Color(248, 249, 250));
         bar.setBorder(new MatteBorder(1, 0, 0, 0, new Color(220, 220, 220)));
         JLabel lbl = new JLabel(labelText);
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        JLabel val = new JLabel(value);
-        val.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        val.setForeground(valueColor);
-        bar.add(lbl); bar.add(val);
+        bar.add(lbl); bar.add(valueLabel);
         return bar;
     }
 
@@ -483,56 +495,32 @@ public class ThongKeBaoCaoGUI extends JPanel {
     }
 
     private JLabel sectionLabel(String text) {
-        JLabel lbl = new JLabel(text);
-        lbl.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        lbl.setForeground(primaryColor);
-        return lbl;
+        JLabel lbl = new JLabel(text); lbl.setFont(new Font("Segoe UI", Font.BOLD, 15)); lbl.setForeground(primaryColor); return lbl;
     }
 
     private JLabel label(String text) {
-        JLabel lbl = new JLabel(text);
-        lbl.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        return lbl;
+        JLabel lbl = new JLabel(text); lbl.setFont(new Font("Segoe UI", Font.PLAIN, 14)); return lbl;
     }
 
     private void styleCombo(JComboBox<String> cb) {
-        cb.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        cb.setPreferredSize(new Dimension(110, 36));
+        cb.setFont(new Font("Segoe UI", Font.PLAIN, 14)); cb.setPreferredSize(new Dimension(110, 36));
     }
 
     private JTextField styledField(int cols) {
-        JTextField f = new JTextField(cols);
-        f.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        f.setBorder(BorderFactory.createCompoundBorder(
-                new LineBorder(new Color(200, 200, 200), 1),
-                new EmptyBorder(4, 8, 4, 8)));
-        return f;
+        JTextField f = new JTextField(cols); f.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        f.setBorder(BorderFactory.createCompoundBorder(new LineBorder(new Color(200, 200, 200), 1), new EmptyBorder(4, 8, 4, 8))); return f;
     }
 
     private void styleTable(JTable t) {
-        t.setRowHeight(40);
-        t.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        t.setGridColor(new Color(245, 245, 245));
-        t.setShowVerticalLines(false);
-        t.setSelectionBackground(new Color(240, 247, 255));
-        t.setSelectionForeground(Color.BLACK);
-        t.getTableHeader().setReorderingAllowed(false);
-        JTableHeader header = t.getTableHeader();
-        header.setPreferredSize(new Dimension(0, 42));
-        header.setBackground(new Color(250, 251, 252));
-        header.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        header.setForeground(secondaryColor);
+        t.setRowHeight(40); t.setFont(new Font("Segoe UI", Font.PLAIN, 14)); t.setGridColor(new Color(245, 245, 245)); t.setShowVerticalLines(false);
+        t.setSelectionBackground(new Color(240, 247, 255)); t.setSelectionForeground(Color.BLACK); t.getTableHeader().setReorderingAllowed(false);
+        JTableHeader header = t.getTableHeader(); header.setPreferredSize(new Dimension(0, 42)); header.setBackground(new Color(250, 251, 252));
+        header.setFont(new Font("Segoe UI", Font.BOLD, 13)); header.setForeground(secondaryColor);
         ((DefaultTableCellRenderer) header.getDefaultRenderer()).setHorizontalAlignment(JLabel.LEFT);
     }
 
     private JButton createBtn(String text, Color bg) {
-        JButton btn = new JButton(text);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btn.setBackground(bg);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        return btn;
+        JButton btn = new JButton(text); btn.setFont(new Font("Segoe UI", Font.BOLD, 13)); btn.setBackground(bg); btn.setForeground(Color.WHITE);
+        btn.setFocusPainted(false); btn.setBorderPainted(false); btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); return btn;
     }
 }

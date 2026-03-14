@@ -103,7 +103,7 @@ public class HoaDonDAO {
         hd.setMaNV(rs.getInt("nhanVienId"));       // Database là nhanVienId
         hd.setMaKH(rs.getInt("khachHangId"));      // Database là khachHangId
         hd.setNgayLapDon(rs.getTimestamp("ngayLapHD")); // Database là ngayLapHD (dùng getTimestamp để lấy cả giờ phút)
-        hd.setTongTien(rs.getDouble("tongTien"));  // Database là tongTien
+        hd.setTongTien(rs.getLong("tongTien"));  // Database là tongTien
         return hd;
     }
     
@@ -114,12 +114,12 @@ public class HoaDonDAO {
             ps.setInt(2, hd.getMaNV());
             ps.setInt(3, hd.getMaKH());
             ps.setTimestamp(4, new java.sql.Timestamp(hd.getNgayLapDon().getTime())); // Dùng Timestamp
-            ps.setDouble(5, hd.getTongTien());
+            ps.setLong(5,hd.getTongTien());
         } else {
             ps.setInt(1, hd.getMaNV());
             ps.setInt(2, hd.getMaKH());
             ps.setTimestamp(3, new java.sql.Timestamp(hd.getNgayLapDon().getTime()));
-            ps.setDouble(4, hd.getTongTien());
+            ps.setLong(4, hd.getTongTien());
             ps.setInt(5, hd.getMaHD());
         }
     }

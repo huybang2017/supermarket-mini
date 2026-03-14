@@ -14,9 +14,7 @@ public class PhieuNhapHangBUS {
 
     public void docDSPN() {
         PhieuNhapHangDAO data = new PhieuNhapHangDAO();
-        if (dspn == null) {
-            dspn = data.docDSPNH();
-        }
+        dspn = data.docDSPNH();
     }
 
     public void them(PhieuNhapHangDTO pn) {

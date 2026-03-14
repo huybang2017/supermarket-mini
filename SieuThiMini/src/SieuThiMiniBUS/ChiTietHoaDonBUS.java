@@ -30,14 +30,21 @@ public class ChiTietHoaDonBUS {
      * Thêm chi tiết hóa đơn
      */
     public boolean addChiTietHoaDon(ChiTietHoaDonDTO ct) {
-
         if (ct == null) {
             return false;
         }
 
-        // Tính thành tiền
-        ct.setThanhTien(ct.getSoLuong() * ct.getDonGia());
+        // 1. THÊM LOGIC KIỂM TRA TRÙNG LẶP
+        // Quét xem sản phẩm này đã có trong hóa đơn hiện tại chưa
+        List<ChiTietHoaDonDTO> dsHienTai = chiTietDAO.getByMaHD(ct.getMaHD());
+        for (ChiTietHoaDonDTO item : dsHienTai) {
+            if (item.getMaSP() == ct.getMaSP()) {
+                return false; // Nếu đã tồn tại -> Trả về false để GUI báo lỗi
+            }
+        }
 
+        // 2. Tính thành tiền và lưu
+        ct.setThanhTien(ct.getSoLuong() * ct.getDonGia());
         return chiTietDAO.addChiTietHoaDon(ct);
     }
 

@@ -130,8 +130,8 @@ public class ChiTietHoaDonDAO {
         ct.setMaHD(rs.getInt("hoaDonId"));
         ct.setMaSP(rs.getInt("sanPhamId"));
         ct.setSoLuong(rs.getInt("soLuong"));
-        ct.setDonGia(rs.getDouble("donGia"));
-        ct.setThanhTien(rs.getDouble("thanhTien"));
+        ct.setDonGia(rs.getLong("donGia"));
+        ct.setThanhTien(rs.getLong("thanhTien"));
 
         return ct;
     }

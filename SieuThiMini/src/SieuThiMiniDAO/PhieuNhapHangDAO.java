@@ -8,48 +8,46 @@ import DTO.PhieuNhapHangDTO;
 public class PhieuNhapHangDAO {
     MyConnection data = new MyConnection();     
 
-    // ĐỌC DANH SÁCH PHIẾU NHẬP
     public ArrayList<PhieuNhapHangDTO> docDSPNH() {
         ArrayList<PhieuNhapHangDTO> dspn = new ArrayList<>();
         Connection cnn = data.getConnection();
         try {
-            String qry = "SELECT * FROM phieunhaphang";
+            // Tên bảng trong SQL là PhieuNhapHang
+            String qry = "SELECT * FROM PhieuNhapHang";
             Statement st = cnn.createStatement();
             ResultSet rs = st.executeQuery(qry);
             while (rs.next()) {
                 PhieuNhapHangDTO pn = new PhieuNhapHangDTO();
-                pn.setMaPNH(rs.getInt(1)); 
-                pn.setMaNV(rs.getInt(2));  
-                pn.setTongTien(rs.getDouble(3)); 
-                pn.setMaNCC(rs.getInt(4)); 
-                pn.setNgayNhap(rs.getDate(5));
+                // SQL: id, nhanVienId, nhaCungCapId, tongTien, ngayNhap
+                pn.setMaPNH(rs.getInt("id")); 
+                pn.setMaNV(rs.getInt("nhanVienId"));  
+                pn.setMaNCC(rs.getInt("nhaCungCapId")); 
+                pn.setTongTien(rs.getLong("tongTien")); 
+                pn.setNgayNhap(rs.getDate("ngayNhap"));
                 dspn.add(pn);
             }
         } catch (SQLException e) { 
             System.out.println("Lỗi Đọc: " + e.getMessage()); 
         } finally {
-            data.closeConnection(); // Nên luôn đóng kết nối
+            data.closeConnection(); 
         }
         return dspn;
     }
 
-    // THÊM PHIẾU NHẬP
     public void themPNH(PhieuNhapHangDTO pn) {
         Connection cnn = data.getConnection();
         try {
-            String sql = "INSERT INTO phieunhaphang VALUES (?, ?, ?, ?, ?)";
+            // Thứ tự cột: id, nhanVienId, nhaCungCapId, tongTien, ngayNhap
+            String sql = "INSERT INTO PhieuNhapHang (id, nhanVienId, nhaCungCapId, tongTien, ngayNhap) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement pst = cnn.prepareStatement(sql);
             
             pst.setInt(1, pn.getMaPNH());
             pst.setInt(2, pn.getMaNV());
-            pst.setDouble(3, pn.getTongTien());
-            pst.setInt(4, pn.getMaNCC());
-            
-            // Xử lý ngày tháng an toàn và chuẩn xác hơn kiểu nối chuỗi
+            pst.setInt(3, pn.getMaNCC());
+            pst.setDouble(4, pn.getTongTien());
             pst.setDate(5, new java.sql.Date(pn.getNgayNhap().getTime()));
             
             pst.executeUpdate();
-            
         } catch (SQLException e) { 
             System.out.println("Lỗi Thêm: " + e.getMessage()); 
         } finally {
@@ -57,16 +55,14 @@ public class PhieuNhapHangDAO {
         }
     }
 
-    // XÓA PHIẾU NHẬP
     public void xoaPNH(int ma) { 
         Connection cnn = data.getConnection();
         try {
-            String sql = "DELETE FROM phieunhaphang WHERE id = ?";
+            // Khóa chính trong SQL là 'id'
+            String sql = "DELETE FROM PhieuNhapHang WHERE id = ?";
             PreparedStatement pst = cnn.prepareStatement(sql);
             pst.setInt(1, ma);
-            
             pst.executeUpdate();
-            
         } catch (SQLException e) { 
             System.out.println("Lỗi Xóa: " + e.getMessage()); 
         } finally {
@@ -74,27 +70,20 @@ public class PhieuNhapHangDAO {
         }
     }
 
-    // SỬA PHIẾU NHẬP
     public void suaPNH(PhieuNhapHangDTO pn) {
         Connection cnn = data.getConnection();
         try {
-            String sql = "UPDATE phieunhaphang SET "
-                    + "nhanVienId = ?, "
-                    + "tongTien = ?, "
-                    + "nhaCungCapId = ?, "
-                    + "ngayNhap = ? "
-                    + "WHERE id = ?";
-            
+            // Tên cột phải khớp: nhanVienId, nhaCungCapId, tongTien, ngayNhap
+            String sql = "UPDATE PhieuNhapHang SET nhanVienId = ?, nhaCungCapId = ?, tongTien = ?, ngayNhap = ? WHERE id = ?";
             PreparedStatement pst = cnn.prepareStatement(sql);
             
             pst.setInt(1, pn.getMaNV());
-            pst.setDouble(2, pn.getTongTien());
-            pst.setInt(3, pn.getMaNCC());
+            pst.setInt(2, pn.getMaNCC());
+            pst.setDouble(3, pn.getTongTien());
             pst.setDate(4, new java.sql.Date(pn.getNgayNhap().getTime()));
-            pst.setInt(5, pn.getMaPNH()); // Tham số của WHERE
+            pst.setInt(5, pn.getMaPNH()); 
             
             pst.executeUpdate();
-            
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Lỗi sửa: " + e.getMessage());
         } finally {
@@ -106,15 +95,18 @@ public class PhieuNhapHangDAO {
         Connection cnn = data.getConnection();
         int nextID = 1; 
         try {
-            String querry = "SELECT MAX(maPNH) FROM phieunhaphang";
-            Statement st =cnn.createStatement();
-            ResultSet rs = st.executeQuery(querry);
+            // Lấy MAX của cột 'id'
+            String query = "SELECT MAX(id) FROM PhieuNhapHang";
+            Statement st = cnn.createStatement();
+            ResultSet rs = st.executeQuery(query);
             if (rs.next()) {
                 nextID = rs.getInt(1) + 1;
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }finally { data.closeConnection(); }
+        } finally { 
+            data.closeConnection(); 
+        }
         return nextID;
     }
 }

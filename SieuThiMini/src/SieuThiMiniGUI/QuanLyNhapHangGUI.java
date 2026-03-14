@@ -8,10 +8,12 @@ import javax.swing.table.*;
 
 import DTO.ChiTietPhieuNhapHangDTO;
 import DTO.NhaCungCapDTO;
+import DTO.NhanVienDTO;
 import DTO.PhieuNhapHangDTO;
 import DTO.SanPhamDTO;
 import SieuThiMiniBUS.ChiTietPhieuNhapHangBUS;
 import SieuThiMiniBUS.NhaCungCapBUS;
+import SieuThiMiniBUS.NhanVienBUS;
 import SieuThiMiniBUS.PhieuNhapHangBUS;
 import SieuThiMiniBUS.SanPhamBUS;
 
@@ -305,8 +307,20 @@ public class QuanLyNhapHangGUI extends JPanel {
 
         JTextField txtID = new JTextField(pn != null ? String.valueOf(pn.getMaPNH()) : String.valueOf(id));
         txtID.setEditable(false);
-        JTextField txtMaNV = new JTextField(pn != null ? String.valueOf(pn.getMaNV()) : "1");
-        JTextField txtNgay = new JTextField(pn != null ? pn.getNgayNhap().toString() : new java.sql.Date(System.currentTimeMillis()).toString());
+        JComboBox<String> cbNV = new JComboBox<>();
+        cbNV.addItem("-- Chọn Nhân Viên --");
+        for(NhanVienDTO nv : NhanVienBUS.dsnv){
+            cbNV.addItem(nv.getMaNV() + " - " + nv.getTenNV());
+        }
+        String ngayHienThi = "";
+        if (pn != null && pn.getNgayNhap() != null) {
+            // Ép chuỗi và chỉ cắt lấy 10 ký tự đầu tiên (yyyy-MM-dd) để tránh lỗi Date.valueOf()
+            ngayHienThi = pn.getNgayNhap().toString().substring(0, 10); 
+        } else {
+            // Nếu tạo mới thì lấy ngày hiện tại chuẩn yyyy-MM-dd
+            ngayHienThi = java.time.LocalDate.now().toString(); 
+        }
+        JTextField txtNgay = new JTextField(ngayHienThi);        
         JTextField txtTongTien = new JTextField(pn != null ? String.valueOf(pn.getTongTien()) : "0");
         txtTongTien.setEditable(false);
         
@@ -319,7 +333,7 @@ public class QuanLyNhapHangGUI extends JPanel {
     
         pnlForm.add(new JLabel("Mã Phiếu Nhập:")); pnlForm.add(txtID);
         pnlForm.add(new JLabel("Nhà Cung Cấp:")); pnlForm.add(cbNCC);
-        pnlForm.add(new JLabel("Mã Nhân Viên:")); pnlForm.add(txtMaNV);
+        pnlForm.add(new JLabel("Mã Nhân Viên:")); pnlForm.add(cbNV);
         pnlForm.add(new JLabel("Ngày Nhập (yyyy-mm-dd):")); pnlForm.add(txtNgay);
         pnlForm.add(new JLabel("Tổng Tiền:")); pnlForm.add(txtTongTien);
 
@@ -328,7 +342,7 @@ public class QuanLyNhapHangGUI extends JPanel {
     
         pnlForm.add(new JLabel("Thêm sản phẩm")); pnlForm.add(btnAddSP);
 
-        String[] columns = {"Mã SP", "Số lượng", "Đơn giá", "Thành tiền"};
+        String[] columns = {"Mã SP", "Số lượng", "Giá nhập", "Thành tiền"};
         DefaultTableModel tempModel = new DefaultTableModel(columns, 0); 
         JTable tempTable = new JTable(tempModel); 
         JScrollPane scrollPane = new JScrollPane(tempTable);
@@ -349,25 +363,55 @@ public class QuanLyNhapHangGUI extends JPanel {
                     JOptionPane.showMessageDialog(dialog, "Vui lòng chọn Nhà cung cấp!");
                     return;
                 }
-    
+        
                 PhieuNhapHangDTO newPn = new PhieuNhapHangDTO();
-                newPn.setMaPNH(Integer.parseInt((txtID.getText())));
+                newPn.setMaPNH(Integer.parseInt(txtID.getText()));
                 newPn.setMaNCC(Integer.parseInt(cbNCC.getSelectedItem().toString().split(" - ")[0]));
-                newPn.setMaNV(Integer.parseInt(txtMaNV.getText()));
-                newPn.setNgayNhap(java.sql.Date.valueOf(txtNgay.getText())); 
-                newPn.setTongTien(Double.parseDouble(txtTongTien.getText()));
-
-    
+                newPn.setMaNV(Integer.parseInt(cbNV.getSelectedItem().toString().split(" - ")[0]));
+                
+                try {
+                    newPn.setNgayNhap(java.sql.Date.valueOf(txtNgay.getText().trim()));
+                } catch (IllegalArgumentException ex) {
+                    JOptionPane.showMessageDialog(dialog, "Lỗi định dạng ngày! Chuẩn: yyyy-MM-dd");
+                    return;
+                }                
+                
+                newPn.setTongTien(Long.parseLong(txtTongTien.getText()));
+        
                 if (pn == null) {
                     pnBUS.them(newPn);
-                    for(int i=0; i < tempTable.getRowCount(); i++) {
+                    for(int i = 0; i < tempTable.getRowCount(); i++) {
+                        // SỬA TẠI ĐÂY: Dùng toString() rồi mới Parse để tránh lỗi ép kiểu Object
+                        int maSP = Integer.parseInt(tempTable.getValueAt(i, 0).toString());
+                        int slNhap = Integer.parseInt(tempTable.getValueAt(i, 1).toString());
+                        long giaNhapMoi = Long.parseLong(tempTable.getValueAt(i, 2).toString());
+                    
                         ChiTietPhieuNhapHangDTO ct = new ChiTietPhieuNhapHangDTO();
                         ct.setMaPNH(newPn.getMaPNH());
-                        ct.setMaSP((int)tempTable.getValueAt(i, 0));
-                        ct.setSoLuong((int)tempTable.getValueAt(i, 1));
-                        ct.setDonGia((double)tempTable.getValueAt(i, 2));
+                        ct.setMaSP(maSP);
+                        ct.setSoLuong(slNhap);
+                        ct.setDonGia(giaNhapMoi);
+                        ct.setThanhTien(slNhap * giaNhapMoi);
                         ctBUS.them(ct);
+                    
+                        // Cập nhật sản phẩm
+                        for (SanPhamDTO sp : SanPhamBUS.dssp) {
+                            if (sp.getMasanpham() == maSP) {
+                                sp.setSoluong(sp.getSoluong() + slNhap);
+                                sp.setGiaNhap(giaNhapMoi);
+                                
+                                // Tính lại giá bán
+                                long giaBanMoi = Math.round(giaNhapMoi + (giaNhapMoi * sp.getLoiNhuan() / 100.0));
+                                sp.setDongia(giaBanMoi);
+                                spBUS.sua(sp);
+                                break; 
+                            }
+                        }
                     }
+                    
+                    // QUAN TRỌNG: Cập nhật lại bộ nhớ BUS sau khi thêm thành công
+                    ctBUS.timTheoMaPN(id); 
+                    
                     JOptionPane.showMessageDialog(dialog, "Thêm phiếu nhập thành công!");
                 } else {
                     pnBUS.sua(newPn); 
@@ -378,11 +422,11 @@ public class QuanLyNhapHangGUI extends JPanel {
                 dialog.dispose();
                 
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(dialog, "Lỗi dữ liệu: Kiểm tra định dạng ngày (yyyy-mm-dd) và tiền!");
-                ex.printStackTrace();
+                // In lỗi ra Console để bạn biết chính xác là lỗi gì thay vì chỉ hiện thông báo chung chung
+                ex.printStackTrace(); 
+                JOptionPane.showMessageDialog(dialog, "Lỗi dữ liệu: " + ex.getMessage());
             }
-        });
-        
+        });        
         JPanel pnlCenter = new JPanel(new BorderLayout());
         pnlCenter.add(scrollPane, BorderLayout.CENTER);
 
@@ -444,8 +488,8 @@ public class QuanLyNhapHangGUI extends JPanel {
                 modelCT.addRow(new Object[]{
                     ct.getMaSP(), 
                     ct.getSoLuong(), 
-                    String.format("%,.0f", ct.getDonGia()),
-                    String.format("%,.0f", ct.getSoLuong() * ct.getDonGia())
+                    String.format("%,d", ct.getDonGia()),
+                    String.format("%,d", ct.getSoLuong() * ct.getDonGia())
                 });
             }
         }
@@ -453,13 +497,13 @@ public class QuanLyNhapHangGUI extends JPanel {
     private void addProductToTempList(DefaultTableModel tempModel, JComboBox cbSP, JTextField txtSL, JTextField txtDG, JTextField txtTongPhieu) {
         int maSP = Integer.parseInt(cbSP.getSelectedItem().toString().split(" - ")[0]);
         int sl = Integer.parseInt(txtSL.getText());
-        double dg = Double.parseDouble(txtDG.getText());
-        double thanhTien = sl * dg;
+        long dg = Long.parseLong(txtDG.getText());
+        long thanhTien = sl * dg;
 
         tempModel.addRow(new Object[]{maSP, sl, dg, thanhTien});
-        double tong = 0;
+        long tong = 0;
         for(int i=0; i < tempModel.getRowCount(); i++) {
-            tong += (double) tempModel.getValueAt(i, 3);
+            tong += (long) tempModel.getValueAt(i, 3);
         }
         txtTongPhieu.setText(String.valueOf(tong));
     }
@@ -475,7 +519,6 @@ public class QuanLyNhapHangGUI extends JPanel {
         }
     
         JTextField txtDonGia = new JTextField();
-        txtDonGia.setEditable(false);
         JTextField txtSoLuong = new JTextField();
         JTextField txtThanhTien = new JTextField();
         txtThanhTien.setEditable(false);
@@ -483,7 +526,7 @@ public class QuanLyNhapHangGUI extends JPanel {
         cbSP.addActionListener(e -> {
             int index = cbSP.getSelectedIndex();
             if (index >= 0) {
-                double gia = SanPhamBUS.dssp.get(index).getDongia();
+                long gia = SanPhamBUS.dssp.get(index).getGiaNhap();
                 txtDonGia.setText(String.valueOf(gia));
             }
         });
@@ -492,13 +535,26 @@ public class QuanLyNhapHangGUI extends JPanel {
             @Override
             public void keyReleased(KeyEvent e) {
                 try {
-                    double gia = Double.parseDouble(txtDonGia.getText());
+                    long gia = Long.parseLong(txtDonGia.getText());
                     int sl = Integer.parseInt(txtSoLuong.getText());
                     txtThanhTien.setText(String.valueOf(gia * sl));
                 } catch (Exception ex) { txtThanhTien.setText("0"); }
             }
         });
-    
+        KeyAdapter calcThanhTien = new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                try {
+                    long gia = Long.parseLong(txtDonGia.getText());
+                    int sl = Integer.parseInt(txtSoLuong.getText());
+                    txtThanhTien.setText(String.valueOf(gia * sl));
+                } catch (Exception ex) { 
+                    txtThanhTien.setText("0"); 
+                }
+            }
+        };
+        txtSoLuong.addKeyListener(calcThanhTien);
+        txtDonGia.addKeyListener(calcThanhTien);
         JButton btnConfirm = new JButton("Xác nhận");
         btnConfirm.addActionListener(e -> {
             Object[] row = {
@@ -524,9 +580,9 @@ public class QuanLyNhapHangGUI extends JPanel {
     }
 
     private void updateTotal(DefaultTableModel model, JTextField txtTong) {
-        double total = 0;
+        long total = 0;
         for (int i = 0; i < model.getRowCount(); i++) {
-            total += Double.parseDouble(model.getValueAt(i, 3).toString());
+            total +=Long.parseLong(model.getValueAt(i, 3).toString());
         }
         txtTong.setText(String.valueOf(total));
     }

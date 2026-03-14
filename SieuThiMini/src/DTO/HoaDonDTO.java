@@ -7,12 +7,12 @@ public class HoaDonDTO {
     private int manhanvien;
     private int makhachhang;
     private Date ngaylapdon;
-    private double tongtien;
+    private long tongtien;
 
     public HoaDonDTO() {
     }
 
-    public HoaDonDTO(int mahoadon, int manhanvien, int makhachhang, Date ngaylapdon, double tongtien) {
+    public HoaDonDTO(int mahoadon, int manhanvien, int makhachhang, Date ngaylapdon, long tongtien) {
         this.mahoadon = mahoadon;
         this.manhanvien = manhanvien;
         this.makhachhang = makhachhang;
@@ -28,6 +28,6 @@ public class HoaDonDTO {
     public void setMaKH(int makhachhang) { this.makhachhang = makhachhang; }
     public Date getNgayLapDon() { return ngaylapdon; }
     public void setNgayLapDon(Date ngaylapdon) { this.ngaylapdon = ngaylapdon; }
-    public double getTongTien() { return tongtien; }
-    public void setTongTien(double tongtien) { this.tongtien = tongtien; }
+    public long getTongTien() { return tongtien; }
+    public void setTongTien(long tongtien) { this.tongtien = tongtien; }
 }

@@ -1,16 +1,16 @@
 package DTO;
 
-import java.util.Date;
+import java.sql.Date;
 
 public class PhieuNhapHangDTO {
     private int maphieunhaphang, manhanvien, manhacungcap;
     private Date ngaynhap;
-    private double tongtien;
+    private long tongtien;
 
     public PhieuNhapHangDTO() {
     }
 
-    public PhieuNhapHangDTO(int maphieunhaphang, int manhanvien, int manhacungcap, Date ngaynhap, double tongtien) {
+    public PhieuNhapHangDTO(int maphieunhaphang, int manhanvien, int manhacungcap, Date ngaynhap, long tongtien) {
         this.maphieunhaphang = maphieunhaphang;
         this.manhanvien = manhanvien;
         this.manhacungcap = manhacungcap;
@@ -26,6 +26,6 @@ public class PhieuNhapHangDTO {
     public void setMaNCC(int manhacungcap) { this.manhacungcap = manhacungcap; }
     public Date getNgayNhap() { return ngaynhap; }
     public void setNgayNhap(Date ngaynhap) { this.ngaynhap = ngaynhap; }
-    public double getTongTien() { return tongtien; }
-    public void setTongTien(double tongtien) { this.tongtien = tongtien; }
+    public long getTongTien() { return tongtien; }
+    public void setTongTien(long tongtien) { this.tongtien = tongtien; }
 }

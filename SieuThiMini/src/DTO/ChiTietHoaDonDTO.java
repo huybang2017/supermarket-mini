@@ -4,13 +4,13 @@ public class ChiTietHoaDonDTO {
     private int mahoadon;
     private int masanpham;
     private int soluong;
-    private double dongia;
-    private double thanhtien;
+    private long dongia;
+    private long thanhtien;
 
     public ChiTietHoaDonDTO() {
     }
 
-    public ChiTietHoaDonDTO(int mahoadon, int masanpham, int soluong, double dongia, double thanhtien) {
+    public ChiTietHoaDonDTO(int mahoadon, int masanpham, int soluong, long dongia, long thanhtien) {
         this.mahoadon = mahoadon;
         this.masanpham = masanpham;
         this.soluong = soluong;
@@ -24,8 +24,8 @@ public class ChiTietHoaDonDTO {
     public void setMaSP(int masanpham) { this.masanpham = masanpham; }
     public int getSoLuong() { return soluong; }
     public void setSoLuong(int soluong) { this.soluong = soluong; }
-    public double getDonGia() { return dongia; }
-    public void setDonGia(double dongia) { this.dongia = dongia; }
-    public double getThanhTien() { return thanhtien; }
-    public void setThanhTien(double thanhtien) { this.thanhtien = thanhtien; }
+    public long getDonGia() { return dongia; }
+    public void setDonGia(long dongia) { this.dongia = dongia; }
+    public long getThanhTien() { return thanhtien; }
+    public void setThanhTien(long thanhtien) { this.thanhtien = thanhtien; }
 }

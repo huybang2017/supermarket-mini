@@ -8,68 +8,42 @@ public class ThongKeBaoCaoBUS {
 
     public ThongKeBaoCaoBUS() {}
 
-    // --- Tab 1: Doanh Thu ---
-    public long tongDoanhThu() {
-        return data.tongDoanhThu();
+    // TAB 1
+    public long tongDoanhThu() { return data.tongDoanhThu(); }
+    public long tongPhiNhap() { return data.tongPhiNhap(); }
+    public long loiNhuanUocTinh() { return tongDoanhThu() - tongPhiNhap(); }
+    public List<Object[]> getChiTietDoanhThu(String loaiKy, int nam, int thang) {
+        if ("Tháng".equals(loaiKy)) {
+            // Trả về dữ liệu ngày trong tháng
+            return data.getChiTietDoanhThuTheoThang(nam, thang);
+        } else {
+            // Trả về dữ liệu các tháng trong năm (Dùng chung cho lọc Năm và Quý)
+            return data.getChiTietDoanhThuTheoNam(nam);
+        }
+    }
+    // TAB 2
+    public int tongSoKhachHang() { return data.tongSoKhachHang(); }
+    public int tongKhachHangDaMua() { return data.tongKhachHangDaMua(); }
+    public List<Object[]> getTopKhachHangTheoThoiGian(int nam, int thang) {
+        return data.getTopKhachHangTheoThoiGian(nam, thang);
     }
 
-    public long tongPhiNhap() {
-        return data.tongPhiNhap();
-    }
-
-    public long loiNhuanUocTinh() {
-        return tongDoanhThu() - tongPhiNhap();
-    }
-    public java.util.List<Object[]> getChiTietThang(int nam) {
-        return data.getChiTietTheoThang(nam);
-    }
-    // --- Tab 2: Khách hàng ---
-    public int tongSoKhachHang() {
-        return data.tongSoKhachHang();
-    }
-
-    public int tongKhachHangDaMua() {
-        return data.tongKhachHangDaMua();
-    }
-
-    public List<Object[]> getTopKhachHang() {
-        return data.getTopKhachHang();
-    }
-
-    // --- Tab 3: Nhân viên ---
-    public String nhanVienXuatSac() {
-        return data.nhanVienXuatSac();
-    }
-
-    public int tongNhanVien() {
-        return data.tongSoNhanVien();
-    }
-
+    // TAB 3
+    public int tongNhanVien() { return data.tongSoNhanVien(); }
+    public String nhanVienXuatSac() { return data.nhanVienXuatSac(); }
     public long doanhThuTrungBinhNhanVien() {
-        long tong = tongDoanhThu();
         int soNV = tongNhanVien(); 
-        return soNV > 0 ? tong / soNV : 0; 
+        return soNV > 0 ? tongDoanhThu() / soNV : 0; 
+    }
+    public List<Object[]> getTopNhanVienTheoThoiGian(int nam, int thang) {
+        return data.getTopNhanVienTheoThoiGian(nam, thang);
     }
 
-    // Hàm bị thiếu gây lỗi ở GUI
-    public List<Object[]> getTopNhanVien() {
-        return data.getTopNhanVien();
-    }
-
-    // --- Tab 4: Sản phẩm ---
-    public int tongSanPham() {
-        return data.tongSanPhamDangKinhDoanh();
-    }
-
-    public String sanPhamBanChay() {
-        return data.sanPhamBanChayNhat();
-    }
-
-    public int spSapHetHang() {
-        return data.soSanPhamSapHetHang();
-    }
-
-    public List<Object[]> getTopSanPham() {
-        return data.getTopSanPham();
+    // TAB 4
+    public int tongSanPham() { return data.tongSanPhamDangKinhDoanh(); }
+    public String sanPhamBanChay() { return data.sanPhamBanChayNhat(); }
+    public int spSapHetHang() { return data.soSanPhamSapHetHang(); }
+    public List<Object[]> getTopSanPhamTheoThoiGian(int nam, int thang) {
+        return data.getTopSanPhamTheoThoiGian(nam, thang);
     }
 }

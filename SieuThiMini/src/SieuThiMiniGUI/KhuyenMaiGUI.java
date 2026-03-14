@@ -265,8 +265,9 @@ public class KhuyenMaiGUI extends JPanel {
                 java.sql.Date sqlDateKT = new java.sql.Date(km.getNgayKetThuc().getTime());
                 txtNgayKT.setDate(sqlDateKT.toLocalDate());
             }
-            txtID.setEditable(false);
-        }
+            JTextField txtID = new JTextField(km != null ? String.valueOf(km.getId()) : "");
+            txtID.setEditable(false); // Khóa luôn từ đầu cho an toàn
+            txtID.setBackground(new Color(245, 245, 245));        }
 
         JCheckBox cbTrangThai = new JCheckBox("Đang hoạt động");
         if (km != null) cbTrangThai.setSelected(km.isTrangThai());
@@ -640,8 +641,8 @@ public class KhuyenMaiGUI extends JPanel {
                 }
 
                 // Tính giá trị giảm thực tế (VNĐ)
-                int giaTriGiam = giaTriNhap;
-                int giaGoc = 0;
+                long giaTriGiam = giaTriNhap;
+                long giaGoc = 0L;
                 for (SanPhamDTO sp : SanPhamBUS.dssp) {
                     if (sp.getMasanpham() == Integer.parseInt(spId)) {
                         giaGoc = sp.getDongia();
@@ -719,21 +720,21 @@ public class KhuyenMaiGUI extends JPanel {
         dialog.setVisible(true);
     }
 
-    private void updateGiaSauGiam(int giaGoc, String giaTriText, boolean isPhanTram, JLabel lblGiaSauGiam) {
+    private void updateGiaSauGiam(long giaGoc, String giaTriText, boolean isPhanTram, JLabel lblGiaSauGiam) {
         try {
             if (giaTriText.isEmpty()) {
                 lblGiaSauGiam.setText("Giá sau giảm: " + String.format("%,d", giaGoc) + " VNĐ");
                 return;
             }
             
-            int giaTriNhap = Integer.parseInt(giaTriText.trim());
-            int giaTriGiam = giaTriNhap;
+            long giaTriNhap = Long.parseLong(giaTriText.trim());
+            long giaTriGiam = giaTriNhap;
             
             if (isPhanTram) {
                 giaTriGiam = (giaGoc * giaTriNhap) / 100;
             }
             
-            int giaSauGiam = giaGoc - giaTriGiam;
+            long giaSauGiam = giaGoc - giaTriGiam;
             if (giaSauGiam < 0) giaSauGiam = 0;
             
             lblGiaSauGiam.setText("Giá sau giảm: " + String.format("%,d", giaSauGiam) + " VNĐ" + 

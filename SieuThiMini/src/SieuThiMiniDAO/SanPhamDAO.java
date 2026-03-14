@@ -20,7 +20,7 @@ public class SanPhamDAO {
                 sp.setTensanpham(rs.getString("ten"));
                 sp.setSoluong(rs.getInt("soLuong"));
                 sp.setDongia(rs.getInt("donGia"));
-                sp.setGiaNhap(rs.getDouble("giaNhap"));
+                sp.setGiaNhap(rs.getLong("giaNhap"));
                 sp.setLoiNhuan(rs.getDouble("loiNhuan"));
                 sp.setDonvitinh(rs.getString("donViTinh"));
                 dssp.add(sp);
@@ -63,8 +63,8 @@ public class SanPhamDAO {
             pst.setInt(3, sp.getMaHang());
             pst.setString(4, sp.getTensanpham()); // Tự động xử lý chữ có dấu nháy như Lay's
             pst.setInt(5, sp.getSoluong());
-            pst.setInt(6, sp.getDongia());
-            pst.setDouble(7, sp.getGiaNhap());
+            pst.setLong(6, sp.getDongia());
+            pst.setLong(7, sp.getGiaNhap());
             pst.setDouble(8, sp.getLoiNhuan());
             pst.setString(9, sp.getDonvitinh());
 
@@ -98,8 +98,8 @@ public class SanPhamDAO {
             pst.setInt(2, sp.getMaHang());
             pst.setString(3, sp.getTensanpham());   
             pst.setInt(4, sp.getSoluong());
-            pst.setInt(5, sp.getDongia());
-            pst.setDouble(6, sp.getGiaNhap());
+            pst.setLong(5, sp.getDongia());
+            pst.setLong(6, sp.getGiaNhap());
             pst.setDouble(7, sp.getLoiNhuan());
             pst.setString(8, sp.getDonvitinh());
             pst.setInt(9, sp.getMasanpham()); 

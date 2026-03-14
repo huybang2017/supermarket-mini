@@ -124,6 +124,13 @@ public class QuanLyGiaBanGUI extends JPanel {
         card.add(scrollPane, BorderLayout.CENTER);
 
         this.add(card, BorderLayout.CENTER);
+                // Thêm sự kiện tự động làm mới dữ liệu khi mở tab này
+        this.addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentShown(java.awt.event.ComponentEvent e) {
+                docDSGiaBan(); 
+            }
+        });
     }
 
     private void docDSGiaBan() {
@@ -147,14 +154,14 @@ public class QuanLyGiaBanGUI extends JPanel {
     private void showEditPriceForm(int id, String ten, double giaNhapHienTai, double loiNhuanHienTai) {
         Window parentWindow = SwingUtilities.getWindowAncestor(this);
         JDialog dialog = new JDialog((Frame)parentWindow, "Chỉnh Sửa Giá Bán - " + ten, true);
-        dialog.setSize(400, 350);
+        dialog.setSize(450, 280); 
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
 
-        JPanel pnlForm = new JPanel(new GridLayout(4, 2, 10, 20));
-        pnlForm.setBorder(new EmptyBorder(30, 30, 30, 30));
+        // 2. CHỈNH LẠI GRID: Đổi (4, 2) thành (3, 2) vì bạn chỉ có 3 dòng. Tinh chỉnh lại Padding cho đẹp.
+        JPanel pnlForm = new JPanel(new GridLayout(3, 2, 15, 20));
+        pnlForm.setBorder(new EmptyBorder(25, 35, 25, 35)); // Canh lề (Trên, Trái, Dưới, Phải)
         pnlForm.setBackground(Color.WHITE);
-
         // FIX: Tránh lỗi Locale gây ra dấu phẩy. Giá nhập thành số nguyên, lợi nhuận bắt buộc dùng dấu chấm
         JTextField txtGiaNhap = new JTextField(String.valueOf(Math.round(giaNhapHienTai)));
         JTextField txtLoiNhuan = new JTextField(String.format(Locale.US, "%.1f", loiNhuanHienTai));
@@ -199,8 +206,6 @@ public class QuanLyGiaBanGUI extends JPanel {
         calcPrice.run(); // Chạy lần đầu
 
         JButton btnSave = createActionBtn("Lưu Thay Đổi");
-        btnSave.setBackground(new Color(0, 123, 255));
-        btnSave.setForeground(Color.WHITE);
         btnSave.addActionListener(e -> {
             try {
                 // Parse lại chuẩn xác khi bấm lưu
@@ -226,7 +231,7 @@ public class QuanLyGiaBanGUI extends JPanel {
                 }
 
                 if (spUpdate != null) {
-                    spUpdate.setGiaNhap((double) gn);
+                    spUpdate.setGiaNhap((long) gn);
                     spUpdate.setLoiNhuan(ln);
                     spUpdate.setDongia((int) gb); // Ép về int theo DTO của bạn
 
@@ -286,4 +291,5 @@ public class QuanLyGiaBanGUI extends JPanel {
         public void removeUpdate(DocumentEvent e) { action.run(); }
         public void changedUpdate(DocumentEvent e) { action.run(); }
     }
+    
 }

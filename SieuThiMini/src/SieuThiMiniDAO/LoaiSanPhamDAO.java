@@ -1,24 +1,21 @@
 package SieuThiMiniDAO;
 
 import DTO.LoaiSanPhamDTO;
-import DTO.SanPhamDTO;
-
-import javax.swing.*;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 
 public class LoaiSanPhamDAO {
     MyConnection data = new MyConnection();
+
     public ArrayList<LoaiSanPhamDTO> docDSLSP(){
         ArrayList<LoaiSanPhamDTO> dslsp = new ArrayList<>();
-        Connection cnn = data.getConnection();
-        try {
-            String qry = "SELECT * FROM loaisanpham";
-            Statement st = cnn.createStatement();
-            ResultSet rs = st.executeQuery(qry);
+        try (Connection cnn = data.getConnection();
+             PreparedStatement ps = cnn.prepareStatement("SELECT * FROM loaisanpham");
+             ResultSet rs = ps.executeQuery()) {
+            
             while (rs.next()) {
                 LoaiSanPhamDTO lsp = new LoaiSanPhamDTO();
                 lsp.setMaLoai(rs.getInt("id"));
@@ -27,58 +24,54 @@ public class LoaiSanPhamDAO {
                 dslsp.add(lsp);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-        }finally {
-            data.closeConnection(); // ĐÓNG KẾT NỐI
+            System.err.println("Lỗi đọc danh sách loại SP: " + e.getMessage());
         }
         return dslsp;
     }
-    public void themLSP(LoaiSanPhamDTO lsp) {
-        Connection cnn = data.getConnection();
-        try {
-            String qry = "INSERT INTO loaisanpham VALUES ('"
-                    + lsp.getMaLoai() + "','"
-                    + lsp.getTenLoai() + "','"
-                    + lsp.getHang() + "')";
-            Statement st = cnn.createStatement();
-            st.executeUpdate(qry);
-            JOptionPane.showMessageDialog(null, "Thêm thành công!");
+
+    public boolean themLSP(LoaiSanPhamDTO lsp) {
+        // Cột id là AUTO_INCREMENT nên không cần truyền vào
+        String qry = "INSERT INTO loaisanpham (name, hangId) VALUES (?, ?)";
+        try (Connection cnn = data.getConnection();
+             PreparedStatement ps = cnn.prepareStatement(qry)) {
+            
+            ps.setString(1, lsp.getTenLoai());
+            ps.setInt(2, lsp.getHang());
+            return ps.executeUpdate() > 0;
+            
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, "Lỗi thêm: " + ex.getMessage());
-        }finally {
-            data.closeConnection(); // ĐÓNG KẾT NỐI
+            System.err.println("Lỗi thêm: " + ex.getMessage());
+            return false;
         }
     }
 
-    public void xoaLSP(int maLoai) {
-        Connection cnn = data.getConnection();
-
-        try {
-            String qry = "DELETE FROM loaisanpham WHERE id = '" + maLoai + "'";
-            Statement st = cnn.createStatement();
-            st.executeUpdate(qry);
-            JOptionPane.showMessageDialog(null, "Xóa thành công!");
+    public boolean xoaLSP(int maLoai) {
+        String qry = "DELETE FROM loaisanpham WHERE id = ?";
+        try (Connection cnn = data.getConnection();
+             PreparedStatement ps = cnn.prepareStatement(qry)) {
+            
+            ps.setInt(1, maLoai);
+            return ps.executeUpdate() > 0;
+            
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Lỗi xóa: " + e.getMessage());
-        }finally {
-            data.closeConnection(); // ĐÓNG KẾT NỐI
+            System.err.println("Lỗi xóa: " + e.getMessage());
+            return false;
         }
     }
 
-    public void suaLSP(LoaiSanPhamDTO lsp) {
-        Connection cnn = data.getConnection();
-        try {
-            String qry = "UPDATE loaisanpham SET "
-                    + "name = '" + lsp.getTenLoai() + "', "
-                    + "hangId = '" + lsp.getHang() + "', "
-                    + "WHERE id = '" + lsp.getMaLoai() + "'";
-            Statement st = cnn.createStatement();
-            st.executeUpdate(qry);
+    public boolean suaLSP(LoaiSanPhamDTO lsp) {
+        String qry = "UPDATE loaisanpham SET name = ?, hangId = ? WHERE id = ?";
+        try (Connection cnn = data.getConnection();
+             PreparedStatement ps = cnn.prepareStatement(qry)) {
+            
+            ps.setString(1, lsp.getTenLoai());
+            ps.setInt(2, lsp.getHang());
+            ps.setInt(3, lsp.getMaLoai());
+            return ps.executeUpdate() > 0;
+            
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Lỗi sửa: " + e.getMessage());
-        }finally {
-            data.closeConnection(); // ĐÓNG KẾT NỐI
+            System.err.println("Lỗi sửa: " + e.getMessage());
+            return false;
         }
     }
-
 }

@@ -23,6 +23,12 @@ public class QuanLySanPhamGUI extends JPanel {
     public QuanLySanPhamGUI() {
         initComponents();
         docDSSP(); // Đọc dữ liệu lên bảng khi vừa mở
+        this.addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentShown(java.awt.event.ComponentEvent e) {
+                docDSSP(); // Tải lại danh sách sản phẩm mới nhất
+            }
+        });
     }
 
     // Hàm khởi tạo toàn bộ giao diện
@@ -125,7 +131,7 @@ public class QuanLySanPhamGUI extends JPanel {
                 model.setRowCount(0);
                 if (SanPhamBUS.dssp != null) {
                     for (SanPhamDTO sp : SanPhamBUS.dssp) {
-                        if (sp.getMasanpham()== Integer.parseInt(keyword) || sp.getTensanpham().toLowerCase().contains(keyword)) {
+                        if (String.valueOf(sp.getMasanpham()).contains(keyword) || sp.getTensanpham().toLowerCase().contains(keyword)) {
                             model.addRow(new Object[]{sp.getMasanpham(), sp.getTensanpham(), sp.getSoluong(), sp.getDongia(), sp.getDonvitinh(), "⚙ Sửa"});
                         }
                     }
@@ -184,51 +190,55 @@ public class QuanLySanPhamGUI extends JPanel {
 
     private void showForm(SanPhamDTO sp) {
         Window parentWindow = SwingUtilities.getWindowAncestor(this);
+        // Điều chỉnh kích thước Dialog gọn gàng hơn vì đã bớt cột
         JDialog dialog = new JDialog((Frame)parentWindow, sp == null ? "Thêm Sản Phẩm" : "Sửa Sản Phẩm", true);
-        dialog.setSize(500, 550);
+        dialog.setSize(450, 400); 
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
 
-        JPanel pnlForm = new JPanel(new GridLayout(7, 2, 10, 20));
+        // Sử dụng GridLayout 5 hàng (Mã, Tên, Loại, Hãng, ĐVT)
+        JPanel pnlForm = new JPanel(new GridLayout(5, 2, 10, 20));
         pnlForm.setBorder(new EmptyBorder(30, 30, 30, 30));
         pnlForm.setBackground(Color.WHITE);
 
+        // 1. Ô Mã Sản Phẩm: KHÓA CHỨC NĂNG GHI
         JTextField txtID = new JTextField(sp != null ? String.valueOf(sp.getMasanpham()) : "");
-        JTextField txtTen = new JTextField(sp != null ? String.valueOf(sp.getTensanpham()) : "");
-        JTextField txtSoLuong = new JTextField(sp != null ? String.valueOf(sp.getSoluong()) : "");
-        JTextField txtGia = new JTextField(sp != null ? String.valueOf(sp.getDongia()) : "");
+        txtID.setEditable(false); // Không cho phép chỉnh sửa
+        txtID.setBackground(new Color(245, 245, 245)); // Đổi màu xám nhẹ để báo hiệu bị khóa
+        
+        JTextField txtTen = new JTextField(sp != null ? sp.getTensanpham() : "");
         JTextField txtDVT = new JTextField(sp != null ? sp.getDonvitinh() : "");
 
-        // Cập nhật JComboBox với mục "-- Chọn --"
+        // 2. ComboBox Loại Sản Phẩm
         LoaiSanPhamBUS lspBus = new LoaiSanPhamBUS();
         lspBus.docDSLSP();
         JComboBox<String> cbLoai = new JComboBox<>();
         cbLoai.addItem("-- Chọn Loại Sản Phẩm --");
-        for (LoaiSanPhamDTO lsp : LoaiSanPhamBUS.dslsp) {
-            cbLoai.addItem(lsp.getMaLoai() + " - " + lsp.getTenLoai());
+        if (LoaiSanPhamBUS.dslsp != null) {
+            for (LoaiSanPhamDTO lsp : LoaiSanPhamBUS.dslsp) {
+                cbLoai.addItem(lsp.getMaLoai() + " - " + lsp.getTenLoai());
+            }
         }
 
+        // 3. ComboBox Hãng Sản Xuất
         HangSanXuatBUS hsxBus = new HangSanXuatBUS();
         hsxBus.docDSHSX();
         JComboBox<String> cbHang = new JComboBox<>();
         cbHang.addItem("-- Chọn Hãng Sản Xuất --");
-        for (HangSanXuatDTO hsx : HangSanXuatBUS.dshsx) {
-            cbHang.addItem(hsx.getMaHang() + " - " + hsx.getTenHang());
+        if (HangSanXuatBUS.dshsx != null) {
+            for (HangSanXuatDTO hsx : HangSanXuatBUS.dshsx) {
+                cbHang.addItem(hsx.getMaHang() + " - " + hsx.getTenHang());
+            }
         }
 
+        // Đổ dữ liệu cũ vào nếu là chế độ Sửa
         if (sp != null) {
-            txtID.setEditable(false);
-            
-            // Cập nhật ComboBox Loại Sản Phẩm
             for (int i = 0; i < cbLoai.getItemCount(); i++) {
-                // Chuyển int thành String trước khi so sánh
                 if (cbLoai.getItemAt(i).startsWith(String.valueOf(sp.getMaLoai()))) {
                     cbLoai.setSelectedIndex(i);
-                    break; // Thêm break để dừng vòng lặp ngay khi tìm thấy, giúp tối ưu hiệu suất
+                    break;
                 }
             }
-            
-            // Cập nhật ComboBox Hãng Sản Xuất
             for (int i = 0; i < cbHang.getItemCount(); i++) {
                 if (cbHang.getItemAt(i).startsWith(String.valueOf(sp.getMaHang()))) {
                     cbHang.setSelectedIndex(i);
@@ -236,38 +246,45 @@ public class QuanLySanPhamGUI extends JPanel {
                 }
             }
         }
+
         pnlForm.add(new JLabel("Mã Sản Phẩm:")); pnlForm.add(txtID);
         pnlForm.add(new JLabel("Tên Sản Phẩm:")); pnlForm.add(txtTen);
         pnlForm.add(new JLabel("Loại SP:")); pnlForm.add(cbLoai);
         pnlForm.add(new JLabel("Hãng SX:")); pnlForm.add(cbHang);
-        pnlForm.add(new JLabel("Số Lượng:")); pnlForm.add(txtSoLuong);
-        pnlForm.add(new JLabel("Đơn Giá:")); pnlForm.add(txtGia);
         pnlForm.add(new JLabel("Đơn Vị Tính:")); pnlForm.add(txtDVT);
 
+        // 4. Nút Lưu
         JButton btnSave = createActionBtn(sp == null ? "Thêm Mới" : "Lưu Thay Đổi");
         btnSave.addActionListener(e -> {
             try {
-                // Kiểm tra xem đã chọn Loại và Hãng chưa
-                if (cbLoai.getSelectedIndex() == 0 || cbHang.getSelectedIndex() == 0) {
-                    JOptionPane.showMessageDialog(dialog, "Vui lòng chọn Loại và Hãng sản xuất!");
+                if (cbLoai.getSelectedIndex() == 0 || cbHang.getSelectedIndex() == 0 || txtTen.getText().trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(dialog, "Vui lòng nhập đầy đủ thông tin!");
                     return;
                 }
 
                 SanPhamDTO newSp = new SanPhamDTO();
-                newSp.setMasanpham(Integer.parseInt(txtID.getText()));
-                newSp.setTensanpham(txtTen.getText());
+                if (sp != null) {
+                    newSp.setMasanpham(Integer.parseInt(txtID.getText()));
+                }
+                newSp.setTensanpham(txtTen.getText().trim());
                 newSp.setMaLoai(Integer.parseInt(cbLoai.getSelectedItem().toString().split(" - ")[0]));
                 newSp.setMaHang(Integer.parseInt(cbHang.getSelectedItem().toString().split(" - ")[0]));
-                newSp.setSoluong(Integer.parseInt(txtSoLuong.getText()));
-                newSp.setDongia(Integer.parseInt(txtGia.getText()));
-                newSp.setDonvitinh(txtDVT.getText());
+                newSp.setDonvitinh(txtDVT.getText().trim());
+                
+                // Gán giá trị mặc định cho các cột đã xóa trong Form để tránh lỗi logic
+                newSp.setSoluong(sp != null ? sp.getSoluong() : 0);
+                newSp.setDongia(sp != null ? sp.getDongia() : 0L);
 
                 SanPhamBUS bus = new SanPhamBUS();
                 if (sp == null) bus.them(newSp); else bus.sua(newSp);
+                
                 docDSSP();
                 dialog.dispose();
-            } catch (Exception ex) { JOptionPane.showMessageDialog(dialog, "Lỗi dữ liệu: Vui lòng kiểm tra lại!"); }
+            } catch (Exception ex) { 
+                JOptionPane.showMessageDialog(dialog, "Lỗi dữ liệu: Vui lòng kiểm tra lại!"); 
+            }
         });
+
         dialog.add(pnlForm, BorderLayout.CENTER);
         dialog.add(btnSave, BorderLayout.SOUTH);
         dialog.setVisible(true);
