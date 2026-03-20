@@ -26,6 +26,9 @@ public class KhuyenMaiGUI extends JPanel {
     public KhuyenMaiGUI() {
         initComponents();
         docDSKM();
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override public void componentShown(java.awt.event.ComponentEvent e) { docDSKM(); }
+        });
     }
 
     private void initComponents() {
@@ -285,7 +288,7 @@ public class KhuyenMaiGUI extends JPanel {
         btnSave.addActionListener(e -> {
             try {
                 ChuongTrinhKhuyenMaiDTO newKM = new ChuongTrinhKhuyenMaiDTO();
-                // if (km != null) newKM.setId(Integer.parseInt(txtID.getText()));
+                if (km != null) newKM.setId(km.getId());
                 newKM.setTen(txtTen.getText());
                 newKM.setGhiChu(txtGhiChu.getText());
                 
@@ -394,7 +397,7 @@ public class KhuyenMaiGUI extends JPanel {
         btnDeleteSP.addActionListener(e -> {
             int row = tblSP.getSelectedRow();
             if (row != -1) {
-                int spId = (int) tblSP.getValueAt(row, 0);
+                int spId = Integer.parseInt(tblSP.getValueAt(row, 0).toString());
                 new ChuongTrinhKhuyenMaiSpBUS().xoa(kmId, spId);
                 modelSP.removeRow(row);
             }
@@ -504,15 +507,6 @@ public class KhuyenMaiGUI extends JPanel {
         lblGiaSauGiam.setFont(new Font("Segoe UI", Font.BOLD, 14));
         lblGiaSauGiam.setForeground(new Color(40, 167, 69));
 
-        // Radio buttons: Giảm theo số tiền hoặc %
-        JRadioButton rbGiamTien = new JRadioButton("Giảm theo số tiền (VNĐ)", true);
-        JRadioButton rbGiamPhanTram = new JRadioButton("Giảm theo phần trăm (%)");
-        ButtonGroup bgLoaiGiam = new ButtonGroup();
-        bgLoaiGiam.add(rbGiamTien);
-        bgLoaiGiam.add(rbGiamPhanTram);
-        rbGiamTien.setBackground(Color.WHITE);
-        rbGiamPhanTram.setBackground(Color.WHITE);
-
         // Event: Khi chọn sản phẩm khác
         cbSP.addActionListener(e -> {
             if (cbSP.getSelectedItem() != null) {
@@ -521,7 +515,7 @@ public class KhuyenMaiGUI extends JPanel {
                 for (SanPhamDTO sp : SanPhamBUS.dssp) {
                     if (sp.getMasanpham() == Integer.parseInt(spId)) {
                         lblGiaGoc.setText("Giá gốc: " + String.format("%,d", sp.getDongia()) + " VNĐ");
-                        updateGiaSauGiam(sp.getDongia(), txtGiamGia.getText(), rbGiamPhanTram.isSelected(), lblGiaSauGiam);
+                        updateGiaSauGiam(sp.getDongia(), txtGiamGia.getText(), false, lblGiaSauGiam);
                         break;
                     }
                 }
@@ -537,29 +531,13 @@ public class KhuyenMaiGUI extends JPanel {
                     String spId = selected.split(" - ")[0];
                     for (SanPhamDTO sp : SanPhamBUS.dssp) {
                         if (sp.getMasanpham() == Integer.parseInt(spId)) {
-                            updateGiaSauGiam(sp.getDongia(), txtGiamGia.getText(), rbGiamPhanTram.isSelected(), lblGiaSauGiam);
+                            updateGiaSauGiam(sp.getDongia(), txtGiamGia.getText(), false, lblGiaSauGiam);
                             break;
                         }
                     }
                 }
             }
         });
-
-        // Event: Khi đổi loại giảm giá
-        ActionListener radioListener = e -> {
-            if (cbSP.getSelectedItem() != null) {
-                String selected = cbSP.getSelectedItem().toString();
-                String spId = selected.split(" - ")[0];
-                for (SanPhamDTO sp : SanPhamBUS.dssp) {
-                    if (sp.getMasanpham() == Integer.parseInt(spId)) {
-                        updateGiaSauGiam(sp.getDongia(), txtGiamGia.getText(), rbGiamPhanTram.isSelected(), lblGiaSauGiam);
-                        break;
-                    }
-                }
-            }
-        };
-        rbGiamTien.addActionListener(radioListener);
-        rbGiamPhanTram.addActionListener(radioListener);
 
         // Trigger initial update
         if (cbSP.getItemCount() > 0) {
@@ -576,13 +554,8 @@ public class KhuyenMaiGUI extends JPanel {
         gbc.gridy = 2;
         formPanel.add(lblGiaGoc, gbc);
 
-        gbc.gridy = 3; gbc.gridwidth = 1;
-        formPanel.add(rbGiamTien, gbc);
-        gbc.gridx = 1;
-        formPanel.add(rbGiamPhanTram, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
-        formPanel.add(new JLabel("Giá Trị Giảm:"), gbc);
+        gbc.gridy = 3; gbc.gridwidth = 2;
+        formPanel.add(new JLabel("Giá Trị Giảm (VNĐ):"), gbc);
         
         gbc.gridy = 5;
         formPanel.add(txtGiamGia, gbc);
@@ -648,14 +621,6 @@ public class KhuyenMaiGUI extends JPanel {
                         giaGoc = sp.getDongia();
                         break;
                     }
-                }
-
-                if (rbGiamPhanTram.isSelected()) {
-                    if (giaTriNhap > 100) {
-                        JOptionPane.showMessageDialog(dialog, "Phần trăm giảm không được vượt quá 100%!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                    giaTriGiam = (giaGoc * giaTriNhap) / 100;
                 }
 
                 if (giaTriGiam >= giaGoc) {
@@ -780,15 +745,6 @@ public class KhuyenMaiGUI extends JPanel {
         txtGiamGia.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         txtGiamGia.setPreferredSize(new Dimension(200, 35));
 
-        // Radio buttons: Giảm theo số tiền hoặc %
-        JRadioButton rbGiamTien = new JRadioButton("Giảm theo số tiền (VNĐ)", true);
-        JRadioButton rbGiamPhanTram = new JRadioButton("Giảm theo phần trăm (%)");
-        ButtonGroup bgLoaiGiam = new ButtonGroup();
-        bgLoaiGiam.add(rbGiamTien);
-        bgLoaiGiam.add(rbGiamPhanTram);
-        rbGiamTien.setBackground(Color.WHITE);
-        rbGiamPhanTram.setBackground(Color.WHITE);
-
         // Label preview
         JLabel lblPreview = new JLabel("Ví dụ: Hóa đơn từ 0 VNĐ → Giảm 0 VNĐ");
         lblPreview.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -810,15 +766,8 @@ public class KhuyenMaiGUI extends JPanel {
                     int soTien = Integer.parseInt(soTienText);
                     int giamGia = Integer.parseInt(giamGiaText);
                     
-                    String preview;
-                    if (rbGiamPhanTram.isSelected()) {
-                        int giamThucTe = (soTien * giamGia) / 100;
-                        preview = String.format("Ví dụ: Hóa đơn từ %,d VNĐ → Giảm %,d VNĐ (-%d%%)", 
-                            soTien, giamThucTe, giamGia);
-                    } else {
-                        preview = String.format("Ví dụ: Hóa đơn từ %,d VNĐ → Giảm %,d VNĐ", 
-                            soTien, giamGia);
-                    }
+                    String preview = String.format("Ví dụ: Hóa đơn từ %,d VNĐ → Giảm %,d VNĐ",
+                        soTien, giamGia);
                     lblPreview.setText(preview);
                 } catch (NumberFormatException ex) {
                     lblPreview.setText("Vui lòng nhập số hợp lệ!");
@@ -832,12 +781,6 @@ public class KhuyenMaiGUI extends JPanel {
         txtSoTien.addKeyListener(updatePreview);
         txtGiamGia.addKeyListener(updatePreview);
         
-        ActionListener radioListener = e -> {
-            updatePreview.keyReleased(null);
-        };
-        rbGiamTien.addActionListener(radioListener);
-        rbGiamPhanTram.addActionListener(radioListener);
-
         // Layout form
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
         JLabel lblHelp1 = new JLabel("💡 Điều kiện: Giá trị hóa đơn tối thiểu để được giảm");
@@ -851,19 +794,8 @@ public class KhuyenMaiGUI extends JPanel {
         gbc.gridy = 2;
         formPanel.add(txtSoTien, gbc);
 
-        gbc.gridy = 3; gbc.gridwidth = 1;
-        formPanel.add(rbGiamTien, gbc);
-        gbc.gridx = 1;
-        formPanel.add(rbGiamPhanTram, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
-        JLabel lblHelp2 = new JLabel("💡 Giá trị giảm: Số tiền hoặc % sẽ được giảm");
-        lblHelp2.setFont(new Font("Segoe UI", Font.ITALIC, 12));
-        lblHelp2.setForeground(new Color(108, 117, 125));
-        formPanel.add(lblHelp2, gbc);
-
-        gbc.gridy = 5;
-        formPanel.add(new JLabel("Giá Trị Giảm:"), gbc);
+        gbc.gridy = 3; gbc.gridwidth = 2;
+        formPanel.add(new JLabel("Giá Trị Giảm (VNĐ):"), gbc);
         
         gbc.gridy = 6;
         formPanel.add(txtGiamGia, gbc);
@@ -949,15 +881,7 @@ public class KhuyenMaiGUI extends JPanel {
                     return;
                 }
 
-                // Tính giá trị giảm thực tế
                 int giaTriGiam = giaTriNhap;
-                if (rbGiamPhanTram.isSelected()) {
-                    if (giaTriNhap > 100) {
-                        JOptionPane.showMessageDialog(dialog, "Phần trăm giảm không được vượt quá 100%!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                    giaTriGiam = (soTien * giaTriNhap) / 100;
-                }
 
                 if (giaTriGiam >= soTien) {
                     JOptionPane.showMessageDialog(dialog, "Giá trị giảm không được lớn hơn hoặc bằng điều kiện hóa đơn!", "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -999,10 +923,8 @@ public class KhuyenMaiGUI extends JPanel {
                 String message = String.format(
                     "✓ Thêm điều kiện thành công!\n\n" +
                     "Điều kiện: Hóa đơn từ %,d VNĐ\n" +
-                    "Giảm giá: %,d VNĐ%s",
-                    soTien, 
-                    giaTriGiam,
-                    rbGiamPhanTram.isSelected() ? " (-" + giaTriNhap + "%)" : ""
+                    "Giảm giá: %,d VNĐ",
+                    soTien, giaTriGiam
                 );
                 
                 JOptionPane.showMessageDialog(dialog, message, "Thành công", JOptionPane.INFORMATION_MESSAGE);

@@ -55,7 +55,7 @@ public class ChuongTrinhKhuyenMaiSpDAO {
     public void themKMSP(ChuongTrinhKhuyenMaiSpDTO kmsp) {
         Connection cnn = data.getConnection();
         try {
-            String qry = "INSERT INTO chuongtrinhkhuyenmaisp VALUES ("
+            String qry = "INSERT INTO chuongtrinhkhuyenmaisp (chuongTrinhKhuyenMaiId, sanPhamId, giaTriGiam) VALUES ("
                     + kmsp.getChuongTrinhKhuyenMaiId() + ","
                     + kmsp.getSanPhamId() + ","
                     + kmsp.getGiaTriGiam() + ")";

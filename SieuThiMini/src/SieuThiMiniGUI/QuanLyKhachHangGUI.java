@@ -20,7 +20,10 @@ public class QuanLyKhachHangGUI extends JPanel {
 
     public QuanLyKhachHangGUI() {
         initComponents();
-        docDSKH(); 
+        docDSKH();
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override public void componentShown(java.awt.event.ComponentEvent e) { docDSKH(); }
+        });
     }
 
     private void initComponents() {

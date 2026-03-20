@@ -44,14 +44,22 @@ public class QuanLyDonHangGUI extends JPanel {
     private final Color secondaryColor= new Color(108, 117, 125);
     private final Color bgColor       = new Color(244, 246, 249);
 
-    public QuanLyDonHangGUI() { 
-        initComponents(); 
+    public QuanLyDonHangGUI() {
+        initComponents();
         loadHoaDon();
-        
+
         // Khởi tạo danh sách sản phẩm nếu chưa có
         if (SanPhamBUS.dssp == null) {
             sanPhamBUS.docDSSP();
         }
+
+        // Tự động reload khi tab được chuyển sang
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentShown(java.awt.event.ComponentEvent e) {
+                loadHoaDon();
+            }
+        });
     }
 
     private void initComponents() {

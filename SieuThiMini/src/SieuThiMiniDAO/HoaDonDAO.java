@@ -66,6 +66,25 @@ public class HoaDonDAO {
         return false;
     }
 
+    /** Thêm hóa đơn dùng AUTO_INCREMENT, trả về id được sinh ra (-1 nếu lỗi) */
+    public int addHoaDonReturnId(HoaDonDTO hd) {
+        String sql = "INSERT INTO hoadon (nhanVienId, khachHangId, ngayLapHD, tongTien) VALUES (?, ?, ?, ?)";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, hd.getMaNV());
+            ps.setInt(2, hd.getMaKH());
+            ps.setTimestamp(3, new java.sql.Timestamp(hd.getNgayLapDon().getTime()));
+            ps.setLong(4, hd.getTongTien());
+            ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) return keys.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi thêm hóa đơn: " + e.getMessage());
+        }
+        return -1;
+    }
+
     public boolean deleteHoaDon(int maHD) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(DELETE)) {

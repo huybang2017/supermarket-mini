@@ -21,7 +21,10 @@ public class QuanLyNhanVienGUI extends JPanel {
 
     public QuanLyNhanVienGUI() {
         initComponents();
-        docDSNV(); 
+        docDSNV();
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override public void componentShown(java.awt.event.ComponentEvent e) { docDSNV(); }
+        });
     }
 
     private void initComponents() {

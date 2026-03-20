@@ -43,6 +43,13 @@ public class ThongKeBaoCaoGUI extends JPanel {
 
         refreshData();
         add(tabs, BorderLayout.CENTER);
+
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentShown(java.awt.event.ComponentEvent e) {
+                refreshData();
+            }
+        });
     }
 
     public void refreshData() {

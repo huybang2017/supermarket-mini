@@ -55,7 +55,7 @@ public class ChuongTrinhKhuyenMaiHDDAO {
     public void themKMHD(ChuongTrinhKhuyenMaiHDDTO kmhd) {
         Connection cnn = data.getConnection();
         try {
-            String qry = "INSERT INTO chuongtrinhkhuyenmaihd VALUES ("
+            String qry = "INSERT INTO chuongtrinhkhuyenmaihd (chuongTrinhKhuyenMaiId, soTienHd, giaTriGiam) VALUES ("
                     + kmhd.getChuongTrinhKhuyenMaiId() + ","
                     + kmhd.getSoTienHd() + ","
                     + kmhd.getGiaTriGiam() + ")";

@@ -38,10 +38,13 @@ public class QuanLyNhapHangGUI extends JPanel {
     private Font fontTitle = new Font("Segoe UI", Font.BOLD, 24);
     private Font fontPlain = new Font("Segoe UI", Font.PLAIN, 14);
 
-    public QuanLyNhapHangGUI() { 
+    public QuanLyNhapHangGUI() {
         initComponents();
         docDSPN();
-     }
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override public void componentShown(java.awt.event.ComponentEvent e) { docDSPN(); }
+        });
+    }
 
     private void initComponents() {
         this.setLayout(new BorderLayout(20, 20));

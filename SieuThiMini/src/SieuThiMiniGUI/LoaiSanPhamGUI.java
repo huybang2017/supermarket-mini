@@ -20,9 +20,12 @@ public class LoaiSanPhamGUI extends JPanel {
     private Font fontTitle = new Font("Segoe UI", Font.BOLD, 24);
     private Font fontPlain = new Font("Segoe UI", Font.PLAIN, 14);
 
-    public LoaiSanPhamGUI() { 
-        initComponents(); 
+    public LoaiSanPhamGUI() {
+        initComponents();
         docDSLSP();
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override public void componentShown(java.awt.event.ComponentEvent e) { docDSLSP(); }
+        });
     }
 
     private void initComponents() {

@@ -42,4 +42,9 @@ public class HoaDonBUS {
     public HoaDonDTO getHoaDonById(int maHD) {
         return hoaDonDAO.getHoaDonById(maHD);
     }
+
+    /** Thêm hóa đơn dùng AUTO_INCREMENT, trả về id được sinh ra (-1 nếu lỗi) */
+    public int addHoaDonReturnId(HoaDonDTO hd) {
+        return hoaDonDAO.addHoaDonReturnId(hd);
+    }
 }
