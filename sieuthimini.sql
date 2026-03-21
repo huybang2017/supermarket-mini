@@ -1,6 +1,6 @@
 -- ================================================
 -- DATABASE: sieuthimini
--- Phiên bản: đầy đủ, chuẩn hoá khoá ngoại
+-- Phiên bản: đã bỏ hangId khỏi LoaiSanPham
 -- ================================================
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -86,12 +86,7 @@ CREATE TABLE `NhanVien` (
 CREATE TABLE `LoaiSanPham` (
   `id`     INT          NOT NULL AUTO_INCREMENT,
   `name`   VARCHAR(255) DEFAULT NULL,
-  `hangId` INT          DEFAULT NULL COMMENT 'Hãng sản xuất mặc định của loại SP',
-  PRIMARY KEY (`id`),
-  KEY `fk_loaisp_hang` (`hangId`),
-  CONSTRAINT `fk_loaisp_hang`
-    FOREIGN KEY (`hangId`) REFERENCES `HangSanXuat` (`id`)
-    ON DELETE SET NULL ON UPDATE CASCADE
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -105,8 +100,6 @@ CREATE TABLE `SanPham` (
   `soLuong`           INT          DEFAULT NULL,
   `donGia`            INT          DEFAULT NULL,
   `donViTinh`         VARCHAR(20)  DEFAULT NULL,
-  `giaNhap`           BIGINT       DEFAULT NULL,
-  `loiNhuan`          DOUBLE       DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_sp_loaisp` (`loaiSanPhamId`),
   KEY `fk_sp_hang`   (`hangId`),
@@ -283,14 +276,14 @@ INSERT INTO `HangSanXuat` (`ten`, `diaChi`, `phone`) VALUES
 ('Unilever Vietnam',   'TP.HCM',     '028 3333 222'),
 ('Vinamilk',           'TP.HCM',     '028 9988 7766');
 
-INSERT INTO `LoaiSanPham` (`name`, `hangId`) VALUES
-('Bánh Kẹo',           3),
-('Đồ Uống',            2),
-('Gia Dụng & Cá Nhân', 9),
-('Mì Ăn Liền',         1),
-('Snack & Bí Đỏ',      6),
-('Sữa & Chế Phẩm',     10),
-('Thực Phẩm Chế Biến', 4);
+INSERT INTO `LoaiSanPham` (`name`) VALUES
+('Bánh Kẹo'),
+('Đồ Uống'),
+('Gia Dụng & Cá Nhân'),
+('Mì Ăn Liền'),
+('Snack & Bí Đỏ'),
+('Sữa & Chế Phẩm'),
+('Thực Phẩm Chế Biến');
 
 INSERT INTO `KhachHang` (`ho`, `ten`, `phone`, `diaChi`) VALUES
 ('Nguyễn Văn',  'An',     '0901234567', 'Quận 1, TP.HCM'),
@@ -318,27 +311,27 @@ INSERT INTO `NhanVien` (`ho`, `ten`, `phone`, `diaChi`, `ngaySinh`, `Luong`) VAL
 ('Nguyễn Ngọc Phương', 'Duy',  '0354271956', 'abc', '2006-08-30', 50000000),
 ('Đặng Thanh',         'Tuấn', '0972139443', 'abc', '2006-07-09', 100000);
 
-INSERT INTO `SanPham` (`loaiSanPhamId`, `hangId`, `ten`, `soLuong`, `donGia`, `donViTinh`, `giaNhap`, `loiNhuan`) VALUES
-(3, 9,  'Dầu Gội Sunsilk 170g',               45,  55000, 'Chai',  38500, 30.0),
-(2, 2,  'Nước Ngọt Coca-Cola 330ml',           92,  10000, 'Lon',    7000, 30.0),
-(1, 3,  'Bánh Mì Staff Chà Bông',              25,  12000, 'Cái',    8400, 30.0),
-(6, 10, 'Sữa Chua Vinamilk Có Đường',          60,   7500, 'Hộp',   5250, 30.0),
-(5, 7,  'Snack Lay''s Khoai Tây Tự Nhiên',     38,  12000, 'Gói',   8400, 30.0),
-(2, 7,  'Nước Ngọt Pepsi 330ml',               85,  10000, 'Lon',    7000, 30.0),
-(4, 1,  'Mì Hảo Hảo Tôm Chua Cay',           150,   4500, 'Gói',   3150, 30.0),
-(2, 7,  'Nước Suối Aquafina 500ml',           100,   5000, 'Chai',   3500, 30.0),
-(4, 1,  'Mì Trộn Indomie Mi Goreng',           40,   6500, 'Gói',   4550, 30.0),
-(6, 8,  'Sữa TH True Milk Nguyên Chất 180ml',  48,   9000, 'Hộp',   6300, 30.0),
-(6, 10, 'Sữa Tươi Vinamilk Ít Đường 180ml',   55,   8500, 'Hộp',   5950, 30.0),
-(1, 3,  'Bánh Que Pocky Chocolate',            30,  18000, 'Hộp',  12600, 30.0),
-(7, 4,  'Xúc Xích Ponnie Thịt Heo',            70,   5000, 'Cây',   3500, 30.0),
-(2, 5,  'Cà phê Nescafé 3in1 (Bịch 20 gói)',  20,  48000, 'Bịch',  33600, 30.0),
-(2, 4,  'Nước Tăng Lực Redbull',              65,  15000, 'Lon',   10500, 30.0),
-(7, 4,  'Nước Mắm Nam Ngư 500ml',             15,  38000, 'Chai',  26600, 30.0),
-(1, 3,  'Kẹo Sing-gum Doublemint',            50,   6000, 'Thanh',  4200, 30.0),
-(7, 5,  'Nước Tương Maggi Đậm Đặc',           22,  19000, 'Chai',  13300, 30.0),
-(5, 6,  'Snack Oishi Bí Đỏ Cay',              45,   6000, 'Gói',   4200, 30.0),
-(4, 4,  'Mì Omachi Xốt Bò Hầm',              80,   8500, 'Gói',   5950, 30.0);
+INSERT INTO `SanPham` (`loaiSanPhamId`, `hangId`, `ten`, `soLuong`, `donGia`, `donViTinh`) VALUES
+(3, 9,  'Dầu Gội Sunsilk 170g',               45,  55000, 'Chai'),
+(2, 2,  'Nước Ngọt Coca-Cola 330ml',           92,  10000, 'Lon'),
+(1, 3,  'Bánh Mì Staff Chà Bông',              25,  12000, 'Cái'),
+(6, 10, 'Sữa Chua Vinamilk Có Đường',          60,   7500, 'Hộp'),
+(5, 7,  'Snack Lay''s Khoai Tây Tự Nhiên',     38,  12000, 'Gói'),
+(2, 7,  'Nước Ngọt Pepsi 330ml',               85,  10000, 'Lon'),
+(4, 1,  'Mì Hảo Hảo Tôm Chua Cay',           150,   4500, 'Gói'),
+(2, 7,  'Nước Suối Aquafina 500ml',           100,   5000, 'Chai'),
+(4, 1,  'Mì Trộn Indomie Mi Goreng',           40,   6500, 'Gói'),
+(6, 8,  'Sữa TH True Milk Nguyên Chất 180ml',  48,   9000, 'Hộp'),
+(6, 10, 'Sữa Tươi Vinamilk Ít Đường 180ml',   55,   8500, 'Hộp'),
+(1, 3,  'Bánh Que Pocky Chocolate',            30,  18000, 'Hộp'),
+(7, 4,  'Xúc Xích Ponnie Thịt Heo',            70,   5000, 'Cây'),
+(2, 5,  'Cà phê Nescafé 3in1 (Bịch 20 gói)',  20,  48000, 'Bịch'),
+(2, 4,  'Nước Tăng Lực Redbull',              65,  15000, 'Lon'),
+(7, 4,  'Nước Mắm Nam Ngư 500ml',             15,  38000, 'Chai'),
+(1, 3,  'Kẹo Sing-gum Doublemint',            50,   6000, 'Thanh'),
+(7, 5,  'Nước Tương Maggi Đậm Đặc',           22,  19000, 'Chai'),
+(5, 6,  'Snack Oishi Bí Đỏ Cay',              45,   6000, 'Gói'),
+(4, 4,  'Mì Omachi Xốt Bò Hầm',              80,   8500, 'Gói');
 
 INSERT INTO `ChuongTrinhKhuyenMai` (`ten`, `ghiChu`, `ngayBatDau`, `ngayKetThuc`, `trangThai`) VALUES
 ('Khuyến mãi Tết 2026', 'Giảm giá đặc biệt dịp Tết Nguyên Đán', '2026-01-15', '2026-02-15', 1),

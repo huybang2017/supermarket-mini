@@ -94,7 +94,7 @@ public class LoaiSanPhamGUI extends JPanel {
         card.add(pnlHeader, BorderLayout.NORTH);
 
         // ===== BẢNG DỮ LIỆU =====
-        String[] headers = {"Mã Loại", "Tên Loại", "Mã Hãng", "Hành Động"};
+        String[] headers = {"Mã Loại", "Tên Loại", "Hành Động"};
         model = new DefaultTableModel(headers, 0) { 
             @Override public boolean isCellEditable(int r, int c) { return false; } 
         };
@@ -133,7 +133,7 @@ public class LoaiSanPhamGUI extends JPanel {
         model.setRowCount(0);
         if(LoaiSanPhamBUS.dslsp != null) {
             for (LoaiSanPhamDTO lsp : LoaiSanPhamBUS.dslsp) {
-                model.addRow(new Object[]{lsp.getMaLoai(), lsp.getTenLoai(), lsp.getHang(), "⚙ Sửa"});
+                model.addRow(new Object[]{lsp.getMaLoai(), lsp.getTenLoai(), "⚙ Sửa"});
             }
         }
     }
@@ -149,7 +149,7 @@ public class LoaiSanPhamGUI extends JPanel {
         for (LoaiSanPhamDTO lsp : LoaiSanPhamBUS.dslsp) {
             if (String.valueOf(lsp.getMaLoai()).contains(query) || 
                 lsp.getTenLoai().toLowerCase().contains(query)) {
-                model.addRow(new Object[]{lsp.getMaLoai(), lsp.getTenLoai(), lsp.getHang(), "⚙ Sửa"});
+                model.addRow(new Object[]{lsp.getMaLoai(), lsp.getTenLoai(), "⚙ Sửa"});
             }
         }
     }
@@ -158,51 +158,42 @@ public class LoaiSanPhamGUI extends JPanel {
     private void openForm(LoaiSanPhamDTO lsp) {
         Window parent = SwingUtilities.getWindowAncestor(this);
         JDialog dlg = new JDialog((Frame) parent, lsp == null ? "Thêm Loại Sản Phẩm" : "Sửa Loại Sản Phẩm", true);
-        dlg.setSize(380, 250);
+        dlg.setSize(380, 180); // Thu nhỏ chiều cao form lại vì ít field hơn
         dlg.setLocationRelativeTo(this);
         dlg.setLayout(new BorderLayout(10, 10));
-
-        JPanel form = new JPanel(new GridLayout(3, 2, 10, 20));
+    
+        JPanel form = new JPanel(new GridLayout(1, 2, 10, 20));
         form.setBorder(new EmptyBorder(20, 20, 10, 20));
         form.setBackground(Color.WHITE);
-
+    
         JTextField txtTen = new JTextField(lsp != null ? lsp.getTenLoai() : "");
-        JTextField txtHang = new JTextField(lsp != null ? String.valueOf(lsp.getHang()) : "");
-
         form.add(new JLabel("Tên Loại SP *:")); form.add(txtTen);
-        form.add(new JLabel("Mã Hãng SX *:")); form.add(txtHang);
-
+    
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         btnPanel.setBackground(Color.WHITE);
         JButton btnSave = createActionBtn("Lưu");
         
         btnSave.addActionListener(e -> {
-            try {
-                if (txtTen.getText().trim().isEmpty() || txtHang.getText().trim().isEmpty()) {
-                    JOptionPane.showMessageDialog(dlg, "Vui lòng nhập đầy đủ thông tin!");
-                    return;
+            if (txtTen.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(dlg, "Vui lòng nhập tên loại sản phẩm!");
+                return;
+            }
+            LoaiSanPhamDTO obj = new LoaiSanPhamDTO();
+            obj.setTenLoai(txtTen.getText().trim());
+            
+            if (lsp == null) {
+                if (lspBUS.them(obj)) {
+                    JOptionPane.showMessageDialog(dlg, "Thêm thành công!");
+                    dlg.dispose();
+                    hienThiBang();
                 }
-                
-                LoaiSanPhamDTO obj = new LoaiSanPhamDTO();
-                obj.setTenLoai(txtTen.getText().trim());
-                obj.setHang(Integer.parseInt(txtHang.getText().trim()));
-                
-                if (lsp == null) {
-                    if (lspBUS.them(obj)) {
-                        JOptionPane.showMessageDialog(dlg, "Thêm thành công!");
-                        dlg.dispose();
-                        hienThiBang();
-                    }
-                } else {
-                    obj.setMaLoai(lsp.getMaLoai());
-                    if (lspBUS.sua(obj)) {
-                        JOptionPane.showMessageDialog(dlg, "Cập nhật thành công!");
-                        dlg.dispose();
-                        hienThiBang();
-                    }
+            } else {
+                obj.setMaLoai(lsp.getMaLoai());
+                if (lspBUS.sua(obj)) {
+                    JOptionPane.showMessageDialog(dlg, "Cập nhật thành công!");
+                    dlg.dispose();
+                    hienThiBang();
                 }
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(dlg, "Mã hãng phải là số nguyên!");
             }
         });
         

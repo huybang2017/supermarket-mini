@@ -25,7 +25,7 @@ public class NhaCungCapDAO {
             ResultSet rs = st.executeQuery(qry);
             while (rs.next()) {
                 NhaCungCapDTO ncc = new NhaCungCapDTO();
-                ncc.setMaNCC(rs.getString(1));
+                ncc.setMaNCC(rs.getInt(1));
                 ncc.setTenNCC(rs.getString(2));
                 ncc.setDiaChi(rs.getString(3));
                 ncc.setSdt(rs.getString(4));
@@ -38,14 +38,19 @@ public class NhaCungCapDAO {
     public void themNCC(NhaCungCapDTO ncc) {
         Connection cnn = data.getConnection();
         try {
-            String qry = "INSERT INTO nhacungcap VALUES ('" + ncc.getMaNCC() + "','" + ncc.getTenNCC() + "','" + ncc.getDiaChi() + "','" + ncc.getSdt() + "')";
+            // Đã sửa: Bỏ cột id ra khỏi câu lệnh INSERT để CSDL tự tăng
+            String qry = "INSERT INTO nhacungcap (ten, diaChi, phone) VALUES ('" 
+                       + ncc.getTenNCC() + "','" + ncc.getDiaChi() + "','" + ncc.getSdt() + "')";
             Statement st = cnn.createStatement();
             st.executeUpdate(qry);
-        } catch (SQLException e) { System.out.println("Lỗi khúc thêm ấy"); }
-        finally { data.closeConnection(); }
+        } catch (SQLException e) { 
+            System.out.println("Lỗi khúc thêm: " + e.getMessage()); 
+        } finally { 
+            data.closeConnection(); 
+        }
     }
 
-    public void xoaNCC(String ma) {
+    public void xoaNCC(int ma) {
         Connection cnn = data.getConnection();
         try {
             String qry = "DELETE FROM nhacungcap WHERE id='" + ma + "'";

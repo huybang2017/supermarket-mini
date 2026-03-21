@@ -44,7 +44,6 @@ public class HangSanXuatDAO {
                     + hsx.getSdt() + "')";
             Statement st = cnn.createStatement();
             st.executeUpdate(qry);
-            JOptionPane.showMessageDialog(null, "Thêm thành công!");
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Lỗi thêm: " + ex.getMessage());
         }finally {
@@ -59,7 +58,6 @@ public class HangSanXuatDAO {
             String qry = "DELETE FROM hangsanxuat WHERE id = '" + maHang + "'";
             Statement st = cnn.createStatement();
             st.executeUpdate(qry);
-            JOptionPane.showMessageDialog(null, "Xóa thành công!");
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Lỗi xóa: " + e.getMessage());
         }finally {

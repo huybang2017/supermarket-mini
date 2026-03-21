@@ -42,7 +42,7 @@ public class SieuThiMiniGUI extends JFrame {
         lblLogo.setAlignmentX(Component.LEFT_ALIGNMENT);
         sidebar.add(lblLogo);
 
-        String[] menus = {"Trang Tổng Quan", "Loại Sản Phẩm", "Quản Lý Sản Phẩm", "Quản Lý Nhập Hàng","Quản Lý Nhân Viên","Quản Lý Giá Bán", "Quản Lý Đơn Hàng", "Quản Lý Khách Hàng","Quản Lý Khuyến Mãi", "Thống Kê & Báo Cáo"};
+        String[] menus = {"Trang Tổng Quan", "Loại Sản Phẩm", "Quản Lý Sản Phẩm","Quản Lý Hãng Sản Xuất", "Quản Lý Nhập Hàng","Quản Lý Nhà Cung Cấp","Quản Lý Nhân Viên","Quản Lý Giá Bán", "Quản Lý Đơn Hàng", "Quản Lý Khách Hàng","Quản Lý Khuyến Mãi", "Thống Kê & Báo Cáo"};
 
         for (String m : menus) {
             JButton btn = createSidebarBtn(m);
@@ -715,9 +715,10 @@ public class SieuThiMiniGUI extends JFrame {
     private void initMainContent() {
         pnlMainContent = new JPanel(cardLayout);
         pnlMainContent.add(creatTongQuanPanel(),"Trang Tổng Quan");
-        pnlMainContent.add(new JPanel(),"Loại Sản Phẩm");
         pnlMainContent.add(new QuanLySanPhamGUI(),"Quản Lý Sản Phẩm");
         pnlMainContent.add(new LoaiSanPhamGUI(), "Loại Sản Phẩm");
+        pnlMainContent.add(new NhaCungCapGUI(), "Quản Lý Nhà Cung Cấp");
+        pnlMainContent.add(new HangSanXuatGUI(), "Quản Lý Hãng Sản Xuất");
         pnlMainContent.add(new QuanLyKhachHangGUI(), "Quản Lý Khách Hàng");
         pnlMainContent.add(new QuanLyNhanVienGUI(), "Quản Lý Nhân Viên");
         pnlMainContent.add(new QuanLyDonHangGUI(), "Quản Lý Đơn Hàng");

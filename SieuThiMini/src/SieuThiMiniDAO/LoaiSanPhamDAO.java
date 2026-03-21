@@ -20,7 +20,6 @@ public class LoaiSanPhamDAO {
                 LoaiSanPhamDTO lsp = new LoaiSanPhamDTO();
                 lsp.setMaLoai(rs.getInt("id"));
                 lsp.setTenLoai(rs.getString("name"));
-                lsp.setHang(rs.getInt("hangId"));
                 dslsp.add(lsp);
             }
         } catch (SQLException e) {
@@ -31,12 +30,11 @@ public class LoaiSanPhamDAO {
 
     public boolean themLSP(LoaiSanPhamDTO lsp) {
         // Cột id là AUTO_INCREMENT nên không cần truyền vào
-        String qry = "INSERT INTO loaisanpham (name, hangId) VALUES (?, ?)";
+        String qry = "INSERT INTO loaisanpham (name) VALUES (?)";
         try (Connection cnn = data.getConnection();
-             PreparedStatement ps = cnn.prepareStatement(qry)) {
+            PreparedStatement ps = cnn.prepareStatement(qry)) {
             
             ps.setString(1, lsp.getTenLoai());
-            ps.setInt(2, lsp.getHang());
             return ps.executeUpdate() > 0;
             
         } catch (SQLException ex) {
@@ -65,7 +63,6 @@ public class LoaiSanPhamDAO {
              PreparedStatement ps = cnn.prepareStatement(qry)) {
             
             ps.setString(1, lsp.getTenLoai());
-            ps.setInt(2, lsp.getHang());
             ps.setInt(3, lsp.getMaLoai());
             return ps.executeUpdate() > 0;
             
