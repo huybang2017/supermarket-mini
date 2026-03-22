@@ -69,4 +69,8 @@ public class ChiTietHoaDonBUS {
     public boolean deleteChiTietHoaDon(int maHD, int maSP) {
         return chiTietDAO.deleteChiTietHoaDon(maHD, maSP);
     }
+
+    public boolean importExcel(ChiTietHoaDonDTO ct) {
+        return chiTietDAO.importExcel(ct);
+    }
 }

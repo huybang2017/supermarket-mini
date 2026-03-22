@@ -109,4 +109,20 @@ public class PhieuNhapHangDAO {
         }
         return nextID;
     }
+
+    public boolean importExcel(PhieuNhapHangDTO pn) {
+        String sql = "INSERT INTO PhieuNhapHang (id, nhanVienId, nhaCungCapId, tongTien, ngayNhap) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE nhanVienId = VALUES(nhanVienId), nhaCungCapId = VALUES(nhaCungCapId), tongTien = VALUES(tongTien), ngayNhap = VALUES(ngayNhap)";
+        try (Connection cnn = data.getConnection();
+             PreparedStatement ps = cnn.prepareStatement(sql)) {
+            ps.setInt(1, pn.getMaPNH());
+            ps.setInt(2, pn.getMaNV());
+            ps.setInt(3, pn.getMaNCC());
+            ps.setLong(4, pn.getTongTien());
+            ps.setDate(5, new java.sql.Date(pn.getNgayNhap().getTime()));
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Lỗi Import PhieuNhapHang: " + e.getMessage());
+            return false;
+        }
+    }
 }

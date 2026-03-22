@@ -47,4 +47,12 @@ public class ChiTietPhieuNhapHangBUS {
             dsctpn.addAll(dsSauKhiSua);
         }
     }
+
+    public ArrayList<ChiTietPhieuNhapHangDTO> getAllChiTietPhieuNhapHang() {
+        return data.getAllChiTietPhieuNhapHang();
+    }
+
+    public boolean importExcel(ChiTietPhieuNhapHangDTO ct) {
+        return data.importExcel(ct);
+    }
 }

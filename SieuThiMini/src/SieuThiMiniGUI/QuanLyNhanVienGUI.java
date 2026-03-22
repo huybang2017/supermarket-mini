@@ -204,9 +204,12 @@ public class QuanLyNhanVienGUI extends JPanel {
 
         // Nếu là đang bấm Sửa (nv != null), thì đổ dữ liệu ngày sinh cũ lên Lịch
         if (nv != null && nv.getNgaySinh() != null) {
-            txtNgaySinh.setDate(nv.getNgaySinh().toLocalDate());
-        }        JTextField txtLuong = new JTextField(nv != null ? String.valueOf(nv.getLuong()) : "");
-
+            // Chuyển đổi an toàn từ java.util.Date sang LocalDate
+            java.util.Date oldDate = nv.getNgaySinh();
+            LocalDate localDate = new java.sql.Date(oldDate.getTime()).toLocalDate();
+            txtNgaySinh.setDate(localDate);
+        }        
+        JTextField txtLuong = new JTextField(nv != null ? String.valueOf(nv.getLuong()) : "");
         if (nv != null) {
             txtID.setEditable(false);
         }

@@ -81,4 +81,40 @@ public class ChiTietPhieuNhapHangDAO {
              System.err.println("Lỗi sửa: " + e.getMessage());
         }
     }
+
+    public ArrayList<ChiTietPhieuNhapHangDTO> getAllChiTietPhieuNhapHang() {
+        ArrayList<ChiTietPhieuNhapHangDTO> dsAll = new ArrayList<>();
+        try (Connection cnn = data.getConnection();
+             PreparedStatement ps = cnn.prepareStatement("SELECT * FROM chitietphieunhaphang");
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                ChiTietPhieuNhapHangDTO ct = new ChiTietPhieuNhapHangDTO();
+                ct.setMaPNH(rs.getInt("phieuNhapHangId"));
+                ct.setMaSP(rs.getInt("sanPhamId"));
+                ct.setSoLuong(rs.getInt("soLuong"));
+                ct.setDonGia(rs.getLong("giaNhap"));
+                ct.setThanhTien(rs.getLong("thanhTien"));
+                dsAll.add(ct);
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi đọc all chi tiết PN: " + e.getMessage());
+        }
+        return dsAll;
+    }
+
+    public boolean importExcel(ChiTietPhieuNhapHangDTO ct) {
+        String sql = "INSERT INTO chitietphieunhaphang (phieuNhapHangId, sanPhamId, soLuong, giaNhap, thanhTien) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE soLuong = VALUES(soLuong), giaNhap = VALUES(giaNhap), thanhTien = VALUES(thanhTien)";
+        try (Connection cnn = data.getConnection();
+             PreparedStatement ps = cnn.prepareStatement(sql)) {
+            ps.setInt(1, ct.getMaPNH());
+            ps.setInt(2, ct.getMaSP());
+            ps.setInt(3, ct.getSoLuong());
+            ps.setLong(4, ct.getDonGia());
+            ps.setLong(5, ct.getThanhTien());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Lỗi Import ChiTietPhieuNhapHang: " + e.getMessage());
+            return false;
+        }
+    }
 }

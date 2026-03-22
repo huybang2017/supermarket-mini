@@ -258,91 +258,94 @@ CREATE TABLE `ChuongTrinhKhuyenMaiHD` (
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+ALTER TABLE sanpham 
+ADD COLUMN giaNhap BIGINT DEFAULT 0 AFTER donGia,
+ADD COLUMN loiNhuan DOUBLE DEFAULT 0 AFTER giaNhap;
 -- ========================================================
 -- DỮ LIỆU MẪU
 -- ========================================================
 
-START TRANSACTION;
+-- START TRANSACTION;
 
-INSERT INTO `HangSanXuat` (`ten`, `diaChi`, `phone`) VALUES
-('Acecook Vietnam',    'TP.HCM',     '028 1122 3344'),
-('Coca-Cola',          'TP.HCM',     '028 1234 5678'),
-('Kinh Đô (Mondelez)', 'TP.HCM',     '028 2222 111'),
-('Masan Consumer',     'TP.HCM',     '028 5555 444'),
-('Nestle Vietnam',     'Đồng Nai',   '025 8888 999'),
-('Orion Food',         'Bình Dương', '027 1234 567'),
-('PepsiCo',            'TP.HCM',     '028 8765 4321'),
-('TH Group',           'Nghệ An',    '1800 545409'),
-('Unilever Vietnam',   'TP.HCM',     '028 3333 222'),
-('Vinamilk',           'TP.HCM',     '028 9988 7766');
+-- INSERT INTO `HangSanXuat` (`ten`, `diaChi`, `phone`) VALUES
+-- ('Acecook Vietnam',    'TP.HCM',     '028 1122 3344'),
+-- ('Coca-Cola',          'TP.HCM',     '028 1234 5678'),
+-- ('Kinh Đô (Mondelez)', 'TP.HCM',     '028 2222 111'),
+-- ('Masan Consumer',     'TP.HCM',     '028 5555 444'),
+-- ('Nestle Vietnam',     'Đồng Nai',   '025 8888 999'),
+-- ('Orion Food',         'Bình Dương', '027 1234 567'),
+-- ('PepsiCo',            'TP.HCM',     '028 8765 4321'),
+-- ('TH Group',           'Nghệ An',    '1800 545409'),
+-- ('Unilever Vietnam',   'TP.HCM',     '028 3333 222'),
+-- ('Vinamilk',           'TP.HCM',     '028 9988 7766');
 
-INSERT INTO `LoaiSanPham` (`name`) VALUES
-('Bánh Kẹo'),
-('Đồ Uống'),
-('Gia Dụng & Cá Nhân'),
-('Mì Ăn Liền'),
-('Snack & Bí Đỏ'),
-('Sữa & Chế Phẩm'),
-('Thực Phẩm Chế Biến');
+-- INSERT INTO `LoaiSanPham` (`name`) VALUES
+-- ('Bánh Kẹo'),
+-- ('Đồ Uống'),
+-- ('Gia Dụng & Cá Nhân'),
+-- ('Mì Ăn Liền'),
+-- ('Snack & Bí Đỏ'),
+-- ('Sữa & Chế Phẩm'),
+-- ('Thực Phẩm Chế Biến');
 
-INSERT INTO `KhachHang` (`ho`, `ten`, `phone`, `diaChi`) VALUES
-('Nguyễn Văn',  'An',     '0901234567', 'Quận 1, TP.HCM'),
-('Trần Thị',    'Bảo',    '0912345678', 'Quận 2, TP.HCM'),
-('Lê Hoàng',    'Cường',  '0923456789', 'Quận 3, TP.HCM'),
-('Phạm',        'Dung',   '0934567890', 'Quận 4, TP.HCM'),
-('Hoàng Tuấn',  'Em',     '0945678901', 'Quận 5, TP.HCM'),
-('Vũ Bích',     'Phượng', '0956789012', 'Quận 6, TP.HCM'),
-('Đặng Kim',    'Giao',   '0967890123', 'Quận 7, TP.HCM'),
-('Bùi Xuân',    'Hiếu',   '0978901234', 'Quận 8, TP.HCM'),
-('Đỗ Minh',     'Inh',    '0989012345', 'Quận 9, TP.HCM'),
-('Hồ Thanh',    'Kiệt',   '0990123456', 'Quận 10, TP.HCM'),
-('Ngô Đình',    'Long',   '0809876543', 'Quận 11, TP.HCM'),
-('Dương Ngọc',  'Mai',    '0818765432', 'Quận 12, TP.HCM'),
-('Lý Tiểu',     'Nam',    '0827654321', 'Bình Thạnh, TP.HCM'),
-('Vương Tuấn',  'Oanh',   '0836543210', 'Phú Nhuận, TP.HCM'),
-('Trịnh Trọng', 'Phúc',   '0845432109', 'Gò Vấp, TP.HCM'),
-('Mai Quỳnh',   'Quân',   '0854321098', 'Tân Bình, TP.HCM'),
-('Đào Huy',     'Rô',     '0863210987', 'Tân Phú, TP.HCM'),
-('Đoàn Văn',    'Sáng',   '0872109876', 'Bình Tân, TP.HCM'),
-('Lâm Tài',     'Tâm',    '0881098765', 'Thủ Đức, TP.HCM'),
-('Phùng Thị',   'Uyên',   '0890987654', 'Bình Chánh, TP.HCM');
+-- INSERT INTO `KhachHang` (`ho`, `ten`, `phone`, `diaChi`) VALUES
+-- ('Nguyễn Văn',  'An',     '0901234567', 'Quận 1, TP.HCM'),
+-- ('Trần Thị',    'Bảo',    '0912345678', 'Quận 2, TP.HCM'),
+-- ('Lê Hoàng',    'Cường',  '0923456789', 'Quận 3, TP.HCM'),
+-- ('Phạm',        'Dung',   '0934567890', 'Quận 4, TP.HCM'),
+-- ('Hoàng Tuấn',  'Em',     '0945678901', 'Quận 5, TP.HCM'),
+-- ('Vũ Bích',     'Phượng', '0956789012', 'Quận 6, TP.HCM'),
+-- ('Đặng Kim',    'Giao',   '0967890123', 'Quận 7, TP.HCM'),
+-- ('Bùi Xuân',    'Hiếu',   '0978901234', 'Quận 8, TP.HCM'),
+-- ('Đỗ Minh',     'Inh',    '0989012345', 'Quận 9, TP.HCM'),
+-- ('Hồ Thanh',    'Kiệt',   '0990123456', 'Quận 10, TP.HCM'),
+-- ('Ngô Đình',    'Long',   '0809876543', 'Quận 11, TP.HCM'),
+-- ('Dương Ngọc',  'Mai',    '0818765432', 'Quận 12, TP.HCM'),
+-- ('Lý Tiểu',     'Nam',    '0827654321', 'Bình Thạnh, TP.HCM'),
+-- ('Vương Tuấn',  'Oanh',   '0836543210', 'Phú Nhuận, TP.HCM'),
+-- ('Trịnh Trọng', 'Phúc',   '0845432109', 'Gò Vấp, TP.HCM'),
+-- ('Mai Quỳnh',   'Quân',   '0854321098', 'Tân Bình, TP.HCM'),
+-- ('Đào Huy',     'Rô',     '0863210987', 'Tân Phú, TP.HCM'),
+-- ('Đoàn Văn',    'Sáng',   '0872109876', 'Bình Tân, TP.HCM'),
+-- ('Lâm Tài',     'Tâm',    '0881098765', 'Thủ Đức, TP.HCM'),
+-- ('Phùng Thị',   'Uyên',   '0890987654', 'Bình Chánh, TP.HCM');
 
-INSERT INTO `NhanVien` (`ho`, `ten`, `phone`, `diaChi`, `ngaySinh`, `Luong`) VALUES
-('Nguyễn Ngọc Phương', 'Duy',  '0354271956', 'abc', '2006-08-30', 50000000),
-('Đặng Thanh',         'Tuấn', '0972139443', 'abc', '2006-07-09', 100000);
+-- INSERT INTO `NhanVien` (`ho`, `ten`, `phone`, `diaChi`, `ngaySinh`, `Luong`) VALUES
+-- ('Nguyễn Ngọc Phương', 'Duy',  '0354271956', 'abc', '2006-08-30', 50000000),
+-- ('Đặng Thanh',         'Tuấn', '0972139443', 'abc', '2006-07-09', 100000);
 
-INSERT INTO `SanPham` (`loaiSanPhamId`, `hangId`, `ten`, `soLuong`, `donGia`, `donViTinh`) VALUES
-(3, 9,  'Dầu Gội Sunsilk 170g',               45,  55000, 'Chai'),
-(2, 2,  'Nước Ngọt Coca-Cola 330ml',           92,  10000, 'Lon'),
-(1, 3,  'Bánh Mì Staff Chà Bông',              25,  12000, 'Cái'),
-(6, 10, 'Sữa Chua Vinamilk Có Đường',          60,   7500, 'Hộp'),
-(5, 7,  'Snack Lay''s Khoai Tây Tự Nhiên',     38,  12000, 'Gói'),
-(2, 7,  'Nước Ngọt Pepsi 330ml',               85,  10000, 'Lon'),
-(4, 1,  'Mì Hảo Hảo Tôm Chua Cay',           150,   4500, 'Gói'),
-(2, 7,  'Nước Suối Aquafina 500ml',           100,   5000, 'Chai'),
-(4, 1,  'Mì Trộn Indomie Mi Goreng',           40,   6500, 'Gói'),
-(6, 8,  'Sữa TH True Milk Nguyên Chất 180ml',  48,   9000, 'Hộp'),
-(6, 10, 'Sữa Tươi Vinamilk Ít Đường 180ml',   55,   8500, 'Hộp'),
-(1, 3,  'Bánh Que Pocky Chocolate',            30,  18000, 'Hộp'),
-(7, 4,  'Xúc Xích Ponnie Thịt Heo',            70,   5000, 'Cây'),
-(2, 5,  'Cà phê Nescafé 3in1 (Bịch 20 gói)',  20,  48000, 'Bịch'),
-(2, 4,  'Nước Tăng Lực Redbull',              65,  15000, 'Lon'),
-(7, 4,  'Nước Mắm Nam Ngư 500ml',             15,  38000, 'Chai'),
-(1, 3,  'Kẹo Sing-gum Doublemint',            50,   6000, 'Thanh'),
-(7, 5,  'Nước Tương Maggi Đậm Đặc',           22,  19000, 'Chai'),
-(5, 6,  'Snack Oishi Bí Đỏ Cay',              45,   6000, 'Gói'),
-(4, 4,  'Mì Omachi Xốt Bò Hầm',              80,   8500, 'Gói');
+-- INSERT INTO `SanPham` (`loaiSanPhamId`, `hangId`, `ten`, `soLuong`, `donGia`, `donViTinh`) VALUES
+-- (3, 9,  'Dầu Gội Sunsilk 170g',               45,  55000, 'Chai'),
+-- (2, 2,  'Nước Ngọt Coca-Cola 330ml',           92,  10000, 'Lon'),
+-- (1, 3,  'Bánh Mì Staff Chà Bông',              25,  12000, 'Cái'),
+-- (6, 10, 'Sữa Chua Vinamilk Có Đường',          60,   7500, 'Hộp'),
+-- (5, 7,  'Snack Lay''s Khoai Tây Tự Nhiên',     38,  12000, 'Gói'),
+-- (2, 7,  'Nước Ngọt Pepsi 330ml',               85,  10000, 'Lon'),
+-- (4, 1,  'Mì Hảo Hảo Tôm Chua Cay',           150,   4500, 'Gói'),
+-- (2, 7,  'Nước Suối Aquafina 500ml',           100,   5000, 'Chai'),
+-- (4, 1,  'Mì Trộn Indomie Mi Goreng',           40,   6500, 'Gói'),
+-- (6, 8,  'Sữa TH True Milk Nguyên Chất 180ml',  48,   9000, 'Hộp'),
+-- (6, 10, 'Sữa Tươi Vinamilk Ít Đường 180ml',   55,   8500, 'Hộp'),
+-- (1, 3,  'Bánh Que Pocky Chocolate',            30,  18000, 'Hộp'),
+-- (7, 4,  'Xúc Xích Ponnie Thịt Heo',            70,   5000, 'Cây'),
+-- (2, 5,  'Cà phê Nescafé 3in1 (Bịch 20 gói)',  20,  48000, 'Bịch'),
+-- (2, 4,  'Nước Tăng Lực Redbull',              65,  15000, 'Lon'),
+-- (7, 4,  'Nước Mắm Nam Ngư 500ml',             15,  38000, 'Chai'),
+-- (1, 3,  'Kẹo Sing-gum Doublemint',            50,   6000, 'Thanh'),
+-- (7, 5,  'Nước Tương Maggi Đậm Đặc',           22,  19000, 'Chai'),
+-- (5, 6,  'Snack Oishi Bí Đỏ Cay',              45,   6000, 'Gói'),
+-- (4, 4,  'Mì Omachi Xốt Bò Hầm',              80,   8500, 'Gói');
 
-INSERT INTO `ChuongTrinhKhuyenMai` (`ten`, `ghiChu`, `ngayBatDau`, `ngayKetThuc`, `trangThai`) VALUES
-('Khuyến mãi Tết 2026', 'Giảm giá đặc biệt dịp Tết Nguyên Đán', '2026-01-15', '2026-02-15', 1),
-('Khuyến mãi Hè 2026',  'Giảm giá mùa hè sôi động',              '2026-06-01', '2026-08-31', 1),
-('Black Friday 2026',    'Giảm giá cực sốc Black Friday',          '2026-11-20', '2026-11-30', 0);
+-- INSERT INTO `ChuongTrinhKhuyenMai` (`ten`, `ghiChu`, `ngayBatDau`, `ngayKetThuc`, `trangThai`) VALUES
+-- ('Khuyến mãi Tết 2026', 'Giảm giá đặc biệt dịp Tết Nguyên Đán', '2026-01-15', '2026-02-15', 1),
+-- ('Khuyến mãi Hè 2026',  'Giảm giá mùa hè sôi động',              '2026-06-01', '2026-08-31', 1),
+-- ('Black Friday 2026',    'Giảm giá cực sốc Black Friday',          '2026-11-20', '2026-11-30', 0);
 
-INSERT INTO `ChuongTrinhKhuyenMaiHD` (`chuongTrinhKhuyenMaiId`, `soTienHd`, `giaTriGiam`) VALUES
-(1, 100000, 10000),
-(1, 200000, 25000),
-(1, 500000, 75000),
-(2, 150000, 20000),
-(2, 300000, 50000);
+-- INSERT INTO `ChuongTrinhKhuyenMaiHD` (`chuongTrinhKhuyenMaiId`, `soTienHd`, `giaTriGiam`) VALUES
+-- (1, 100000, 10000),
+-- (1, 200000, 25000),
+-- (1, 500000, 75000),
+-- (2, 150000, 20000),
+-- (2, 300000, 50000);
 
-COMMIT;
+-- COMMIT;

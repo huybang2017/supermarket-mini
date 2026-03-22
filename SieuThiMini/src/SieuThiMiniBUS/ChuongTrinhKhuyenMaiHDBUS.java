@@ -64,4 +64,9 @@ public class ChuongTrinhKhuyenMaiHDBUS {
             }
         }
     }
+
+    public boolean importExcel(ChuongTrinhKhuyenMaiHDDTO kmhd) {
+        ChuongTrinhKhuyenMaiHDDAO data = new ChuongTrinhKhuyenMaiHDDAO();
+        return data.importExcel(kmhd);
+    }
 }

@@ -38,4 +38,9 @@ public class HangSanXuatBUS {
             }
         }
     }
+
+    public boolean importExcel(HangSanXuatDTO hsx) {
+        HangSanXuatDAO data = new HangSanXuatDAO();
+        return data.importExcel(hsx);
+    }
 }

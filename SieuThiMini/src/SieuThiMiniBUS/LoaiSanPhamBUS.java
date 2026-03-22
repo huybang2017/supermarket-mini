@@ -51,4 +51,8 @@ public class LoaiSanPhamBUS {
         }
         return null;
     }
+
+    public boolean importExcel(LoaiSanPhamDTO lsp) {
+        return data.importExcel(lsp);
+    }
 }

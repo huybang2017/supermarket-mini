@@ -142,4 +142,20 @@ public class HoaDonDAO {
             ps.setInt(5, hd.getMaHD());
         }
     }
+
+    public boolean importExcel(HoaDonDTO hd) {
+        String sql = "INSERT INTO hoadon (id, nhanVienId, khachHangId, ngayLapHD, tongTien) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE nhanVienId = VALUES(nhanVienId), khachHangId = VALUES(khachHangId), ngayLapHD = VALUES(ngayLapHD), tongTien = VALUES(tongTien)";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, hd.getMaHD());
+            ps.setInt(2, hd.getMaNV());
+            ps.setInt(3, hd.getMaKH());
+            ps.setTimestamp(4, new java.sql.Timestamp(hd.getNgayLapDon().getTime()));
+            ps.setLong(5, hd.getTongTien());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Lỗi Import HoaDon: " + e.getMessage());
+            return false;
+        }
+    }
 }

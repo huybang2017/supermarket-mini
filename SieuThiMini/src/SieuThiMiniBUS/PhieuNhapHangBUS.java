@@ -52,4 +52,8 @@ public class PhieuNhapHangBUS {
         return id;
     }
 
+    public boolean importExcel(PhieuNhapHangDTO pn) {
+        PhieuNhapHangDAO data = new PhieuNhapHangDAO();
+        return data.importExcel(pn);
+    }
 }

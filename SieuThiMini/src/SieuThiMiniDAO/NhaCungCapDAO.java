@@ -9,6 +9,7 @@ import DTO.NhaCungCapDTO;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.PreparedStatement;
 import java.sql.Statement;
 
 public class NhaCungCapDAO {
@@ -76,6 +77,21 @@ public class NhaCungCapDAO {
             JOptionPane.showMessageDialog(null, "Lỗi sửa: " + e.getMessage());
         } finally {
             data.closeConnection(); 
+        }
+    }
+
+    public boolean importExcel(NhaCungCapDTO ncc) {
+        String sql = "INSERT INTO nhacungcap (id, ten, diaChi, phone) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE ten = VALUES(ten), diaChi = VALUES(diaChi), phone = VALUES(phone)";
+        try (Connection cnn = data.getConnection();
+             PreparedStatement ps = cnn.prepareStatement(sql)) {
+            ps.setInt(1, ncc.getMaNCC());
+            ps.setString(2, ncc.getTenNCC());
+            ps.setString(3, ncc.getDiaChi());
+            ps.setString(4, ncc.getSdt());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Lỗi Import NhaCungCap: " + e.getMessage());
+            return false;
         }
     }
 }

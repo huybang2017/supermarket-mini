@@ -35,4 +35,9 @@ public class KhachHangBUS {
             }
         }
     }
+
+    public boolean importExcel(KhachHangDTO kh) {
+        KhachHangDAO data = new KhachHangDAO();
+        return data.importExcel(kh);
+    }
 }

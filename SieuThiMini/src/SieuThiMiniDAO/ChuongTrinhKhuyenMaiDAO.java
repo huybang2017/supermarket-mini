@@ -2,7 +2,9 @@ package SieuThiMiniDAO;
 
 import DTO.ChuongTrinhKhuyenMaiDTO;
 import javax.swing.*;
+import java.sql.PreparedStatement;
 import java.sql.*;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 
 public class ChuongTrinhKhuyenMaiDAO {
@@ -83,6 +85,23 @@ public class ChuongTrinhKhuyenMaiDAO {
             JOptionPane.showMessageDialog(null, "Lỗi sửa: " + e.getMessage());
         } finally {
             data.closeConnection();
+        }
+    }
+
+    public boolean importExcel(ChuongTrinhKhuyenMaiDTO km) {
+        String sql = "INSERT INTO chuongtrinhkhuyenmai (id, ten, ghiChu, ngayBatDau, ngayKetThuc, trangThai) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE ten = VALUES(ten), ghiChu = VALUES(ghiChu), ngayBatDau = VALUES(ngayBatDau), ngayKetThuc = VALUES(ngayKetThuc), trangThai = VALUES(trangThai)";
+        try (Connection cnn = data.getConnection();
+             PreparedStatement ps = cnn.prepareStatement(sql)) {
+            ps.setInt(1, km.getId());
+            ps.setString(2, km.getTen());
+            ps.setString(3, km.getGhiChu());
+            ps.setDate(4, new java.sql.Date(km.getNgayBatDau().getTime()));
+            ps.setDate(5, new java.sql.Date(km.getNgayKetThuc().getTime()));
+            ps.setBoolean(6, km.isTrangThai());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Lỗi Import ChuongTrinhKhuyenMai: " + e.getMessage());
+            return false;
         }
     }
 }

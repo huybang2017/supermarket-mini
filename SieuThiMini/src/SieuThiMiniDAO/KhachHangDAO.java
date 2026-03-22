@@ -2,6 +2,7 @@ package SieuThiMiniDAO;
 
 import DTO.KhachHangDTO;
 import javax.swing.*;
+import java.sql.PreparedStatement;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -84,6 +85,22 @@ public class KhachHangDAO {
             JOptionPane.showMessageDialog(null, "Lỗi sửa KH: " + e.getMessage());
         } finally {
             data.closeConnection();
+        }
+    }
+
+    public boolean importExcel(KhachHangDTO kh) {
+        String sql = "INSERT INTO khachhang (id, ho, ten, phone, diaChi) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE ho = VALUES(ho), ten = VALUES(ten), phone = VALUES(phone), diaChi = VALUES(diaChi)";
+        try (Connection cnn = data.getConnection();
+             PreparedStatement ps = cnn.prepareStatement(sql)) {
+            ps.setInt(1, kh.getMaKH());
+            ps.setString(2, kh.getHoKH());
+            ps.setString(3, kh.getTenKH());
+            ps.setString(4, kh.getSdt());
+            ps.setString(5, kh.getDiaChi());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Lỗi Import KhachHang: " + e.getMessage());
+            return false;
         }
     }
 }

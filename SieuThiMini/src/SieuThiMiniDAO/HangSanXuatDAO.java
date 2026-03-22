@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.ArrayList;
 
@@ -82,4 +83,18 @@ public class HangSanXuatDAO {
         }
     }
 
+    public boolean importExcel(HangSanXuatDTO hsx) {
+        String sql = "INSERT INTO hangsanxuat (id, ten, diaChi, phone) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE ten = VALUES(ten), diaChi = VALUES(diaChi), phone = VALUES(phone)";
+        try (Connection cnn = data.getConnection();
+             PreparedStatement ps = cnn.prepareStatement(sql)) {
+            ps.setInt(1, hsx.getMaHang());
+            ps.setString(2, hsx.getTenHang());
+            ps.setString(3, hsx.getDiaChi());
+            ps.setString(4, hsx.getSdt());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Lỗi Import HangSanXuat: " + e.getMessage());
+            return false;
+        }
+    }
 }

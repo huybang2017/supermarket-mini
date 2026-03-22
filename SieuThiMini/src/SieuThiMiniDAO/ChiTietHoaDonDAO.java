@@ -153,4 +153,20 @@ public class ChiTietHoaDonDAO {
             ps.setInt(5, ct.getMaSP());
         }
     }
+
+    public boolean importExcel(ChiTietHoaDonDTO ct) {
+        String sql = "INSERT INTO chitiethoadon (hoaDonId, sanPhamId, soLuong, donGia, thanhTien) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE soLuong = VALUES(soLuong), donGia = VALUES(donGia), thanhTien = VALUES(thanhTien)";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, ct.getMaHD());
+            ps.setInt(2, ct.getMaSP());
+            ps.setInt(3, ct.getSoLuong());
+            ps.setLong(4, ct.getDonGia());
+            ps.setLong(5, ct.getThanhTien());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Lỗi Import ChiTietHoaDon: " + e.getMessage());
+            return false;
+        }
+    }
 }

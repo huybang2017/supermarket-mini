@@ -47,4 +47,8 @@ public class HoaDonBUS {
     public int addHoaDonReturnId(HoaDonDTO hd) {
         return hoaDonDAO.addHoaDonReturnId(hd);
     }
+
+    public boolean importExcel(HoaDonDTO hd) {
+        return hoaDonDAO.importExcel(hd);
+    }
 }

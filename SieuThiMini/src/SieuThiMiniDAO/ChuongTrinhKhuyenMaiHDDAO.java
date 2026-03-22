@@ -2,6 +2,7 @@ package SieuThiMiniDAO;
 
 import DTO.ChuongTrinhKhuyenMaiHDDTO;
 import javax.swing.*;
+import java.sql.PreparedStatement;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -107,6 +108,20 @@ public class ChuongTrinhKhuyenMaiHDDAO {
             JOptionPane.showMessageDialog(null, "Lỗi sửa: " + e.getMessage());
         } finally {
             data.closeConnection();
+        }
+    }
+
+    public boolean importExcel(ChuongTrinhKhuyenMaiHDDTO kmhd) {
+        String sql = "INSERT INTO chuongtrinhkhuyenmaihd (chuongTrinhKhuyenMaiId, soTienHd, giaTriGiam) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE giaTriGiam = VALUES(giaTriGiam)";
+        try (Connection cnn = data.getConnection();
+             PreparedStatement ps = cnn.prepareStatement(sql)) {
+            ps.setInt(1, kmhd.getChuongTrinhKhuyenMaiId());
+            ps.setInt(2, kmhd.getSoTienHd());
+            ps.setInt(3, kmhd.getGiaTriGiam());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Lỗi Import ChuongTrinhKhuyenMaiHD: " + e.getMessage());
+            return false;
         }
     }
 }

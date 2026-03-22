@@ -15,11 +15,10 @@ import java.util.Locale;
 public class QuanLyGiaBanGUI extends JPanel {
     private DefaultTableModel model;
     private JTable tblGiaBan;
+    private JTextField txtSearch;
     
     private Color secondaryColor = new Color(108, 117, 125);
     private Color bgColor = new Color(244, 246, 249);
-    private Font fontTitle = new Font("Segoe UI", Font.BOLD, 24);
-    private Font fontPlain = new Font("Segoe UI", Font.PLAIN, 14);
 
     public QuanLyGiaBanGUI() { 
         initComponents(); 
@@ -32,62 +31,50 @@ public class QuanLyGiaBanGUI extends JPanel {
         this.setBorder(new EmptyBorder(20, 25, 20, 25));
 
         JLabel lblTitle = new JLabel("Quản Lý Giá Bán");
-        lblTitle.setFont(fontTitle);
-        lblTitle.setForeground(new Color(40, 40, 40));
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 24));
         this.add(lblTitle, BorderLayout.NORTH);
 
         JPanel card = new JPanel(new BorderLayout(15, 15));
         card.setBackground(Color.WHITE);
         card.setBorder(new CompoundBorder(new LineBorder(new Color(230, 230, 230), 1), new EmptyBorder(15, 15, 15, 15)));
 
-        JPanel pnlHeader = new JPanel();
-        pnlHeader.setLayout(new BoxLayout(pnlHeader, BoxLayout.Y_AXIS));
+        JPanel pnlHeader = new JPanel(new BorderLayout());
         pnlHeader.setOpaque(false);
 
-        JPanel topToolBar = new JPanel(new BorderLayout());
-        topToolBar.setOpaque(false);
-
-        // Thanh tìm kiếm
+        // ===== THANH TÌM KIẾM (Đã fix hiệu ứng chữ mờ giống mẫu) =====
         JPanel pnlSearchGroup = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         pnlSearchGroup.setOpaque(false);
-        JTextField txtSearch = new JTextField(" Tìm mã hoặc tên sản phẩm...");
-        txtSearch.setPreferredSize(new Dimension(220, 38));
-        txtSearch.setFont(fontPlain);
+        txtSearch = new JTextField(" Tìm mã hoặc tên sản phẩm...");
+        txtSearch.setPreferredSize(new Dimension(250, 38));
+        txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         txtSearch.setForeground(Color.GRAY);
         txtSearch.addFocusListener(new FocusAdapter() {
-            public void focusGained(FocusEvent e) { if (txtSearch.getText().trim().equals("Tìm mã hoặc tên sản phẩm...")) { txtSearch.setText(""); txtSearch.setForeground(Color.BLACK); } }
-            public void focusLost(FocusEvent e) { if (txtSearch.getText().trim().isEmpty()) { txtSearch.setForeground(Color.GRAY); txtSearch.setText(" Tìm mã hoặc tên sản phẩm..."); } }
-        });
-        
-        JButton btnAdvToggle = createActionBtn("▼");
-        btnAdvToggle.setPreferredSize(new Dimension(45, 38));
-        pnlSearchGroup.add(txtSearch); pnlSearchGroup.add(btnAdvToggle);
-        topToolBar.add(pnlSearchGroup, BorderLayout.WEST);
-
-        // Tìm kiếm Real-time
-        txtSearch.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                String keyword = txtSearch.getText().toLowerCase().trim();
-                if (keyword.equals("tìm mã hoặc tên sản phẩm...") || keyword.isEmpty()) { docDSGiaBan(); return; }
-                model.setRowCount(0);
-                if (SanPhamBUS.dssp != null) {
-                    for (SanPhamDTO sp : SanPhamBUS.dssp) {
-                        if (String.valueOf(sp.getMasanpham()).contains(keyword) || sp.getTensanpham().toLowerCase().contains(keyword)) {
-                            // Cập nhật lại logic để hiển thị giá nhập và giá bán làm tròn nguyên
-                            long giaNhap = Math.round(sp.getGiaNhap()); 
-                            double loiNhuan = sp.getLoiNhuan();
-                            long giaBan = Math.round(sp.getDongia());
-                            model.addRow(new Object[]{sp.getMasanpham(), sp.getTensanpham(), giaNhap, loiNhuan, giaBan, "⚙ Chỉnh Giá"});
-                        }
-                    }
-                }
+            public void focusGained(FocusEvent e) { 
+                if(txtSearch.getText().equals(" Tìm mã hoặc tên sản phẩm...")) { 
+                    txtSearch.setText(""); 
+                    txtSearch.setForeground(Color.BLACK); 
+                } 
+            }
+            public void focusLost(FocusEvent e) { 
+                if(txtSearch.getText().isEmpty()) { 
+                    txtSearch.setText(" Tìm mã hoặc tên sản phẩm..."); 
+                    txtSearch.setForeground(Color.GRAY); 
+                } 
             }
         });
+        txtSearch.addKeyListener(new KeyAdapter() {
+            @Override public void keyReleased(KeyEvent e) { timKiem(); }
+        });
+        pnlSearchGroup.add(txtSearch);
+        pnlHeader.add(pnlSearchGroup, BorderLayout.WEST);
+        card.add(pnlHeader, BorderLayout.NORTH);
 
+        // ===== BẢNG DỮ LIỆU =====
         String[] headers = {"Mã SP", "Tên Sản Phẩm", "Giá Nhập Vô (VNĐ)", "Lợi Nhuận (%)", "Giá Bán Ra (VNĐ)", "Hành Động"};
         model = new DefaultTableModel(headers, 0) { @Override public boolean isCellEditable(int r, int c) { return false; } };
         tblGiaBan = new JTable(model);
+        
+        // Gọi hàm styleTable chuẩn mẫu
         styleTable(tblGiaBan);
 
         tblGiaBan.addMouseListener(new MouseAdapter() {
@@ -99,9 +86,7 @@ public class QuanLyGiaBanGUI extends JPanel {
                         int id = Integer.parseInt(tblGiaBan.getValueAt(row, 0).toString());
                         String ten = tblGiaBan.getValueAt(row, 1).toString();
                         
-                        double giaNhap = 0;
-                        double loiNhuan = 0;
-                        
+                        double giaNhap = 0, loiNhuan = 0;
                         if (SanPhamBUS.dssp != null) {
                             for (SanPhamDTO sp : SanPhamBUS.dssp) {
                                 if (sp.getMasanpham() == id) {
@@ -111,25 +96,20 @@ public class QuanLyGiaBanGUI extends JPanel {
                                 }
                             }
                         }
-                        
                         showEditPriceForm(id, ten, giaNhap, loiNhuan);
                     }
                 }
             }
         });
+        
         JScrollPane scrollPane = new JScrollPane(tblGiaBan);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.setBorder(BorderFactory.createEmptyBorder()); // Xóa viền bao quanh cuộn giống mẫu
         scrollPane.getViewport().setBackground(Color.WHITE);
-        card.add(pnlHeader, BorderLayout.NORTH);
         card.add(scrollPane, BorderLayout.CENTER);
-
         this.add(card, BorderLayout.CENTER);
-                // Thêm sự kiện tự động làm mới dữ liệu khi mở tab này
+        
         this.addComponentListener(new java.awt.event.ComponentAdapter() {
-            @Override
-            public void componentShown(java.awt.event.ComponentEvent e) {
-                docDSGiaBan(); 
-            }
+            @Override public void componentShown(java.awt.event.ComponentEvent e) { docDSGiaBan(); }
         });
     }
 
@@ -139,37 +119,43 @@ public class QuanLyGiaBanGUI extends JPanel {
         if(SanPhamBUS.dssp != null) {
             for (SanPhamDTO sp : SanPhamBUS.dssp) {
                 model.addRow(new Object[]{
-                    sp.getMasanpham(), 
-                    sp.getTensanpham(), 
-                    Math.round(sp.getGiaNhap()), // Trình bày số nguyên
-                    sp.getLoiNhuan(), 
-                    Math.round(sp.getDongia()),  // Trình bày số nguyên
-                    "⚙ Chỉnh Giá"
+                    sp.getMasanpham(), sp.getTensanpham(), 
+                    Math.round(sp.getGiaNhap()), sp.getLoiNhuan(), Math.round(sp.getDongia()), "⚙ Chỉnh Giá"
                 });
             }
         }
     }
 
-    // --- FORM CHỈNH SỬA GIÁ BÁN (ĐÃ FIX LỖI LOGIC VÀ PARSE SỐ) ---
+    private void timKiem() {
+        String kw = txtSearch.getText().toLowerCase().trim();
+        if (kw.equals(" tìm mã hoặc tên sản phẩm...") || kw.isEmpty()) { docDSGiaBan(); return; }
+        model.setRowCount(0);
+        if (SanPhamBUS.dssp != null) {
+            for (SanPhamDTO sp : SanPhamBUS.dssp) {
+                if (String.valueOf(sp.getMasanpham()).contains(kw) || sp.getTensanpham().toLowerCase().contains(kw)) {
+                    model.addRow(new Object[]{sp.getMasanpham(), sp.getTensanpham(), Math.round(sp.getGiaNhap()), sp.getLoiNhuan(), Math.round(sp.getDongia()), "⚙ Chỉnh Giá"});
+                }
+            }
+        }
+    }
+
     private void showEditPriceForm(int id, String ten, double giaNhapHienTai, double loiNhuanHienTai) {
         Window parentWindow = SwingUtilities.getWindowAncestor(this);
         JDialog dialog = new JDialog((Frame)parentWindow, "Chỉnh Sửa Giá Bán - " + ten, true);
-        dialog.setSize(450, 280); 
+        dialog.setSize(450, 250); 
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
 
-        // 2. CHỈNH LẠI GRID: Đổi (4, 2) thành (3, 2) vì bạn chỉ có 3 dòng. Tinh chỉnh lại Padding cho đẹp.
         JPanel pnlForm = new JPanel(new GridLayout(3, 2, 15, 20));
-        pnlForm.setBorder(new EmptyBorder(25, 35, 25, 35)); // Canh lề (Trên, Trái, Dưới, Phải)
+        pnlForm.setBorder(new EmptyBorder(25, 35, 25, 35)); 
         pnlForm.setBackground(Color.WHITE);
-        // FIX: Tránh lỗi Locale gây ra dấu phẩy. Giá nhập thành số nguyên, lợi nhuận bắt buộc dùng dấu chấm
+
         JTextField txtGiaNhap = new JTextField(String.valueOf(Math.round(giaNhapHienTai)));
         JTextField txtLoiNhuan = new JTextField(String.format(Locale.US, "%.1f", loiNhuanHienTai));
         
         JTextField txtGiaBan = new JTextField();
         txtGiaBan.setEditable(false); 
         txtGiaBan.setBackground(new Color(240, 240, 240));
-        // Đặt màu text nổi bật một chút để dễ nhìn giá bán ra
         txtGiaBan.setFont(new Font("Segoe UI", Font.BOLD, 14));
         txtGiaBan.setForeground(new Color(220, 53, 69)); 
 
@@ -177,110 +163,72 @@ public class QuanLyGiaBanGUI extends JPanel {
         pnlForm.add(new JLabel("Lợi Nhuận (%):")); pnlForm.add(txtLoiNhuan);
         pnlForm.add(new JLabel("Giá Bán Ra (VNĐ):")); pnlForm.add(txtGiaBan);
 
-        // Hàm tự động tính
         Runnable calcPrice = () -> {
             try {
-                String strGiaNhap = txtGiaNhap.getText().trim();
-                String strLoiNhuan = txtLoiNhuan.getText().trim();
+                String strGN = txtGiaNhap.getText().trim();
+                String strLN = txtLoiNhuan.getText().trim();
+                if (strGN.isEmpty() || strLN.isEmpty()) { txtGiaBan.setText("0"); return; }
 
-                // FIX: Nếu người dùng lỡ xóa hết số đi thì gán tạm bằng 0 để tránh lỗi văng form
-                if (strGiaNhap.isEmpty() || strLoiNhuan.isEmpty()) {
-                    txtGiaBan.setText("0");
-                    return;
-                }
-
-                long gn = Long.parseLong(strGiaNhap); // Giá nhập nguyên
-                double ln = Double.parseDouble(strLoiNhuan);
-                
-                // Tính giá bán và ép về số nguyên làm tròn
+                long gn = Long.parseLong(strGN);
+                double ln = Double.parseDouble(strLN);
                 long gb = Math.round(gn + (gn * ln / 100.0));
                 txtGiaBan.setText(String.valueOf(gb));
-                
-            } catch (NumberFormatException ex) {
-                txtGiaBan.setText("Lỗi định dạng số!");
-            }
+            } catch (Exception ex) { txtGiaBan.setText("Lỗi số!"); }
         };
 
         txtGiaNhap.getDocument().addDocumentListener(new SimpleDocumentListener(calcPrice));
         txtLoiNhuan.getDocument().addDocumentListener(new SimpleDocumentListener(calcPrice));
-        calcPrice.run(); // Chạy lần đầu
+        calcPrice.run(); 
 
         JButton btnSave = createActionBtn("Lưu Thay Đổi");
         btnSave.addActionListener(e -> {
             try {
-                // Parse lại chuẩn xác khi bấm lưu
-                String strGiaNhap = txtGiaNhap.getText().trim();
-                String strLoiNhuan = txtLoiNhuan.getText().trim();
-                String strGiaBan = txtGiaBan.getText().trim();
-
-                if(strGiaNhap.isEmpty() || strLoiNhuan.isEmpty() || strGiaBan.equals("Lỗi định dạng số!")) {
-                    JOptionPane.showMessageDialog(dialog, "Vui lòng nhập đúng dữ liệu trước khi lưu!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                long gn = Long.parseLong(strGiaNhap);
-                double ln = Double.parseDouble(strLoiNhuan);
-                long gb = Long.parseLong(strGiaBan);
+                long gn = Long.parseLong(txtGiaNhap.getText().trim());
+                double ln = Double.parseDouble(txtLoiNhuan.getText().trim());
+                long gb = Long.parseLong(txtGiaBan.getText().trim());
 
                 SanPhamDTO spUpdate = null;
                 for (SanPhamDTO sp : SanPhamBUS.dssp) {
-                    if (sp.getMasanpham() == id) {
-                        spUpdate = sp;
-                        break;
-                    }
+                    if (sp.getMasanpham() == id) { spUpdate = sp; break; }
                 }
 
                 if (spUpdate != null) {
-                    spUpdate.setGiaNhap((long) gn);
+                    spUpdate.setGiaNhap(gn);
                     spUpdate.setLoiNhuan(ln);
-                    spUpdate.setDongia((int) gb); // Ép về int theo DTO của bạn
+                    spUpdate.setDongia(gb); 
 
-                    SanPhamBUS spBus = new SanPhamBUS();
-                    spBus.sua(spUpdate); 
-
-                    JOptionPane.showMessageDialog(dialog, "Cập nhật giá bán thành công cho SP: " + ten);
+                    new SanPhamBUS().sua(spUpdate); 
+                    JOptionPane.showMessageDialog(dialog, "Cập nhật thành công!");
                     docDSGiaBan(); 
                     dialog.dispose(); 
-                } else {
-                    JOptionPane.showMessageDialog(dialog, "Lỗi: Không tìm thấy sản phẩm trong hệ thống!");
                 }
-
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(dialog, "Lỗi nhập liệu: Giá nhập và Lợi nhuận phải là số hợp lệ!");
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(dialog, "Lỗi hệ thống: " + ex.getMessage());
+                JOptionPane.showMessageDialog(dialog, "Dữ liệu không hợp lệ!");
             }
         });        
+        
+        JPanel pnlBottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        pnlBottom.setBackground(Color.WHITE);
+        pnlBottom.add(btnSave);
         dialog.add(pnlForm, BorderLayout.CENTER);
-        dialog.add(btnSave, BorderLayout.SOUTH);
+        dialog.add(pnlBottom, BorderLayout.SOUTH);
         dialog.setVisible(true);
     }
 
+    // ===== HÀM ĐỊNH DẠNG CHUẨN MẪU =====
     private void styleTable(JTable t) {
-        t.setRowHeight(45);
-        t.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        t.setGridColor(new Color(245, 245, 245));
-        t.setShowVerticalLines(false); 
-        t.setSelectionBackground(new Color(240, 247, 255));
-        t.setSelectionForeground(Color.BLACK);
-        t.getTableHeader().setReorderingAllowed(false);
-
-        JTableHeader header = t.getTableHeader();
-        header.setPreferredSize(new Dimension(0, 45));
-        header.setBackground(new Color(250, 251, 252));
-        header.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        header.setForeground(secondaryColor);
-        ((DefaultTableCellRenderer)header.getDefaultRenderer()).setHorizontalAlignment(JLabel.LEFT);
+        t.setRowHeight(45); t.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        t.setGridColor(new Color(245, 245, 245)); t.setShowVerticalLines(false);
+        t.getTableHeader().setPreferredSize(new Dimension(0, 45));
+        t.getTableHeader().setBackground(new Color(250, 251, 252));
+        t.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        ((DefaultTableCellRenderer)t.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.LEFT);
     }
 
     private JButton createActionBtn(String text) {
         JButton btn = new JButton(text);
-        btn.setPreferredSize(new Dimension(140, 38));
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btn.setFocusPainted(false);
-        btn.setBackground(new Color(226, 232, 240)); 
-        btn.setForeground(Color.BLACK); 
-        btn.setBorder(new LineBorder(new Color(203, 213, 225), 1)); 
+        btn.setPreferredSize(new Dimension(140, 38)); btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btn.setBackground(new Color(226, 232, 240)); btn.setBorder(new LineBorder(new Color(203, 213, 225), 1));
         return btn;
     }
 
@@ -291,5 +239,4 @@ public class QuanLyGiaBanGUI extends JPanel {
         public void removeUpdate(DocumentEvent e) { action.run(); }
         public void changedUpdate(DocumentEvent e) { action.run(); }
     }
-    
 }

@@ -43,4 +43,9 @@ public class ChuongTrinhKhuyenMaiBUS {
             }
         }
     }
+
+    public boolean importExcel(ChuongTrinhKhuyenMaiDTO km) {
+        ChuongTrinhKhuyenMaiDAO data = new ChuongTrinhKhuyenMaiDAO();
+        return data.importExcel(km);
+    }
 }

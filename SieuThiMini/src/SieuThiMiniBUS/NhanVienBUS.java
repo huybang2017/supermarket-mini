@@ -34,4 +34,9 @@ public class NhanVienBUS {
             }
         }
     }
+
+    public boolean importExcel(NhanVienDTO nv) {
+        NhanVienDAO data = new NhanVienDAO();
+        return data.importExcel(nv);
+    }
 }

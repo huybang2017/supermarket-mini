@@ -17,6 +17,8 @@ import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.awt.print.*;
+import java.text.DecimalFormat;
 
 public class QuanLyDonHangGUI extends JPanel {
     
@@ -124,11 +126,19 @@ public class QuanLyDonHangGUI extends JPanel {
         btnAdd.addActionListener(e -> showDialogTaoHoaDon());
 
         JButton btnDelete = createActionBtn("Xóa Đơn");
-        btnDelete.setPreferredSize(new Dimension(100, 36));
+        btnDelete.setPreferredSize(new Dimension(90, 36));
         btnDelete.addActionListener(e -> xoaHoaDon());
+
+        // NEW: Print button
+        JButton btnPrint = createActionBtn("🖨 In Hóa Đơn");
+        btnPrint.setPreferredSize(new Dimension(120, 36));
+        btnPrint.setBackground(new Color(40, 167, 69));
+        btnPrint.setForeground(Color.WHITE);
+        btnPrint.addActionListener(e -> printHoaDon());
 
         btnGroup.add(btnAdd);
         btnGroup.add(btnDelete);
+        btnGroup.add(btnPrint);
         toolbar.add(btnGroup, BorderLayout.EAST);
 
         String[] hdHeaders = {"Mã HĐ", "Tên NV", "Tên KH", "Ngày Lập", "Tổng Tiền (VNĐ)"};
@@ -870,7 +880,137 @@ private void showDialogSuaChiTiet() {
         btn.setBorder(new LineBorder(new Color(203, 213, 225), 1)); 
         return btn;
     }
-    
+
+    // NEW: Print selected invoice
+    private void printHoaDon() {
+        int row = tblHoaDon.getSelectedRow();
+        if (row == -1) {
+            msg("Vui lòng chọn hóa đơn cần in!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        int maHD = (int) modelHD.getValueAt(row, 0);
+        HoaDonDTO hd = hoaDonBUS.getHoaDonById(maHD);
+        if (hd == null) return;
+
+        // Create printable invoice panel
+        JPanel invoicePanel = createInvoicePanel(maHD);
+        PrinterJob job = PrinterJob.getPrinterJob();
+        job.setPrintable(new Printable() {
+            @Override
+            public int print(Graphics g, PageFormat pf, int page) {
+                if (page > 0) return Printable.NO_SUCH_PAGE;
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.translate(pf.getImageableX(), pf.getImageableY());
+                g2d.scale(0.8, 0.8); // Scale to fit
+                invoicePanel.printAll(g2d);
+                return Printable.PAGE_EXISTS;
+            }
+        });
+
+        if (job.printDialog()) {
+            try {
+                job.print();
+                msg("In hóa đơn thành công!", "OK", JOptionPane.INFORMATION_MESSAGE);
+            } catch (PrinterException ex) {
+                msg("Lỗi in: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private JPanel createInvoicePanel(int maHD) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setPreferredSize(new Dimension(550, 800));
+
+        // Header
+        JPanel header = new JPanel(new GridBagLayout());
+        header.setBackground(Color.WHITE);
+        header.setBorder(new EmptyBorder(20, 20, 10, 20));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2; gbc.anchor = GridBagConstraints.CENTER;
+        JLabel logo = new JLabel("🛒 SIÊU THỊ MINI", JLabel.CENTER);
+        logo.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        logo.setForeground(primaryColor);
+        header.add(logo, gbc);
+
+        gbc.gridy = 1;
+        JLabel title = new JLabel("HÓA ĐƠN BÁN HÀNG", JLabel.CENTER);
+        title.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        header.add(title, gbc);
+
+        gbc.gridy = 2; gbc.gridwidth = 1;
+        gbc.gridx = 0;
+        JLabel lblMHD = new JLabel("Mã HD: #" + maHD);
+        lblMHD.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        header.add(lblMHD, gbc);
+
+        HoaDonDTO hd = hoaDonBUS.getHoaDonById(maHD);
+        gbc.gridx = 1;
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        JLabel lblDate = new JLabel("Ngày: " + sdf.format(hd.getNgayLapDon()));
+        header.add(lblDate, gbc);
+
+        panel.add(header, BorderLayout.NORTH);
+
+        // Table chi tiết
+        String[] cols = {"STT", "Sản phẩm", "SL", "Đơn giá", "Thành tiền"};
+        DefaultTableModel modelCTPrint = new DefaultTableModel(cols, 0);
+        List<ChiTietHoaDonDTO> chiTietList = chiTietBUS.getListByMaHD(maHD);
+        DecimalFormat df = new DecimalFormat("#,### VNĐ");
+
+        for (int i = 0; i < chiTietList.size(); i++) {
+            ChiTietHoaDonDTO ct = chiTietList.get(i);
+            SanPhamDTO sp = getSanPham(ct.getMaSP());
+            modelCTPrint.addRow(new Object[]{
+                i + 1,
+                sp != null ? sp.getTensanpham() : "Unknown",
+                ct.getSoLuong(),
+                df.format(ct.getDonGia()),
+                df.format(ct.getThanhTien())
+            });
+        }
+
+        JTable tblPrint = new JTable(modelCTPrint);
+        tblPrint.setTableHeader(null);
+        tblPrint.setRowHeight(25);
+        tblPrint.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        tblPrint.setShowHorizontalLines(true);
+        tblPrint.setGridColor(Color.BLACK);
+
+        JScrollPane scrollPrint = new JScrollPane(tblPrint);
+        scrollPrint.setPreferredSize(new Dimension(500, 300));
+        scrollPrint.setBorder(null);
+
+        JPanel tablePanel = new JPanel(new BorderLayout());
+        tablePanel.setBorder(new EmptyBorder(10, 20, 10, 20));
+        tablePanel.setBackground(Color.WHITE);
+        tablePanel.add(scrollPrint, BorderLayout.CENTER);
+        panel.add(tablePanel, BorderLayout.CENTER);
+
+        // Footer totals
+        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        footer.setBackground(Color.WHITE);
+        footer.setBorder(new EmptyBorder(10, 20, 20, 20));
+
+        JLabel lblTong = new JLabel("Tổng tiền: ");
+        lblTong.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        JLabel lblTongTien = new JLabel(df.format(hd.getTongTien()));
+        lblTongTien.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblTongTien.setForeground(dangerColor);
+        footer.add(lblTong);
+        footer.add(lblTongTien);
+
+        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 2; gbc.anchor = GridBagConstraints.CENTER;
+        JLabel lblFooter = new JLabel("Cảm ơn quý khách! Hẹn gặp lại ❤️");
+        lblFooter.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        header.add(lblFooter, gbc);
+
+        panel.add(footer, BorderLayout.SOUTH);
+
+        return panel;
+    }
     private void msg(String text, String title, int type) {
         JOptionPane.showMessageDialog(this, text, title, type);
     }
@@ -897,3 +1037,6 @@ private void showDialogSuaChiTiet() {
         return String.valueOf(maKH);
     }
 }
+    
+
+    

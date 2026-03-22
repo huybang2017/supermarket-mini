@@ -64,4 +64,9 @@ public class ChuongTrinhKhuyenMaiSpBUS {
             }
         }
     }
+
+    public boolean importExcel(ChuongTrinhKhuyenMaiSpDTO kmsp) {
+        ChuongTrinhKhuyenMaiSpDAO data = new ChuongTrinhKhuyenMaiSpDAO();
+        return data.importExcel(kmsp);
+    }
 }

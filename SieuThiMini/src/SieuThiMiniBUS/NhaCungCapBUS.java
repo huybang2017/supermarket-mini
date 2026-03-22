@@ -33,4 +33,9 @@ public class NhaCungCapBUS {
         data.suaNCC(ncc);
         // Không cần vòng lặp for để sửa thủ công trong mảng nữa
     }
+
+    public boolean importExcel(NhaCungCapDTO ncc) {
+        NhaCungCapDAO data = new NhaCungCapDAO();
+        return data.importExcel(ncc);
+    }
 }

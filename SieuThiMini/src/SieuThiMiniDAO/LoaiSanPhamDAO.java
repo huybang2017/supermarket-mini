@@ -71,4 +71,17 @@ public class LoaiSanPhamDAO {
             return false;
         }
     }
+
+    public boolean importExcel(LoaiSanPhamDTO lsp) {
+        String sql = "INSERT INTO loaisanpham (id, name) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name)";
+        try (Connection cnn = data.getConnection();
+             PreparedStatement ps = cnn.prepareStatement(sql)) {
+            ps.setInt(1, lsp.getMaLoai());
+            ps.setString(2, lsp.getTenLoai());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Lỗi Import LoaiSanPham: " + e.getMessage());
+            return false;
+        }
+    }
 }

@@ -80,5 +80,6 @@ gradlew.bat
 .claude
 *.txt
 *.md
+lib/poi-*.jar
 
 nbproject

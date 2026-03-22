@@ -2,6 +2,7 @@ package SieuThiMiniDAO;
 
 import DTO.NhanVienDTO;
 import javax.swing.*;
+import java.sql.PreparedStatement;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -93,6 +94,24 @@ public class NhanVienDAO {
             JOptionPane.showMessageDialog(null, "Lỗi sửa NV: " + e.getMessage());
         } finally {
             data.closeConnection(); // ĐÓNG KẾT NỐI
+        }
+    }
+
+    public boolean importExcel(NhanVienDTO nv) {
+        String sql = "INSERT INTO nhanvien (id, ho, ten, phone, diaChi, ngaySinh, luong) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE ho = VALUES(ho), ten = VALUES(ten), phone = VALUES(phone), diaChi = VALUES(diaChi), ngaySinh = VALUES(ngaySinh), luong = VALUES(luong)";
+        try (Connection cnn = data.getConnection();
+             PreparedStatement ps = cnn.prepareStatement(sql)) {
+            ps.setInt(1, nv.getMaNV());
+            ps.setString(2, nv.getHoNV());
+            ps.setString(3, nv.getTenNV());
+            ps.setString(4, nv.getSdt());
+            ps.setString(5, nv.getDiaChi());
+            ps.setDate(6, new java.sql.Date(nv.getNgaySinh().getTime()));
+            ps.setDouble(7, nv.getLuong());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Lỗi Import NhanVien: " + e.getMessage());
+            return false;
         }
     }
 }
