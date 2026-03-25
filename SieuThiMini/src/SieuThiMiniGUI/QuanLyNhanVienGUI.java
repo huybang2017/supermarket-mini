@@ -116,21 +116,8 @@ public class QuanLyNhanVienGUI extends JPanel {
         txtSearch.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                String keyword = txtSearch.getText().toLowerCase().trim();
-                if (keyword.equals("tìm kiếm nhân viên...") || keyword.isEmpty()) { docDSNV(); return; }
-                model.setRowCount(0);
-                NhanVienBUS bus = new NhanVienBUS();
-                if (bus.dsnv != null) {
-                    for (NhanVienDTO nv : bus.dsnv) {
-                        if (String.valueOf(nv.getMaNV()).contains(keyword) || 
-                            nv.getTenNV().toLowerCase().contains(keyword) ||
-                            nv.getSdt().contains(keyword)) {
-                            model.addRow(new Object[]{nv.getMaNV(), nv.getHoNV(), nv.getTenNV(), nv.getSdt(), nv.getDiaChi(), nv.getNgaySinh(), nv.getLuong(), "⚙ Sửa"});
-                        }
-                    }
-                }
-            }
-        });
+                timNhanVien(txtSearch.getText().trim().toLowerCase());
+    }});
 
         // 2. BẢNG DỮ LIỆU
         String[] headers = {"Mã NV", "Họ NV", "Tên NV", "Số Điện Thoại", "Địa Chỉ", "Ngày Sinh", "Lương", "Hành Động"};
@@ -279,5 +266,14 @@ public class QuanLyNhanVienGUI extends JPanel {
         btn.setForeground(Color.BLACK); 
         btn.setBorder(new LineBorder(new Color(203, 213, 225), 1)); 
         return btn;
+    }
+
+    private void timNhanVien(String kw){
+        if (kw.equals("tìm kiếm nhân viên...") || kw.isEmpty()) { docDSNV(); return; }
+            model.setRowCount(0);
+            NhanVienBUS nvbus = new NhanVienBUS();
+            NhanVienDTO nv = new NhanVienDTO();
+            nvbus.timNhanVien(kw, nv);
+            model.addRow(new Object[]{nv.getMaNV(), nv.getHoNV(), nv.getTenNV(), nv.getSdt(), nv.getDiaChi(), nv.getNgaySinh(), nv.getLuong(), "⚙ Sửa"});
     }
 }

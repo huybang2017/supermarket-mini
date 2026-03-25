@@ -39,4 +39,9 @@ public class NhanVienBUS {
         NhanVienDAO data = new NhanVienDAO();
         return data.importExcel(nv);
     }
+
+    public void timNhanVien(String keyword , NhanVienDTO nv) {
+        NhanVienDAO data = new NhanVienDAO();
+        nv = data.timNhanVien(keyword);
+    }
 }

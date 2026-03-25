@@ -4,6 +4,7 @@ import DTO.SanPhamDTO;
 import javax.swing.*;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class SanPhamDAO { 
     MyConnection data = new MyConnection();
@@ -140,4 +141,30 @@ public class SanPhamDAO {
             return false;
         }
     }
+
+    public SanPhamDTO timSanPham(String keyword) {
+        String sql = "SELECT * FROM SanPham WHERE LOWER(TenSanPham) LIKE ? OR CAST(MaSanPham AS CHAR) LIKE ?";
+        try{Connection cnn = data.getConnection();
+        PreparedStatement ps = cnn.prepareStatement(sql);
+
+        String searchKeyword = "%" + keyword.toLowerCase() + "%";
+        ps.setString(1, searchKeyword);
+        ps.setString(2, searchKeyword);
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+            SanPhamDTO sp = new SanPhamDTO();
+            sp.setMasanpham(rs.getInt("MaSanPham"));
+            sp.setTensanpham(rs.getString("TenSanPham"));
+            sp.setSoluong(rs.getInt("SoLuong"));
+            sp.setDongia(rs.getLong("DonGia"));
+            sp.setDonvitinh(rs.getString("DonViTinh"));
+            return sp;
+        }
+    } catch (SQLException e) {
+        System.err.println("Lỗi tìm sản phẩm: " + e.getMessage());
+    } finally {
+        data.closeConnection();
+    }
+    return null;}
 }

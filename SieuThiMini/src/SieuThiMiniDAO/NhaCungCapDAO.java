@@ -94,4 +94,26 @@ public class NhaCungCapDAO {
             return false;
         }
     }
+
+    public NhaCungCapDTO timNhaCungCap(String keyword) {
+        String sql = "SELECT * FROM nhacungcap WHERE id = ? OR LOWER(ten) LIKE ? OR LOWER(diaChi) LIKE ? OR phone LIKE ?";
+        try (Connection cnn = data.getConnection();
+             PreparedStatement ps = cnn.prepareStatement(sql)) {
+    
+            ps.setString(1, keyword);
+            ps.setString(2, "%" + keyword.toLowerCase() + "%"); 
+            ps.setString(3, "%" + keyword.toLowerCase() + "%");
+            ps.setString(4, "%" + keyword + "%"); 
+            ResultSet rs = ps.executeQuery();
+    
+            if (rs.next()) {
+                NhaCungCapDTO ncc = new NhaCungCapDTO();
+                ncc.setMaNCC(rs.getInt("id")); 
+                ncc.setTenNCC(rs.getString("ten")); 
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi tìm kiếm Nhà Cung Cấp: " + e.getMessage());
+        }
+        return null; 
+    }
 }

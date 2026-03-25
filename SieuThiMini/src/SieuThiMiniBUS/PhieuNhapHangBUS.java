@@ -56,4 +56,8 @@ public class PhieuNhapHangBUS {
         PhieuNhapHangDAO data = new PhieuNhapHangDAO();
         return data.importExcel(pn);
     }
+    public void timPhieuNhapHang(String keyword, PhieuNhapHangDTO pn) {
+        PhieuNhapHangDAO data = new PhieuNhapHangDAO();
+        pn = data.timPhieuNhap(keyword);
+    }
 }

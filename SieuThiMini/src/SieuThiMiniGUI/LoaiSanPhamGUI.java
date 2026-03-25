@@ -144,15 +144,13 @@ public class LoaiSanPhamGUI extends JPanel {
             hienThiBang();
             return;
         }
-        
+        LoaiSanPhamBUS lspBUS = new LoaiSanPhamBUS();
+        LoaiSanPhamDTO lsp = new LoaiSanPhamDTO();
+        lspBUS.timLoaiSP(query , lsp);
         model.setRowCount(0);
-        for (LoaiSanPhamDTO lsp : LoaiSanPhamBUS.dslsp) {
-            if (String.valueOf(lsp.getMaLoai()).contains(query) || 
-                lsp.getTenLoai().toLowerCase().contains(query)) {
-                model.addRow(new Object[]{lsp.getMaLoai(), lsp.getTenLoai(), "⚙ Sửa"});
-            }
+ 
+                model.addRow(new Object[]{lsp.getMaLoai(), lsp.getTenLoai()});
         }
-    }
 
     // ===== POPUP FORM THÊM / SỬA =====
     private void openForm(LoaiSanPhamDTO lsp) {

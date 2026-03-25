@@ -40,4 +40,9 @@ public class KhachHangBUS {
         KhachHangDAO data = new KhachHangDAO();
         return data.importExcel(kh);
     }
+    
+    public void timKhachHang(String keyword, KhachHangDTO kh) {
+        KhachHangDAO data = new KhachHangDAO();
+        kh = data.timKhachHang(keyword);
+    }
 }

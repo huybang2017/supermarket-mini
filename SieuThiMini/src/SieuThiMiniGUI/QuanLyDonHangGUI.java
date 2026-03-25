@@ -104,8 +104,8 @@ public class QuanLyDonHangGUI extends JPanel {
 
         JButton btnSearch = createActionBtn("Tìm");
         btnSearch.setPreferredSize(new Dimension(80, 36));
-        btnSearch.addActionListener(e -> timKiemHoaDon());
-        txtSearch.addActionListener(e -> timKiemHoaDon());
+        btnSearch.addActionListener(e -> timKiemHoaDon(txtSearch.getText().trim()));
+        txtSearch.addActionListener(e -> timKiemHoaDon(txtSearch.getText().trim()));
 
         JButton btnRefresh = createActionBtn("Làm Mới");
         btnRefresh.setPreferredSize(new Dimension(100, 36));
@@ -265,8 +265,7 @@ public class QuanLyDonHangGUI extends JPanel {
             });        }
     }
 
-    private void timKiemHoaDon() {
-        String kw = txtSearch.getText().trim();
+    private void timKiemHoaDon(String kw) {
         if (kw.isEmpty()) { loadHoaDon(); return; }
         try {
             int maHD = Integer.parseInt(kw);

@@ -110,14 +110,11 @@ public class NhaCungCapGUI extends JPanel {
         String kw = txtSearch.getText().toLowerCase();
         if(kw.equals(" tìm kiếm ncc...") || kw.isEmpty()) { hienThiBang(); return; }
         model.setRowCount(0);
-        if (NhaCungCapBUS.dsncc != null) {
-            for (NhaCungCapDTO ncc : NhaCungCapBUS.dsncc) {
-                if (ncc.getTenNCC().toLowerCase().contains(kw) || ncc.getSdt().contains(kw)) {
-                    model.addRow(new Object[]{ncc.getMaNCC(), ncc.getTenNCC(), ncc.getSdt(), ncc.getDiaChi(), "⚙ Sửa"});
-                }
-            }
+        NhaCungCapBUS nccBUS = new NhaCungCapBUS();
+        NhaCungCapDTO ncc = new NhaCungCapDTO();
+        nccBUS.timNhaCungCap(kw , ncc);
+        model.addRow(new Object[]{ncc.getMaNCC(), ncc.getTenNCC(), ncc.getSdt(), ncc.getDiaChi(), "⚙ Sửa"});
         }
-    }
 
     private void deleteSelectedNCC() {
         int row = tblNhaCungCap.getSelectedRow();

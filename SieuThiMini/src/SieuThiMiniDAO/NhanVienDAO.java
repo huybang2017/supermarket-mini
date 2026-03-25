@@ -114,4 +114,32 @@ public class NhanVienDAO {
             return false;
         }
     }
+
+    public NhanVienDTO timNhanVien(String keyword) {
+        Connection cnn = data.getConnection();
+        try {
+            String qry = "SELECT * FROM nhanvien WHERE id = ? OR ho LIKE ? OR ten LIKE ?";
+            PreparedStatement pst = cnn.prepareStatement(qry);
+            pst.setString(1,keyword);
+            pst.setString(2,"%" + keyword + "%");
+            pst.setString(3,"%" + keyword + "%");
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                NhanVienDTO nv = new NhanVienDTO();
+                nv.setMaNV(rs.getInt("id"));
+                nv.setHoNV(rs.getString("ho)"));
+                nv.setTenNV(rs.getString("ten"));
+                nv.setSdt(rs.getString("phone"));
+                nv.setDiaChi(rs.getString("diachi"));
+                nv.setNgaySinh(rs.getDate("ngaySinh"));
+                nv.setLuong(rs.getDouble("luong"));
+                return nv;
+            } 
+        }catch (SQLException e){
+            JOptionPane.showMessageDialog(null , "Lỗi tìm kiếm nhân viên" + e.getMessage());
+        } finally{
+            data.closeConnection();
+        }
+        return null;
+}
 }

@@ -151,19 +151,10 @@ public class QuanLySanPhamGUI extends JPanel {
         txtSearch.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                String keyword = txtSearch.getText().toLowerCase().trim();
-                if (keyword.equals("tìm kiếm sản phẩm...") || keyword.isEmpty()) { docDSSP(); return; }
-                model.setRowCount(0);
-                if (SanPhamBUS.dssp != null) {
-                    for (SanPhamDTO sp : SanPhamBUS.dssp) {
-                        if (String.valueOf(sp.getMasanpham()).contains(keyword) || sp.getTensanpham().toLowerCase().contains(keyword)) {
-                            model.addRow(new Object[]{sp.getMasanpham(), sp.getTensanpham(), sp.getSoluong(), sp.getDongia(), sp.getDonvitinh(), "⚙ Sửa"});
-                        }
-                    }
-                }
+                searchSanPham(txtSearch.getText());
             }
         });
-
+            
         // 2. KHU VỰC BẢNG DỮ LIỆU
         String[] headers = {"ID", "Tên Sản Phẩm", "Số Lượng", "Đơn Giá", "Đơn Vị Tính", "Hành Động"};
         model = new DefaultTableModel(headers, 0) { @Override public boolean isCellEditable(int r, int c) { return false; } };
@@ -1190,4 +1181,17 @@ private Date getSafeDate(Cell cell) {
     }
     return null;
 }   
+    private void searchSanPham(String keyword){
+        SanPhamBUS bus = new SanPhamBUS();
+        SanPhamDTO spt = new SanPhamDTO();
+        bus.timSanPham(keyword,spt);
+        model.setRowCount(0); 
+        model.addRow(new Object[]{
+        spt.getMasanpham(),
+        spt.getTensanpham(),
+        spt.getSoluong(),
+        spt.getDongia(),
+        spt.getDonvitinh(),
+        });
+    }
 }

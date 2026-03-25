@@ -2,7 +2,7 @@ package SieuThiMiniDAO;
 
 import DTO.KhachHangDTO;
 import javax.swing.*;
-import java.sql.PreparedStatement;
+
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -103,4 +103,35 @@ public class KhachHangDAO {
             return false;
         }
     }
+
+    public KhachHangDTO timKhachHang(String keyword){
+        Connection cnn = data.getConnection();
+        try {
+            String qry = "SELECT * FROM khachhang WHERE id = ? OR ho LIKE ? OR ten LIKE ? OR phone LIKE ?";
+            PreparedStatement pst = cnn.prepareStatement(qry);
+            pst.setString(1,keyword);
+            pst.setString(2, "%" + keyword + "%");
+            pst.setString(3, "%" + keyword + "%");
+            pst.setString(4, "%" + keyword + "%");
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()){
+                KhachHangDTO kh = new KhachHangDTO();
+            kh.setMaKH(rs.getInt("id")); 
+            kh.setHoKH(rs.getString("ho")); 
+            kh.setTenKH(rs.getString("ten")); 
+            kh.setSdt(rs.getString("phone")); 
+            kh.setDiaChi(rs.getString("diachi")); 
+            return kh;
+        }
+    } catch (SQLException e) {
+        System.err.println("Lỗi tìm kiếm Khách Hàng: " + e.getMessage());
+    } finally {
+        try {
+            if (cnn != null) cnn.close();
+        } catch (SQLException e) {
+            System.err.println("Lỗi đóng kết nối: " + e.getMessage());
+        }
+    }
+    return null;
+}
 }

@@ -38,4 +38,9 @@ public class NhaCungCapBUS {
         NhaCungCapDAO data = new NhaCungCapDAO();
         return data.importExcel(ncc);
     }
+
+    public void timNhaCungCap(String keyword , NhaCungCapDTO ncc) {
+        NhaCungCapDAO data = new NhaCungCapDAO();
+        ncc = data.timNhaCungCap(keyword);
+    }
 }

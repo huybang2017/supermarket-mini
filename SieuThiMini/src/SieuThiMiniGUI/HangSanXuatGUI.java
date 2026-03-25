@@ -110,14 +110,11 @@ public class HangSanXuatGUI extends JPanel {
         String kw = txtSearch.getText().toLowerCase();
         if(kw.equals(" tìm kiếm hãng sx...") || kw.isEmpty()) { hienThiBang(); return; }
         model.setRowCount(0);
-        if (HangSanXuatBUS.dshsx != null) {
-            for (HangSanXuatDTO hsx : HangSanXuatBUS.dshsx) {
-                if (hsx.getTenHang().toLowerCase().contains(kw) || hsx.getSdt().contains(kw)) {
-                    model.addRow(new Object[]{hsx.getMaHang(), hsx.getTenHang(), hsx.getSdt(), hsx.getDiaChi(), "⚙ Sửa"});
-                }
-            }
+        HangSanXuatBUS hsxBUS = new HangSanXuatBUS();
+        HangSanXuatDTO hsx = new HangSanXuatDTO();
+        hsxBUS.timHangSanXuat(kw , hsx);
+        model.addRow(new Object[]{hsx.getMaHang(), hsx.getTenHang(), hsx.getSdt(), hsx.getDiaChi(), "⚙ Sửa"});
         }
-    }
 
     private void deleteSelectedHSX() {
         int row = tblHangSanXuat.getSelectedRow();

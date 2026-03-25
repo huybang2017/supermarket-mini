@@ -46,4 +46,9 @@ public class SanPhamBUS {
         SanPhamDAO data = new SanPhamDAO();
         return data.importExcel(sp);
     }
+
+    public void timSanPham(String keyword, SanPhamDTO sp) {
+        SanPhamDAO data = new SanPhamDAO();
+        sp=data.timSanPham(keyword);
+    }
 }

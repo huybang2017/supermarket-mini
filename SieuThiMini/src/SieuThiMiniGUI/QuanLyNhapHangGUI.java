@@ -72,7 +72,7 @@ public class QuanLyNhapHangGUI extends JPanel {
             public void focusLost(FocusEvent e) { if(txtSearch.getText().isEmpty()) txtSearch.setText(" Tìm kiếm mã phiếu nhập..."); }
         });
         txtSearch.addKeyListener(new KeyAdapter() {
-            @Override public void keyReleased(KeyEvent e) { timKiemPhieuNhap(); }
+            @Override public void keyReleased(KeyEvent e) { timKiemPhieuNhap(txtSearch.getText().trim()); }
         });
         pnlLeft.add(txtSearch);
 
@@ -177,22 +177,19 @@ public class QuanLyNhapHangGUI extends JPanel {
         }
     }
 
-    private void timKiemPhieuNhap() {
-        String kw = txtSearch.getText().trim();
+    private void timKiemPhieuNhap(String kw) {
         if (kw.equals("Tìm kiếm mã phiếu nhập...") || kw.isEmpty()) {
             loadPhieuNhap(); return;
         }
+        PhieuNhapHangDTO pn = new PhieuNhapHangDTO();
+        PhieuNhapHangBUS pnBUS = new PhieuNhapHangBUS();
+        pnBUS.timPhieuNhapHang(kw, pn);
         modelPN.setRowCount(0);
-        if (PhieuNhapHangBUS.dspn != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-            for (PhieuNhapHangDTO pn : PhieuNhapHangBUS.dspn) {
-                if (String.valueOf(pn.getMaPNH()).contains(kw)) {
-                    String ngay = pn.getNgayNhap() != null ? sdf.format(pn.getNgayNhap()) : "";
-                    modelPN.addRow(new Object[]{pn.getMaPNH(), pn.getMaNV(), pn.getMaNCC(), ngay, String.format(java.util.Locale.US, "%,d", (long)pn.getTongTien())});
-                }
+            String ngay = pn.getNgayNhap() != null ? sdf.format(pn.getNgayNhap()) : "";
+            modelPN.addRow(new Object[]{pn.getMaPNH(), pn.getMaNV(), pn.getMaNCC(), ngay, String.format(java.util.Locale.US, "%,d", (long)pn.getTongTien())});
             }
-        }
-    }
+            
 
     // ==========================================================
     // FORM TẠO PHIẾU NHẬP (GIỎ HÀNG NHO NHỎ) ĐÃ ĐƯỢC LÀM TO RA

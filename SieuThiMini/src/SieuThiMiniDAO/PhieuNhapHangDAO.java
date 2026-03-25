@@ -4,6 +4,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import DTO.PhieuNhapHangDTO;
+import DTO.SanPhamDTO;
 
 public class PhieuNhapHangDAO {
     MyConnection data = new MyConnection();     
@@ -125,4 +126,30 @@ public class PhieuNhapHangDAO {
             return false;
         }
     }
+
+    public PhieuNhapHangDTO timPhieuNhap(String keyword) {
+        String sql = "SELECT * FROM PhieuNhapHang WHERE LOWER(MaPhieuNhap) LIKE ? OR CAST(MaSanPham AS CHAR) LIKE ?";
+        try{Connection cnn = data.getConnection();
+        PreparedStatement ps = cnn.prepareStatement(sql);
+
+        String searchKeyword = "%" + keyword.toLowerCase() + "%";
+        ps.setString(1, searchKeyword);
+        ps.setString(2, searchKeyword);
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+            PhieuNhapHangDTO pn = new PhieuNhapHangDTO();
+            pn.setMaPNH(rs.getInt("MaPhieuNhap"));
+            pn.setMaNV(rs.getInt("MaNhanVien"));
+            pn.setMaNCC(rs.getInt("MaNhaCungCap"));
+            pn.setTongTien(rs.getLong("TongTien"));
+            pn.setNgayNhap(rs.getDate("NgayNhap"));
+            return pn;
+        }
+    } catch (SQLException e) {
+        System.err.println("Lỗi tìm phiếu: " + e.getMessage());
+    } finally {
+        data.closeConnection();
+    }
+    return null;}
 }

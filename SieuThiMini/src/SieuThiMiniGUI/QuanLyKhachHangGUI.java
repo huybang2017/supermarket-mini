@@ -117,21 +117,8 @@ public class QuanLyKhachHangGUI extends JPanel {
         txtSearch.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                String keyword = txtSearch.getText().toLowerCase().trim();
-                if (keyword.equals("tìm kiếm khách hàng...") || keyword.isEmpty()) { docDSKH(); return; }
-                model.setRowCount(0);
-                KhachHangBUS bus = new KhachHangBUS();
-                if (bus.dskh != null) {
-                    for (KhachHangDTO kh : bus.dskh) {
-                        if (String.valueOf(kh.getMaKH()).contains(keyword) || 
-                            kh.getTenKH().toLowerCase().contains(keyword) ||
-                            kh.getSdt().contains(keyword)) {
-                            model.addRow(new Object[]{kh.getMaKH(), kh.getHoKH(), kh.getTenKH(), kh.getSdt(), kh.getDiaChi(), "⚙ Sửa"});
-                        }
-                    }
-                }
-            }
-        });
+                timKhachHang(txtSearch.getText().trim());
+            }});
 
         // 2. KHU VỰC BẢNG DỮ LIỆU
         String[] headers = {"Mã KH", "Họ KH", "Tên KH", "Số Điện Thoại", "Địa Chỉ", "Hành Động"};
@@ -259,5 +246,14 @@ public class QuanLyKhachHangGUI extends JPanel {
         btn.setForeground(Color.BLACK); 
         btn.setBorder(new LineBorder(new Color(203, 213, 225), 1)); 
         return btn;
+    }
+
+    private void timKhachHang(String keyword) {
+        if (keyword.equals("tìm kiếm khách hàng...") || keyword.isEmpty()) { docDSKH(); return; }
+        model.setRowCount(0);
+        KhachHangBUS khbus = new KhachHangBUS();
+        KhachHangDTO kh = new KhachHangDTO();
+        khbus.timKhachHang(keyword, kh);
+        model.addRow(new Object[]{kh.getMaKH(), kh.getHoKH(), kh.getTenKH(), kh.getSdt(), kh.getDiaChi(), "⚙ Sửa"});
     }
 }

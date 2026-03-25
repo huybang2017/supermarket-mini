@@ -1,5 +1,6 @@
 package SieuThiMiniDAO;
 
+import DTO.HangSanXuatDTO;
 import DTO.LoaiSanPhamDTO;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -83,5 +84,27 @@ public class LoaiSanPhamDAO {
             System.err.println("Lỗi Import LoaiSanPham: " + e.getMessage());
             return false;
         }
+    }
+
+    public LoaiSanPhamDTO timLoaiSanPham(String keyword) {
+        String sql = "SELECT * FROM loaisanpham WHERE id = ? OR LOWER(name) LIKE ?";
+        try (Connection cnn = data.getConnection();
+             PreparedStatement ps = cnn.prepareStatement(sql)) {
+    
+            ps.setString(1, keyword); 
+            ps.setString(2, "%" + keyword.toLowerCase() + "%"); 
+    
+            ResultSet rs = ps.executeQuery();
+    
+            if (rs.next()) {
+                LoaiSanPhamDTO lsp = new LoaiSanPhamDTO();
+                lsp.setMaLoai(rs.getInt("id")); 
+                lsp.setTenLoai(rs.getString("name")); 
+                return lsp;
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi tìm kiếm Loại Sản Phẩm: " + e.getMessage());
+        }
+        return null; 
     }
 }
