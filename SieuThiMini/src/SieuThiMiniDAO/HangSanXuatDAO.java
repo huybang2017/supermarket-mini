@@ -97,29 +97,30 @@ public class HangSanXuatDAO {
             return false;
         }
     }
-    public HangSanXuatDTO timHangSanXuat(String keyword) {
-        String sql = "SELECT * FROM hangsanxuat WHERE id = ? OR LOWER(ten) LIKE ? OR LOWER(diaChi) LIKE ? OR phone LIKE ?";
+    public ArrayList<HangSanXuatDTO> timHangSanXuat(String keyword) {
+        ArrayList<HangSanXuatDTO> ketQua = new ArrayList<>();
+        String sql = "SELECT * FROM hangsanxuat WHERE CAST(id AS CHAR) LIKE ? OR LOWER(ten) LIKE ? OR LOWER(diaChi) LIKE ? OR phone LIKE ?";
         try (Connection cnn = data.getConnection();
              PreparedStatement ps = cnn.prepareStatement(sql)) {
-    
-            ps.setString(1, keyword); 
-            ps.setString(2, "%" + keyword.toLowerCase() + "%"); 
-            ps.setString(3, "%" + keyword.toLowerCase() + "%"); 
-            ps.setString(4, "%" + keyword + "%"); 
+             
+            String searchKw = "%" + keyword.toLowerCase() + "%";
+            ps.setString(1, searchKw); 
+            ps.setString(2, searchKw); 
+            ps.setString(3, searchKw); 
+            ps.setString(4, searchKw); 
     
             ResultSet rs = ps.executeQuery();
-    
-            if (rs.next()) {
+            while (rs.next()) {
                 HangSanXuatDTO hsx = new HangSanXuatDTO();
                 hsx.setMaHang(rs.getInt("id")); 
                 hsx.setTenHang(rs.getString("ten")); 
                 hsx.setDiaChi(rs.getString("diaChi")); 
                 hsx.setSdt(rs.getString("phone")); 
-                return hsx;
+                ketQua.add(hsx);
             }
         } catch (SQLException e) {
             System.err.println("Lỗi tìm kiếm Hãng Sản Xuất: " + e.getMessage());
         }
-        return null; 
+        return ketQua; 
     }
 }

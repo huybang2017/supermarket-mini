@@ -51,4 +51,7 @@ public class HoaDonBUS {
     public boolean importExcel(HoaDonDTO hd) {
         return hoaDonDAO.importExcel(hd);
     }
+    public List<HoaDonDTO> timHoaDon(String keyword) {
+        return hoaDonDAO.timHoaDon(keyword);
+    }
 }

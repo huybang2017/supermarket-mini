@@ -72,7 +72,9 @@ public class QuanLyNhapHangGUI extends JPanel {
             public void focusLost(FocusEvent e) { if(txtSearch.getText().isEmpty()) txtSearch.setText(" Tìm kiếm mã phiếu nhập..."); }
         });
         txtSearch.addKeyListener(new KeyAdapter() {
-            @Override public void keyReleased(KeyEvent e) { timKiemPhieuNhap(txtSearch.getText().trim()); }
+            @Override public void keyReleased(KeyEvent e) { 
+                timKiem(); 
+            }
         });
         pnlLeft.add(txtSearch);
 
@@ -177,19 +179,30 @@ public class QuanLyNhapHangGUI extends JPanel {
         }
     }
 
-    private void timKiemPhieuNhap(String kw) {
-        if (kw.equals("Tìm kiếm mã phiếu nhập...") || kw.isEmpty()) {
-            loadPhieuNhap(); return;
+    private void timKiem() {
+        String query = txtSearch.getText().toLowerCase().trim();
+        if (query.isEmpty() || query.contains("tìm")) {
+            loadPhieuNhap(); // Sửa hienThiBang() thành loadPhieuNhap()
+            return;
         }
-        PhieuNhapHangDTO pn = new PhieuNhapHangDTO();
-        PhieuNhapHangBUS pnBUS = new PhieuNhapHangBUS();
-        pnBUS.timPhieuNhapHang(kw, pn);
-        modelPN.setRowCount(0);
+        
+        PhieuNhapHangBUS pnhBUS = new PhieuNhapHangBUS(); // Khởi tạo BUS
+        ArrayList<PhieuNhapHangDTO> dsKetQua = pnhBUS.timPhieuNhapHang(query);
+        
+        modelPN.setRowCount(0); // Dùng modelPN thay vì model
+        
+        if (dsKetQua != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-            String ngay = pn.getNgayNhap() != null ? sdf.format(pn.getNgayNhap()) : "";
-            modelPN.addRow(new Object[]{pn.getMaPNH(), pn.getMaNV(), pn.getMaNCC(), ngay, String.format(java.util.Locale.US, "%,d", (long)pn.getTongTien())});
+            for (PhieuNhapHangDTO pn : dsKetQua) {
+                String ngay = pn.getNgayNhap() != null ? sdf.format(pn.getNgayNhap()) : "";
+                // Đảm bảo addRow khớp với cột của hàm loadPhieuNhap()
+                modelPN.addRow(new Object[]{
+                    pn.getMaPNH(), pn.getMaNV(), pn.getMaNCC(), ngay, 
+                    String.format(java.util.Locale.US, "%,d", (long)pn.getTongTien())
+                });
             }
-            
+        }
+    }            
 
     // ==========================================================
     // FORM TẠO PHIẾU NHẬP (GIỎ HÀNG NHO NHỎ) ĐÃ ĐƯỢC LÀM TO RA

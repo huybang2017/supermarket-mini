@@ -8,6 +8,7 @@ import javax.swing.border.*;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 
 public class HangSanXuatGUI extends JPanel {
     
@@ -106,16 +107,24 @@ public class HangSanXuatGUI extends JPanel {
         }
     }
 
-    private void timKiem() {
-        String kw = txtSearch.getText().toLowerCase();
-        if(kw.equals(" tìm kiếm hãng sx...") || kw.isEmpty()) { hienThiBang(); return; }
-        model.setRowCount(0);
-        HangSanXuatBUS hsxBUS = new HangSanXuatBUS();
-        HangSanXuatDTO hsx = new HangSanXuatDTO();
-        hsxBUS.timHangSanXuat(kw , hsx);
-        model.addRow(new Object[]{hsx.getMaHang(), hsx.getTenHang(), hsx.getSdt(), hsx.getDiaChi(), "⚙ Sửa"});
+private void timKiem() {
+        String query = txtSearch.getText().toLowerCase().trim();
+        // Kiểm tra nếu ô tìm kiếm rỗng hoặc đang chứa placeholder text
+        if (query.isEmpty() || query.contains("tìm")) {
+            hienThiBang(); // Gọi lại hàm hiển thị toàn bộ danh sách gốc
+            return;
         }
-
+        
+        ArrayList<HangSanXuatDTO> dsKetQua = hsxBUS.timHangSanXuat(query);
+        model.setRowCount(0); // Xóa dữ liệu cũ trên bảng
+        
+        if (dsKetQua != null) {
+            for (HangSanXuatDTO hsx : dsKetQua) {
+                // Nhớ copy new Object[]{...} từ hàm hiển thị gốc xuống đây nhé!
+                model.addRow(new Object[]{hsx.getMaHang(), hsx.getTenHang(), hsx.getDiaChi(), hsx.getSdt(), "⚙ Sửa"});
+            }
+        }
+    }
     private void deleteSelectedHSX() {
         int row = tblHangSanXuat.getSelectedRow();
         if (row != -1) {

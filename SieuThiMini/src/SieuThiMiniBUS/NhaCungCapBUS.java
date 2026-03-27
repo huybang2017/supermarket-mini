@@ -39,8 +39,8 @@ public class NhaCungCapBUS {
         return data.importExcel(ncc);
     }
 
-    public void timNhaCungCap(String keyword , NhaCungCapDTO ncc) {
+    public ArrayList<NhaCungCapDTO> timNhaCungCap(String keyword) {
         NhaCungCapDAO data = new NhaCungCapDAO();
-        ncc = data.timNhaCungCap(keyword);
+        return data.timNhaCungCap(keyword);
     }
 }

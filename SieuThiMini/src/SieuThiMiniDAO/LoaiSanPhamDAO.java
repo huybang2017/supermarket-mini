@@ -86,25 +86,28 @@ public class LoaiSanPhamDAO {
         }
     }
 
-    public LoaiSanPhamDTO timLoaiSanPham(String keyword) {
-        String sql = "SELECT * FROM loaisanpham WHERE id = ? OR LOWER(name) LIKE ?";
+    public ArrayList<LoaiSanPhamDTO> timLoaiSanPham(String keyword) {
+        ArrayList<LoaiSanPhamDTO> ketQua = new ArrayList<>();
+        // Ép kiểu id sang CHAR để tìm kiếm bằng LIKE chính xác trên MySQL
+        String sql = "SELECT * FROM loaisanpham WHERE CAST(id AS CHAR) LIKE ? OR LOWER(name) LIKE ?";
+        
         try (Connection cnn = data.getConnection();
              PreparedStatement ps = cnn.prepareStatement(sql)) {
     
-            ps.setString(1, keyword); 
+            ps.setString(1, "%" + keyword + "%"); 
             ps.setString(2, "%" + keyword.toLowerCase() + "%"); 
     
             ResultSet rs = ps.executeQuery();
     
-            if (rs.next()) {
+            while (rs.next()) {
                 LoaiSanPhamDTO lsp = new LoaiSanPhamDTO();
                 lsp.setMaLoai(rs.getInt("id")); 
                 lsp.setTenLoai(rs.getString("name")); 
-                return lsp;
+                ketQua.add(lsp);
             }
         } catch (SQLException e) {
             System.err.println("Lỗi tìm kiếm Loại Sản Phẩm: " + e.getMessage());
         }
-        return null; 
+        return ketQua; 
     }
 }

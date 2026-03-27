@@ -10,11 +10,12 @@ import java.awt.*;
 import java.awt.event.*;
 import com.github.lgooddatepicker.components.DatePicker;
 import java.time.LocalDate;
+import java.util.ArrayList;
 public class QuanLyNhanVienGUI extends JPanel {
     
     private DefaultTableModel model;
     private JTable tblNhanVien;
-    
+    private JTextField txtSearch;
     private Color primaryColor = new Color(0, 123, 255);
     private Color secondaryColor = new Color(108, 117, 125);
     private Color bgColor = new Color(244, 246, 249);
@@ -51,7 +52,7 @@ public class QuanLyNhanVienGUI extends JPanel {
 
         JPanel pnlSearchGroup = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         pnlSearchGroup.setOpaque(false);
-        JTextField txtSearch = new JTextField(" Tìm kiếm nhân viên...");
+        txtSearch = new JTextField(" Tìm kiếm nhân viên...");
         txtSearch.setPreferredSize(new Dimension(220, 38));
         txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         txtSearch.setForeground(Color.GRAY);
@@ -90,6 +91,38 @@ public class QuanLyNhanVienGUI extends JPanel {
         pnlAdvancedSearch.add(txtLuongDen);
         
         JButton btnApplyFilter = createActionBtn("Lọc");
+        btnApplyFilter.addActionListener(e -> {
+            try {
+                String strTu = txtLuongTu.getText().trim();
+                String strDen = txtLuongDen.getText().trim();
+
+                double luongTu = strTu.isEmpty() ? 0 : Double.parseDouble(strTu);
+                double luongDen = strDen.isEmpty() ? Double.MAX_VALUE : Double.parseDouble(strDen);
+
+                if (luongTu > luongDen) {
+                    JOptionPane.showMessageDialog(this, "Lương bắt đầu không được lớn hơn lương kết thúc!", "Lỗi", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                NhanVienBUS nvBUS = new NhanVienBUS();
+                ArrayList<NhanVienDTO> dsKetQua = nvBUS.timNhanVienTheoLuong(luongTu, luongDen);
+
+                model.setRowCount(0); 
+                if (dsKetQua != null) {
+                    for (NhanVienDTO nv : dsKetQua) {
+                        // FORMAT LẠI CỘT LƯƠNG
+                        String luongFormat = String.format(java.util.Locale.US, "%,.0f", nv.getLuong());
+                        
+                        model.addRow(new Object[]{
+                            nv.getMaNV(), nv.getHoNV(), nv.getTenNV(), nv.getSdt(), 
+                            nv.getDiaChi(), nv.getNgaySinh(), luongFormat, "⚙ Sửa"
+                        });
+                    }
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập số hợp lệ vào ô lương!", "Lỗi Nhập Liệu", JOptionPane.ERROR_MESSAGE);
+            }
+        });
         JButton btnResetFilter = createActionBtn("Làm Mới");
         btnResetFilter.addActionListener(e -> {
             txtSearch.setText(" Tìm kiếm nhân viên...");
@@ -116,7 +149,7 @@ public class QuanLyNhanVienGUI extends JPanel {
         txtSearch.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                timNhanVien(txtSearch.getText().trim().toLowerCase());
+                timKiem();
     }});
 
         // 2. BẢNG DỮ LIỆU
@@ -153,7 +186,12 @@ public class QuanLyNhanVienGUI extends JPanel {
         model.setRowCount(0);
         if(bus.dsnv != null) {
             for (NhanVienDTO nv : bus.dsnv) {
-                model.addRow(new Object[]{nv.getMaNV(), nv.getHoNV(), nv.getTenNV(), nv.getSdt(), nv.getDiaChi(), nv.getNgaySinh(), nv.getLuong(), "⚙ Sửa"});
+                String luongFormat = String.format(java.util.Locale.US, "%,.0f", nv.getLuong());
+                
+                model.addRow(new Object[]{
+                    nv.getMaNV(), nv.getHoNV(), nv.getTenNV(), nv.getSdt(), 
+                    nv.getDiaChi(), nv.getNgaySinh(), luongFormat, "⚙ Sửa"
+                });
             }
         }
     }
@@ -268,12 +306,21 @@ public class QuanLyNhanVienGUI extends JPanel {
         return btn;
     }
 
-    private void timNhanVien(String kw){
-        if (kw.equals("tìm kiếm nhân viên...") || kw.isEmpty()) { docDSNV(); return; }
-            model.setRowCount(0);
-            NhanVienBUS nvbus = new NhanVienBUS();
-            NhanVienDTO nv = new NhanVienDTO();
-            nvbus.timNhanVien(kw, nv);
-            model.addRow(new Object[]{nv.getMaNV(), nv.getHoNV(), nv.getTenNV(), nv.getSdt(), nv.getDiaChi(), nv.getNgaySinh(), nv.getLuong(), "⚙ Sửa"});
+    private void timKiem() {
+        String query = txtSearch.getText().toLowerCase().trim();
+        if (query.isEmpty() || query.contains("tìm")) {
+            docDSNV(); // Sửa hienThiBang() thành docDSNV()
+            return;
+        }
+        
+        NhanVienBUS nvBUS = new NhanVienBUS(); // Khởi tạo BUS
+        ArrayList<NhanVienDTO> dsKetQua = nvBUS.timNhanVien(query);
+        model.setRowCount(0);
+        
+        if (dsKetQua != null) {
+            for (NhanVienDTO nv : dsKetQua) {
+                model.addRow(new Object[]{nv.getMaNV(), nv.getHoNV(), nv.getTenNV(), nv.getSdt(), nv.getDiaChi(), nv.getNgaySinh(), nv.getLuong(), "⚙ Sửa"});
+            }
+        }
     }
 }

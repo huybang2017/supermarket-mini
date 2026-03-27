@@ -95,25 +95,30 @@ public class NhaCungCapDAO {
         }
     }
 
-    public NhaCungCapDTO timNhaCungCap(String keyword) {
-        String sql = "SELECT * FROM nhacungcap WHERE id = ? OR LOWER(ten) LIKE ? OR LOWER(diaChi) LIKE ? OR phone LIKE ?";
+    public ArrayList<NhaCungCapDTO> timNhaCungCap(String keyword) {
+        ArrayList<NhaCungCapDTO> ketQua = new ArrayList<>();
+        String sql = "SELECT * FROM nhacungcap WHERE CAST(id AS CHAR) LIKE ? OR LOWER(ten) LIKE ? OR LOWER(diaChi) LIKE ? OR phone LIKE ?";
         try (Connection cnn = data.getConnection();
              PreparedStatement ps = cnn.prepareStatement(sql)) {
     
-            ps.setString(1, keyword);
-            ps.setString(2, "%" + keyword.toLowerCase() + "%"); 
-            ps.setString(3, "%" + keyword.toLowerCase() + "%");
-            ps.setString(4, "%" + keyword + "%"); 
+            String searchKw = "%" + keyword.toLowerCase() + "%";
+            ps.setString(1, searchKw);
+            ps.setString(2, searchKw); 
+            ps.setString(3, searchKw);
+            ps.setString(4, searchKw); 
+            
             ResultSet rs = ps.executeQuery();
-    
-            if (rs.next()) {
+            while (rs.next()) {
                 NhaCungCapDTO ncc = new NhaCungCapDTO();
                 ncc.setMaNCC(rs.getInt("id")); 
                 ncc.setTenNCC(rs.getString("ten")); 
+                ncc.setDiaChi(rs.getString("diaChi"));
+                ncc.setSdt(rs.getString("phone"));
+                ketQua.add(ncc);
             }
         } catch (SQLException e) {
             System.err.println("Lỗi tìm kiếm Nhà Cung Cấp: " + e.getMessage());
         }
-        return null; 
+        return ketQua; 
     }
 }

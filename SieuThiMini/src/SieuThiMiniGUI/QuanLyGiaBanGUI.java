@@ -63,7 +63,9 @@ public class QuanLyGiaBanGUI extends JPanel {
             }
         });
         txtSearch.addKeyListener(new KeyAdapter() {
-            @Override public void keyReleased(KeyEvent e) { timKiem(txtSearch.toString().toLowerCase().trim()); }
+            @Override public void keyReleased(KeyEvent e) { 
+                timKiem(txtSearch.getText().toLowerCase().trim()); // Đổi toString() thành getText()
+            }
         });
         pnlSearchGroup.add(txtSearch);
         pnlHeader.add(pnlSearchGroup, BorderLayout.WEST);
@@ -127,12 +129,24 @@ public class QuanLyGiaBanGUI extends JPanel {
     }
 
     private void timKiem(String kw) {
-        if (kw.equals(" tìm mã hoặc tên sản phẩm...") || kw.isEmpty()) { docDSGiaBan(); return; }
-        model.setRowCount(0);
+        if (kw.equals(" tìm mã hoặc tên sản phẩm...") || kw.isEmpty()) { 
+            docDSGiaBan(); 
+            return; 
+        }
+        
         SanPhamBUS spBUS = new SanPhamBUS();
-        SanPhamDTO sp = new SanPhamDTO();
-        spBUS.timSanPham(kw, sp);
-        model.addRow(new Object[]{sp.getMasanpham(), sp.getTensanpham(), Math.round(sp.getGiaNhap()), sp.getLoiNhuan(), Math.round(sp.getDongia()), "⚙ Chỉnh Giá"});
+        // Khai báo ArrayList để nhận kết quả tìm kiếm (giống file sản phẩm)
+        java.util.ArrayList<SanPhamDTO> dsKetQua = spBUS.timSanPham(kw);
+        
+        model.setRowCount(0);
+        if (dsKetQua != null) {
+            for (SanPhamDTO sp : dsKetQua) {
+                model.addRow(new Object[]{
+                    sp.getMasanpham(), sp.getTensanpham(), 
+                    Math.round(sp.getGiaNhap()), sp.getLoiNhuan(), Math.round(sp.getDongia()), "⚙ Chỉnh Giá"
+                });
+            }
+        }
     }
 
     private void showEditPriceForm(int id, String ten, double giaNhapHienTai, double loiNhuanHienTai) {

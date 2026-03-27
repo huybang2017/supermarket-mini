@@ -142,29 +142,61 @@ public class SanPhamDAO {
         }
     }
 
-    public SanPhamDTO timSanPham(String keyword) {
-        String sql = "SELECT * FROM SanPham WHERE LOWER(TenSanPham) LIKE ? OR CAST(MaSanPham AS CHAR) LIKE ?";
-        try{Connection cnn = data.getConnection();
-        PreparedStatement ps = cnn.prepareStatement(sql);
+    public ArrayList<SanPhamDTO> timSanPham(String keyword) {
+        ArrayList<SanPhamDTO> ketQua = new ArrayList<>();
+        String sql = "SELECT * FROM sanpham WHERE LOWER(ten) LIKE ? OR CAST(id AS CHAR) LIKE ?";
+        try (Connection cnn = data.getConnection();
+             PreparedStatement ps = cnn.prepareStatement(sql)) {
 
-        String searchKeyword = "%" + keyword.toLowerCase() + "%";
-        ps.setString(1, searchKeyword);
-        ps.setString(2, searchKeyword);
-        ResultSet rs = ps.executeQuery();
-
-        while (rs.next()) {
-            SanPhamDTO sp = new SanPhamDTO();
-            sp.setMasanpham(rs.getInt("MaSanPham"));
-            sp.setTensanpham(rs.getString("TenSanPham"));
-            sp.setSoluong(rs.getInt("SoLuong"));
-            sp.setDongia(rs.getLong("DonGia"));
-            sp.setDonvitinh(rs.getString("DonViTinh"));
-            return sp;
-        }
-    } catch (SQLException e) {
-        System.err.println("Lỗi tìm sản phẩm: " + e.getMessage());
-    } finally {
-        data.closeConnection();
+            String searchKeyword = "%" + keyword.toLowerCase() + "%";
+            ps.setString(1, searchKeyword);
+            ps.setString(2, searchKeyword);
+            
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                SanPhamDTO sp = new SanPhamDTO();
+                sp.setMasanpham(rs.getInt("id"));
+                sp.setMaLoai(rs.getInt("loaiSanPhamId"));
+                sp.setMaHang(rs.getInt("hangId"));
+                sp.setTensanpham(rs.getString("ten"));
+                sp.setSoluong(rs.getInt("soLuong"));
+                sp.setDongia(rs.getLong("donGia")); 
+                sp.setGiaNhap(rs.getLong("giaNhap")); 
+                sp.setLoiNhuan(rs.getDouble("loiNhuan")); 
+                sp.setDonvitinh(rs.getString("donViTinh"));
+                ketQua.add(sp);
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi tìm sản phẩm: " + e.getMessage());
+        } 
+        return ketQua;
     }
-    return null;}
+    public ArrayList<SanPhamDTO> timSanPhamTheoGia(long giaTu, long giaDen) {
+        ArrayList<SanPhamDTO> ketQua = new ArrayList<>();
+        String sql = "SELECT * FROM sanpham WHERE donGia >= ? AND donGia <= ?";
+        try (Connection cnn = data.getConnection();
+             PreparedStatement ps = cnn.prepareStatement(sql)) {
+
+            ps.setLong(1, giaTu);
+            ps.setLong(2, giaDen);
+            
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                SanPhamDTO sp = new SanPhamDTO();
+                sp.setMasanpham(rs.getInt("id"));
+                sp.setMaLoai(rs.getInt("loaiSanPhamId"));
+                sp.setMaHang(rs.getInt("hangId"));
+                sp.setTensanpham(rs.getString("ten"));
+                sp.setSoluong(rs.getInt("soLuong"));
+                sp.setDongia(rs.getLong("donGia")); 
+                sp.setGiaNhap(rs.getLong("giaNhap")); 
+                sp.setLoiNhuan(rs.getDouble("loiNhuan")); 
+                sp.setDonvitinh(rs.getString("donViTinh"));
+                ketQua.add(sp);
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi tìm sản phẩm theo giá: " + e.getMessage());
+        } 
+        return ketQua;
+    }
 }

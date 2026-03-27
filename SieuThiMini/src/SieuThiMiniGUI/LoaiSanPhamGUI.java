@@ -5,6 +5,7 @@ import javax.swing.border.*;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 
 import DTO.LoaiSanPhamDTO;
 import SieuThiMiniBUS.LoaiSanPhamBUS;
@@ -94,7 +95,7 @@ public class LoaiSanPhamGUI extends JPanel {
         card.add(pnlHeader, BorderLayout.NORTH);
 
         // ===== BẢNG DỮ LIỆU =====
-        String[] headers = {"Mã Loại", "Tên Loại", "Hành Động"};
+        String[] headers = {"Mã Loại", "Tên Loại"};
         model = new DefaultTableModel(headers, 0) { 
             @Override public boolean isCellEditable(int r, int c) { return false; } 
         };
@@ -144,13 +145,20 @@ public class LoaiSanPhamGUI extends JPanel {
             hienThiBang();
             return;
         }
-        LoaiSanPhamBUS lspBUS = new LoaiSanPhamBUS();
-        LoaiSanPhamDTO lsp = new LoaiSanPhamDTO();
-        lspBUS.timLoaiSP(query , lsp);
+        
+        // Nhận danh sách kết quả từ BUS
+        ArrayList<LoaiSanPhamDTO> dsKetQua = lspBUS.timLoaiSP(query);
+        
+        // Xóa dữ liệu cũ trên bảng
         model.setRowCount(0);
  
+        // Đổ dữ liệu mới lên
+        if (dsKetQua != null) {
+            for (LoaiSanPhamDTO lsp : dsKetQua) {
                 model.addRow(new Object[]{lsp.getMaLoai(), lsp.getTenLoai()});
+            }
         }
+    }
 
     // ===== POPUP FORM THÊM / SỬA =====
     private void openForm(LoaiSanPhamDTO lsp) {

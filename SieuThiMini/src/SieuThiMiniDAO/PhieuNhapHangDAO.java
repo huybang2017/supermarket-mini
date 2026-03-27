@@ -127,29 +127,30 @@ public class PhieuNhapHangDAO {
         }
     }
 
-    public PhieuNhapHangDTO timPhieuNhap(String keyword) {
-        String sql = "SELECT * FROM PhieuNhapHang WHERE LOWER(MaPhieuNhap) LIKE ? OR CAST(MaSanPham AS CHAR) LIKE ?";
-        try{Connection cnn = data.getConnection();
-        PreparedStatement ps = cnn.prepareStatement(sql);
+    public ArrayList<PhieuNhapHangDTO> timPhieuNhap(String keyword) {
+        ArrayList<PhieuNhapHangDTO> ketQua = new ArrayList<>();
+        String sql = "SELECT * FROM PhieuNhapHang WHERE CAST(id AS CHAR) LIKE ? OR CAST(nhanVienId AS CHAR) LIKE ? OR CAST(nhaCungCapId AS CHAR) LIKE ?";
+        try (Connection cnn = data.getConnection();
+             PreparedStatement ps = cnn.prepareStatement(sql)) {
 
-        String searchKeyword = "%" + keyword.toLowerCase() + "%";
-        ps.setString(1, searchKeyword);
-        ps.setString(2, searchKeyword);
-        ResultSet rs = ps.executeQuery();
-
-        while (rs.next()) {
-            PhieuNhapHangDTO pn = new PhieuNhapHangDTO();
-            pn.setMaPNH(rs.getInt("MaPhieuNhap"));
-            pn.setMaNV(rs.getInt("MaNhanVien"));
-            pn.setMaNCC(rs.getInt("MaNhaCungCap"));
-            pn.setTongTien(rs.getLong("TongTien"));
-            pn.setNgayNhap(rs.getDate("NgayNhap"));
-            return pn;
+            String searchKeyword = "%" + keyword + "%";
+            ps.setString(1, searchKeyword);
+            ps.setString(2, searchKeyword);
+            ps.setString(3, searchKeyword);
+            
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                PhieuNhapHangDTO pn = new PhieuNhapHangDTO();
+                pn.setMaPNH(rs.getInt("id"));
+                pn.setMaNV(rs.getInt("nhanVienId"));
+                pn.setMaNCC(rs.getInt("nhaCungCapId"));
+                pn.setTongTien(rs.getLong("tongTien"));
+                pn.setNgayNhap(rs.getDate("ngayNhap"));
+                ketQua.add(pn);
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi tìm phiếu nhập: " + e.getMessage());
         }
-    } catch (SQLException e) {
-        System.err.println("Lỗi tìm phiếu: " + e.getMessage());
-    } finally {
-        data.closeConnection();
+        return ketQua;
     }
-    return null;}
 }

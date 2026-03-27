@@ -2,7 +2,7 @@ package SieuThiMiniDAO;
 
 import DTO.NhanVienDTO;
 import javax.swing.*;
-import java.sql.PreparedStatement;
+
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -115,31 +115,59 @@ public class NhanVienDAO {
         }
     }
 
-    public NhanVienDTO timNhanVien(String keyword) {
-        Connection cnn = data.getConnection();
-        try {
-            String qry = "SELECT * FROM nhanvien WHERE id = ? OR ho LIKE ? OR ten LIKE ?";
-            PreparedStatement pst = cnn.prepareStatement(qry);
-            pst.setString(1,keyword);
-            pst.setString(2,"%" + keyword + "%");
-            pst.setString(3,"%" + keyword + "%");
-            ResultSet rs = pst.executeQuery();
+public ArrayList<NhanVienDTO> timNhanVien(String keyword) {
+        ArrayList<NhanVienDTO> ketQua = new ArrayList<>();
+        String sql = "SELECT * FROM nhanvien WHERE CAST(id AS CHAR) LIKE ? OR LOWER(ho) LIKE ? OR LOWER(ten) LIKE ? OR phone LIKE ?";
+        try (Connection cnn = data.getConnection();
+             PreparedStatement ps = cnn.prepareStatement(sql)) {
+             
+            String searchKw = "%" + keyword.toLowerCase() + "%";
+            ps.setString(1, searchKw);
+            ps.setString(2, searchKw);
+            ps.setString(3, searchKw);
+            ps.setString(4, searchKw);
+            
+            ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 NhanVienDTO nv = new NhanVienDTO();
                 nv.setMaNV(rs.getInt("id"));
-                nv.setHoNV(rs.getString("ho)"));
+                nv.setHoNV(rs.getString("ho")); // Đã fix lỗi sai tên cột
                 nv.setTenNV(rs.getString("ten"));
                 nv.setSdt(rs.getString("phone"));
-                nv.setDiaChi(rs.getString("diachi"));
+                nv.setDiaChi(rs.getString("diaChi"));
                 nv.setNgaySinh(rs.getDate("ngaySinh"));
                 nv.setLuong(rs.getDouble("luong"));
-                return nv;
+                ketQua.add(nv);
             } 
-        }catch (SQLException e){
-            JOptionPane.showMessageDialog(null , "Lỗi tìm kiếm nhân viên" + e.getMessage());
-        } finally{
-            data.closeConnection();
+        } catch (SQLException e) {
+            System.err.println("Lỗi tìm kiếm nhân viên: " + e.getMessage());
         }
-        return null;
-}
+        return ketQua;
+    }
+    public ArrayList<NhanVienDTO> timNhanVienTheoLuong(double luongTu, double luongDen) {
+        ArrayList<NhanVienDTO> ketQua = new ArrayList<>();
+        String sql = "SELECT * FROM nhanvien WHERE luong >= ? AND luong <= ?";
+        try (java.sql.Connection cnn = data.getConnection();
+             java.sql.PreparedStatement ps = cnn.prepareStatement(sql)) {
+
+            ps.setDouble(1, luongTu);
+            ps.setDouble(2, luongDen);
+            
+            java.sql.ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                NhanVienDTO nv = new NhanVienDTO();
+                nv.setMaNV(rs.getInt("id")); 
+                nv.setHoNV(rs.getString("ho"));
+                nv.setTenNV(rs.getString("ten"));
+                nv.setNgaySinh(rs.getDate("ngaySinh"));
+                nv.setDiaChi(rs.getString("diaChi"));
+                nv.setSdt(rs.getString("phone"));
+                nv.setLuong(rs.getDouble("luong"));
+                ketQua.add(nv);
+            }
+        } catch (java.sql.SQLException e) {
+            System.err.println("Lỗi tìm NV theo lương: " + e.getMessage());
+        } 
+        return ketQua;
+    }
 }

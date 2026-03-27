@@ -44,8 +44,8 @@ public class HangSanXuatBUS {
         return data.importExcel(hsx);
     }
 
-    public void timHangSanXuat(String keyword, HangSanXuatDTO hsx) {
+    public ArrayList<HangSanXuatDTO> timHangSanXuat(String keyword) {
         HangSanXuatDAO data = new HangSanXuatDAO();
-        hsx = data.timHangSanXuat(keyword);
+        return data.timHangSanXuat(keyword);
     }
 }

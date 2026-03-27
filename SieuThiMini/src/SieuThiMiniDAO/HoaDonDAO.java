@@ -158,4 +158,25 @@ public class HoaDonDAO {
             return false;
         }
     }
+    public List<HoaDonDTO> timHoaDon(String keyword) {
+        List<HoaDonDTO> ketQua = new ArrayList<>();
+        String sql = "SELECT * FROM hoadon WHERE CAST(id AS CHAR) LIKE ? OR CAST(nhanVienId AS CHAR) LIKE ? OR CAST(khachHangId AS CHAR) LIKE ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+             
+            String searchKw = "%" + keyword + "%";
+            ps.setString(1, searchKw);
+            ps.setString(2, searchKw);
+            ps.setString(3, searchKw);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ketQua.add(mapResultSetToDTO(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi tìm kiếm Hóa Đơn: " + e.getMessage());
+        }
+        return ketQua;
+    }
 }

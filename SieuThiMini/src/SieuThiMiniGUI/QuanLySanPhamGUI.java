@@ -29,7 +29,7 @@ public class QuanLySanPhamGUI extends JPanel {
     // Khai báo các biến cục bộ chỉ dùng cho trang này
     private DefaultTableModel model;
     private JTable tblSanPham;
-    
+    private JTextField txtSearch;
     // Bảng màu dùng chung cho giao diện này
     private final java.awt.Color primaryColor = new java.awt.Color(0, 123, 255);
     private final java.awt.Color secondaryColor = new java.awt.Color(108, 117, 125);
@@ -75,7 +75,7 @@ public class QuanLySanPhamGUI extends JPanel {
         // Bộ tìm kiếm
         JPanel pnlSearchGroup = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         pnlSearchGroup.setOpaque(false);
-        JTextField txtSearch = new JTextField(" Tìm kiếm sản phẩm...");
+        txtSearch = new JTextField(" Tìm kiếm sản phẩm...");
         txtSearch.setPreferredSize(new Dimension(220, 38));
         txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         txtSearch.setForeground(java.awt.Color.GRAY);
@@ -124,9 +124,41 @@ public class QuanLySanPhamGUI extends JPanel {
         pnlAdvancedSearch.add(txtGiaDen);
         
         JButton btnApplyFilter = createActionBtn("Lọc");
+        btnApplyFilter.addActionListener(e -> {
+            try {
+                String strTu = txtGiaTu.getText().trim();
+                String strDen = txtGiaDen.getText().trim();
+
+                // Nếu để trống ô "Giá từ" thì mặc định là 0
+                long giaTu = strTu.isEmpty() ? 0 : Long.parseLong(strTu);
+                // Nếu để trống ô "Giá đến" thì mặc định là giá trị lớn nhất
+                long giaDen = strDen.isEmpty() ? Long.MAX_VALUE : Long.parseLong(strDen);
+
+                if (giaTu > giaDen) {
+                    JOptionPane.showMessageDialog(this, "Giá bắt đầu không được lớn hơn giá kết thúc!", "Lỗi", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                // Gọi BUS để tìm kiếm
+                SanPhamBUS spBUS = new SanPhamBUS();
+                ArrayList<SanPhamDTO> dsKetQua = spBUS.timSanPhamTheoGia(giaTu, giaDen);
+
+                // Cập nhật lại bảng
+                model.setRowCount(0); 
+                if (dsKetQua != null) {
+                    for (SanPhamDTO sp : dsKetQua) {
+                        model.addRow(new Object[]{sp.getMasanpham(), sp.getTensanpham(), sp.getSoluong(), sp.getDongia(), sp.getDonvitinh(), "⚙ Sửa"});
+                    }
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập số hợp lệ vào ô giá tiền!", "Lỗi Nhập Liệu", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        
         JButton btnResetFilter = createActionBtn("Làm Mới");
         btnResetFilter.addActionListener(e -> {
             txtSearch.setText(" Tìm kiếm sản phẩm...");
+            txtSearch.setForeground(java.awt.Color.GRAY);
             txtGiaTu.setText("");
             txtGiaDen.setText("");
             docDSSP();
@@ -151,7 +183,7 @@ public class QuanLySanPhamGUI extends JPanel {
         txtSearch.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                searchSanPham(txtSearch.getText());
+                timKiem();
             }
         });
             
@@ -1181,17 +1213,20 @@ private Date getSafeDate(Cell cell) {
     }
     return null;
 }   
-    private void searchSanPham(String keyword){
-        SanPhamBUS bus = new SanPhamBUS();
-        SanPhamDTO spt = new SanPhamDTO();
-        bus.timSanPham(keyword,spt);
-        model.setRowCount(0); 
-        model.addRow(new Object[]{
-        spt.getMasanpham(),
-        spt.getTensanpham(),
-        spt.getSoluong(),
-        spt.getDongia(),
-        spt.getDonvitinh(),
-        });
+private void timKiem() {
+    String query = txtSearch.getText().toLowerCase().trim();
+    if (query.isEmpty() || query.equals("tìm kiếm sản phẩm...")) {
+        docDSSP();
+        return;
     }
+    SanPhamBUS spBUS = new SanPhamBUS();
+    ArrayList<SanPhamDTO> dsKetQua = spBUS.timSanPham(query);
+    model.setRowCount(0); // Xóa dữ liệu cũ trên bảng
+    
+    if (dsKetQua != null) {
+        for (SanPhamDTO sp : dsKetQua) {
+            model.addRow(new Object[]{sp.getMasanpham(), sp.getTensanpham(), sp.getSoluong(), sp.getDongia(), sp.getDonvitinh(), "⚙ Sửa"});
+        }
+    }
+}
 }

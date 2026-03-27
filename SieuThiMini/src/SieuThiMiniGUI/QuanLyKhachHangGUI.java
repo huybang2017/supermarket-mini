@@ -8,12 +8,13 @@ import javax.swing.border.*;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 
 public class QuanLyKhachHangGUI extends JPanel {
     
     private DefaultTableModel model;
     private JTable tblKhachHang;
-    
+    private JTextField txtSearch;
     private Color primaryColor = new Color(0, 123, 255);
     private Color secondaryColor = new Color(108, 117, 125);
     private Color bgColor = new Color(244, 246, 249);
@@ -51,7 +52,7 @@ public class QuanLyKhachHangGUI extends JPanel {
         // Bộ tìm kiếm
         JPanel pnlSearchGroup = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         pnlSearchGroup.setOpaque(false);
-        JTextField txtSearch = new JTextField(" Tìm kiếm khách hàng...");
+        txtSearch = new JTextField(" Tìm kiếm khách hàng...");
         txtSearch.setPreferredSize(new Dimension(220, 38));
         txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         txtSearch.setForeground(Color.GRAY);
@@ -91,6 +92,32 @@ public class QuanLyKhachHangGUI extends JPanel {
         pnlAdvancedSearch.add(txtMaDen);
         
         JButton btnApplyFilter = createActionBtn("Lọc");
+        btnApplyFilter.addActionListener(e -> {
+            try {
+                String strTu = txtMaTu.getText().trim();
+                String strDen = txtMaDen.getText().trim();
+
+                int maTu = strTu.isEmpty() ? 0 : Integer.parseInt(strTu);
+                int maDen = strDen.isEmpty() ? Integer.MAX_VALUE : Integer.parseInt(strDen);
+
+                if (maTu > maDen) {
+                    JOptionPane.showMessageDialog(this, "Mã bắt đầu không được lớn hơn mã kết thúc!", "Lỗi", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                KhachHangBUS khBUS = new KhachHangBUS();
+                ArrayList<KhachHangDTO> dsKetQua = khBUS.timKhachHangTheoMa(maTu, maDen);
+
+                model.setRowCount(0); 
+                if (dsKetQua != null) {
+                    for (KhachHangDTO kh : dsKetQua) {
+                        model.addRow(new Object[]{kh.getMaKH(), kh.getHoKH(), kh.getTenKH(), kh.getSdt(), kh.getDiaChi(), "⚙ Sửa"});
+                    }
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập số hợp lệ vào ô mã KH!", "Lỗi Nhập Liệu", JOptionPane.ERROR_MESSAGE);
+            }
+        });
         JButton btnResetFilter = createActionBtn("Làm Mới");
         btnResetFilter.addActionListener(e -> {
             txtSearch.setText(" Tìm kiếm khách hàng...");
@@ -117,7 +144,7 @@ public class QuanLyKhachHangGUI extends JPanel {
         txtSearch.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                timKhachHang(txtSearch.getText().trim());
+                timKiem();
             }});
 
         // 2. KHU VỰC BẢNG DỮ LIỆU
@@ -248,12 +275,21 @@ public class QuanLyKhachHangGUI extends JPanel {
         return btn;
     }
 
-    private void timKhachHang(String keyword) {
-        if (keyword.equals("tìm kiếm khách hàng...") || keyword.isEmpty()) { docDSKH(); return; }
+    private void timKiem() {
+        String query = txtSearch.getText().toLowerCase().trim();
+        if (query.isEmpty() || query.contains("tìm")) {
+            docDSKH(); // Sửa hienThiBang() thành docDSKH()
+            return;
+        }
+        
+        KhachHangBUS khBUS = new KhachHangBUS(); // Khởi tạo BUS
+        ArrayList<KhachHangDTO> dsKetQua = khBUS.timKhachHang(query);
         model.setRowCount(0);
-        KhachHangBUS khbus = new KhachHangBUS();
-        KhachHangDTO kh = new KhachHangDTO();
-        khbus.timKhachHang(keyword, kh);
-        model.addRow(new Object[]{kh.getMaKH(), kh.getHoKH(), kh.getTenKH(), kh.getSdt(), kh.getDiaChi(), "⚙ Sửa"});
+        
+        if (dsKetQua != null) {
+            for (KhachHangDTO kh : dsKetQua) {
+                model.addRow(new Object[]{kh.getMaKH(), kh.getHoKH(), kh.getTenKH(), kh.getSdt(), kh.getDiaChi(), "⚙ Sửa"});
+            }
+        }
     }
 }

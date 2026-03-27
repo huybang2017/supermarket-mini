@@ -104,34 +104,56 @@ public class KhachHangDAO {
         }
     }
 
-    public KhachHangDTO timKhachHang(String keyword){
-        Connection cnn = data.getConnection();
-        try {
-            String qry = "SELECT * FROM khachhang WHERE id = ? OR ho LIKE ? OR ten LIKE ? OR phone LIKE ?";
-            PreparedStatement pst = cnn.prepareStatement(qry);
-            pst.setString(1,keyword);
-            pst.setString(2, "%" + keyword + "%");
-            pst.setString(3, "%" + keyword + "%");
-            pst.setString(4, "%" + keyword + "%");
-            ResultSet rs = pst.executeQuery();
-            while (rs.next()){
+    public ArrayList<KhachHangDTO> timKhachHang(String keyword) {
+        ArrayList<KhachHangDTO> ketQua = new ArrayList<>();
+        String sql = "SELECT * FROM khachhang WHERE CAST(id AS CHAR) LIKE ? OR LOWER(ho) LIKE ? OR LOWER(ten) LIKE ? OR phone LIKE ?";
+        try (Connection cnn = data.getConnection();
+             PreparedStatement ps = cnn.prepareStatement(sql)) {
+             
+            String searchKw = "%" + keyword.toLowerCase() + "%";
+            ps.setString(1, searchKw);
+            ps.setString(2, searchKw);
+            ps.setString(3, searchKw);
+            ps.setString(4, searchKw);
+            
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
                 KhachHangDTO kh = new KhachHangDTO();
-            kh.setMaKH(rs.getInt("id")); 
-            kh.setHoKH(rs.getString("ho")); 
-            kh.setTenKH(rs.getString("ten")); 
-            kh.setSdt(rs.getString("phone")); 
-            kh.setDiaChi(rs.getString("diachi")); 
-            return kh;
-        }
-    } catch (SQLException e) {
-        System.err.println("Lỗi tìm kiếm Khách Hàng: " + e.getMessage());
-    } finally {
-        try {
-            if (cnn != null) cnn.close();
+                kh.setMaKH(rs.getInt("id")); 
+                kh.setHoKH(rs.getString("ho")); 
+                kh.setTenKH(rs.getString("ten")); 
+                kh.setSdt(rs.getString("phone")); 
+                kh.setDiaChi(rs.getString("diaChi")); 
+                ketQua.add(kh);
+            }
         } catch (SQLException e) {
-            System.err.println("Lỗi đóng kết nối: " + e.getMessage());
+            System.err.println("Lỗi tìm kiếm Khách Hàng: " + e.getMessage());
         }
+        return ketQua;
     }
-    return null;
-}
+    public ArrayList<KhachHangDTO> timKhachHangTheoMa(int maTu, int maDen) {
+        ArrayList<KhachHangDTO> ketQua = new ArrayList<>();
+        // Sửa chữ 'id' thành tên cột mã khách hàng trong database của bạn nếu cần
+        String sql = "SELECT * FROM khachhang WHERE id >= ? AND id <= ?";
+        try (java.sql.Connection cnn = data.getConnection();
+             java.sql.PreparedStatement ps = cnn.prepareStatement(sql)) {
+
+            ps.setInt(1, maTu);
+            ps.setInt(2, maDen);
+            
+            java.sql.ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                KhachHangDTO kh = new KhachHangDTO();
+                kh.setMaKH(rs.getInt("id")); // Cột id
+                kh.setHoKH(rs.getString("ho")); // Cột họ
+                kh.setTenKH(rs.getString("ten")); // Cột tên
+                kh.setDiaChi(rs.getString("diaChi")); // Cột địa chỉ
+                kh.setSdt(rs.getString("phone")); // Cột sdt
+                ketQua.add(kh);
+            }
+        } catch (java.sql.SQLException e) {
+            System.err.println("Lỗi tìm KH theo mã: " + e.getMessage());
+        } 
+        return ketQua;
+    }
 }

@@ -56,8 +56,8 @@ public class LoaiSanPhamBUS {
         return data.importExcel(lsp);
     }
 
-    public void timLoaiSP(String keyword , LoaiSanPhamDTO lsp) {
+    public ArrayList<LoaiSanPhamDTO> timLoaiSP(String keyword) {
         LoaiSanPhamDAO data = new LoaiSanPhamDAO();
-        lsp = data.timLoaiSanPham(keyword);
+        return data.timLoaiSanPham(keyword);
     }
 }

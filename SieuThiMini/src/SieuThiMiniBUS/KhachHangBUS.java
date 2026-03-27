@@ -41,8 +41,12 @@ public class KhachHangBUS {
         return data.importExcel(kh);
     }
     
-    public void timKhachHang(String keyword, KhachHangDTO kh) {
+    public ArrayList<KhachHangDTO> timKhachHang(String keyword) {
         KhachHangDAO data = new KhachHangDAO();
-        kh = data.timKhachHang(keyword);
+        return data.timKhachHang(keyword);
+    }
+    public ArrayList<KhachHangDTO> timKhachHangTheoMa(int maTu, int maDen) {
+        KhachHangDAO data = new KhachHangDAO();
+        return data.timKhachHangTheoMa(maTu, maDen);
     }
 }

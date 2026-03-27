@@ -8,6 +8,7 @@ import javax.swing.border.*;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 
 public class NhaCungCapGUI extends JPanel {
     
@@ -107,14 +108,21 @@ public class NhaCungCapGUI extends JPanel {
     }
 
     private void timKiem() {
-        String kw = txtSearch.getText().toLowerCase();
-        if(kw.equals(" tìm kiếm ncc...") || kw.isEmpty()) { hienThiBang(); return; }
-        model.setRowCount(0);
-        NhaCungCapBUS nccBUS = new NhaCungCapBUS();
-        NhaCungCapDTO ncc = new NhaCungCapDTO();
-        nccBUS.timNhaCungCap(kw , ncc);
-        model.addRow(new Object[]{ncc.getMaNCC(), ncc.getTenNCC(), ncc.getSdt(), ncc.getDiaChi(), "⚙ Sửa"});
+        String query = txtSearch.getText().toLowerCase().trim();
+        if (query.isEmpty() || query.contains("tìm")) {
+            hienThiBang(); 
+            return;
         }
+        
+        ArrayList<NhaCungCapDTO> dsKetQua = nccBUS.timNhaCungCap(query);
+        model.setRowCount(0); 
+        
+        if (dsKetQua != null) {
+            for (NhaCungCapDTO ncc : dsKetQua) {
+                model.addRow(new Object[]{ncc.getMaNCC(), ncc.getTenNCC(), ncc.getDiaChi(), ncc.getSdt(), "⚙ Sửa"});
+            }
+        }
+    }
 
     private void deleteSelectedNCC() {
         int row = tblNhaCungCap.getSelectedRow();

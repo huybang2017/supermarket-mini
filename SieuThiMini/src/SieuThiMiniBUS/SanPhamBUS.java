@@ -1,6 +1,8 @@
 package SieuThiMiniBUS;
 
+import DTO.NhanVienDTO;
 import DTO.SanPhamDTO;
+import SieuThiMiniDAO.NhanVienDAO;
 import SieuThiMiniDAO.SanPhamDAO;
 import java.util.ArrayList;
 
@@ -47,8 +49,13 @@ public class SanPhamBUS {
         return data.importExcel(sp);
     }
 
-    public void timSanPham(String keyword, SanPhamDTO sp) {
+    public ArrayList<SanPhamDTO> timSanPham(String keyword) {
         SanPhamDAO data = new SanPhamDAO();
-        sp=data.timSanPham(keyword);
+        return data.timSanPham(keyword);
     }
+    public ArrayList<SanPhamDTO> timSanPhamTheoGia(long giaTu, long giaDen) {
+        SanPhamDAO data = new SanPhamDAO();
+        return data.timSanPhamTheoGia(giaTu, giaDen);
+    }
+
 }

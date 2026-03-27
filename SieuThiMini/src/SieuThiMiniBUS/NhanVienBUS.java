@@ -40,8 +40,12 @@ public class NhanVienBUS {
         return data.importExcel(nv);
     }
 
-    public void timNhanVien(String keyword , NhanVienDTO nv) {
+    public ArrayList<NhanVienDTO> timNhanVien(String keyword) {
         NhanVienDAO data = new NhanVienDAO();
-        nv = data.timNhanVien(keyword);
+        return data.timNhanVien(keyword);
+    }
+    public ArrayList<NhanVienDTO> timNhanVienTheoLuong(double luongTu, double luongDen) {
+        NhanVienDAO data = new NhanVienDAO();
+        return data.timNhanVienTheoLuong(luongTu, luongDen);
     }
 }
