@@ -5,6 +5,8 @@ import javax.swing.border.*;
 import javax.swing.table.*;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+
+import SieuThiMiniBUS.Excel;
 import SieuThiMiniBUS.ThongKeBaoCaoBUS;
 import java.awt.*;
 import java.util.ArrayList;
@@ -22,26 +24,37 @@ public class ThongKeBaoCaoGUI extends JPanel {
     
     private JTabbedPane tabs;
     private boolean isRefreshing = false;
+    private JButton btnExportExcel, btnImportExcel;
 
     public ThongKeBaoCaoGUI() {
-        this.setLayout(new BorderLayout(20, 20));
+        this.setLayout(new BorderLayout(20, 10)); // Giảm khoảng cách dọc
         this.setBackground(bgColor);
         this.setBorder(new EmptyBorder(20, 25, 20, 25));
 
-        JLabel lblTitle = new JLabel("Thống Kê & Báo Cáo");
-        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        lblTitle.setForeground(new Color(40, 40, 40));
-        add(lblTitle, BorderLayout.NORTH);
+        // --- Header Panel (Gom nhóm tiêu đề và nút Excel) ---
+        JPanel headerPanel = new JPanel(new BorderLayout()); 
+        headerPanel.setBackground(bgColor);
+        
+        JLabel title = new JLabel("Thống Kê & Báo Cáo");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        title.setForeground(new Color(33, 37, 41));
+    
+        headerPanel.add(title, BorderLayout.WEST); 
+        headerPanel.add(createExcelControlPanel(), BorderLayout.EAST); 
+    
+        this.add(headerPanel, BorderLayout.NORTH);
 
+        // --- Tabs Panel ---
         tabs = new JTabbedPane(JTabbedPane.TOP);
         tabs.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        tabs.setBackground(bgColor);
         
+        // Sử dụng một lần duy nhất lúc khởi tạo
+        initTabs();
+
         tabs.addChangeListener(e -> {
-            if (!isRefreshing && tabs.getSelectedIndex() != -1) refreshData();
+            if (!isRefreshing) refreshData();
         });
 
-        refreshData();
         add(tabs, BorderLayout.CENTER);
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -50,6 +63,13 @@ public class ThongKeBaoCaoGUI extends JPanel {
                 refreshData();
             }
         });
+    }
+
+    private void initTabs() {
+        tabs.addTab("  Doanh Thu & Chi Phí  ", buildDoanhThuTab());
+        tabs.addTab("  Theo Khách Hàng  ",     buildKhachHangTab());
+        tabs.addTab("  Theo Nhân Viên  ",       buildNhanVienTab());
+        tabs.addTab("  Theo Sản Phẩm  ",        buildSanPhamTab());
     }
 
     public void refreshData() {
@@ -444,6 +464,38 @@ Runnable loadTableData = () -> {
     }
 
     // =========================================================================
+    //  TAB 5 – Nhập xuất excel
+    // =========================================================================
+    private JPanel createExcelControlPanel() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        panel.setBackground(bgColor); 
+    
+        btnExportExcel = new JButton("Xuất Backup Excel");
+        btnImportExcel = new JButton("Phục hồi từ Excel");
+    
+        styleExcelButton(btnExportExcel, successColor); 
+        styleExcelButton(btnImportExcel, primaryColor); 
+    
+        panel.add(btnImportExcel);
+        panel.add(btnExportExcel);
+    
+        // Gán sự kiện
+        btnExportExcel.addActionListener(e -> handleExport());
+        btnImportExcel.addActionListener(e -> handleImport());
+    
+        return panel;
+    }
+    
+    private void styleExcelButton(JButton btn, Color c) {
+        btn.setFocusPainted(false);
+        btn.setBackground(c);
+        btn.setForeground(Color.WHITE);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btn.setPreferredSize(new Dimension(150, 36));
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    }
+
+    // =========================================================================
     //  SHARED UI HELPERS
     // =========================================================================
 
@@ -527,7 +579,65 @@ Runnable loadTableData = () -> {
     }
 
     private JButton createBtn(String text, Color bg) {
-        JButton btn = new JButton(text); btn.setFont(new Font("Segoe UI", Font.BOLD, 13)); btn.setBackground(bg); btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false); btn.setBorderPainted(false); btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); return btn;
+        JButton btn = new JButton(text);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btn.setBackground(bg);
+        btn.setForeground(Color.WHITE);
+        btn.setFocusPainted(false);
+        btn.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15)); // Thêm padding cho nút
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btn.setBackground(bg.darker());
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btn.setBackground(bg);
+            }
+        });
+        return btn;
     }
+    
+    private void handleImport() {
+        int confirm = JOptionPane.showConfirmDialog(this, 
+            "Cảnh báo: Việc phục hồi sẽ ghi đè dữ liệu hiện tại. Bạn có chắc chắn muốn tiếp tục?", 
+            "Xác nhận phục hồi", JOptionPane.YES_NO_OPTION);
+            
+        if (confirm == JOptionPane.YES_OPTION) {
+            Excel excel = new Excel();
+            String report = excel.importFullDatabase(this);
+            
+            if (report != null) {
+                JTextArea textArea = new JTextArea(report);
+                textArea.setEditable(false);
+                textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+                JScrollPane scrollPane = new JScrollPane(textArea);
+                scrollPane.setPreferredSize(new Dimension(500, 400));
+                
+                JOptionPane.showMessageDialog(this, scrollPane, "Kết quả phục hồi hệ thống", JOptionPane.INFORMATION_MESSAGE);
+                refreshData();
+            }
+        }
+    }
+
+    private void handleExport() {
+    int confirm = JOptionPane.showConfirmDialog(this, 
+        "Bạn có muốn xuất toàn bộ dữ liệu thống kê và hệ thống ra file Excel không?", 
+        "Xác nhận xuất Excel", JOptionPane.YES_NO_OPTION);
+        
+    if (confirm == JOptionPane.YES_OPTION) {
+        try {
+            Excel excel = new Excel();
+            
+            excel.exportFullDatabase(this); 
+            
+            System.out.println("Đã thực hiện lệnh xuất Excel.");
+            
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, 
+                "Đã xảy ra lỗi trong quá trình xuất dữ liệu: " + ex.getMessage(), 
+                "Lỗi Hệ Thống", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+}
 }
