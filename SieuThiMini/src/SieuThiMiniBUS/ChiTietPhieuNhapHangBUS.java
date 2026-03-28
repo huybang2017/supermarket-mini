@@ -5,13 +5,22 @@ import DTO.ChiTietPhieuNhapHangDTO;
 import SieuThiMiniDAO.ChiTietPhieuNhapHangDAO;
 
 public class ChiTietPhieuNhapHangBUS {
-    public static ArrayList<ChiTietPhieuNhapHangDTO> dsctpn;
+    public static ArrayList<ChiTietPhieuNhapHangDTO> dsctpn = null;
     private ChiTietPhieuNhapHangDAO data = new ChiTietPhieuNhapHangDAO();
 
-    public ChiTietPhieuNhapHangBUS() {}
+    public ChiTietPhieuNhapHangBUS() {
+        // 1. Thêm cái này để bảo vệ cái list không bị xóa trắng
+        if (dsctpn == null) {
+            dsctpn = new ArrayList<>();
+        }
+    }
+
+    // 2. HÀM QUAN TRỌNG NHẤT ĐỂ FIX LỖI NULL: Đổ dữ liệu vào biến tĩnh
+    public void docDSCTPN() {
+        dsctpn = data.getAllChiTietPhieuNhapHang();
+    }
 
     public ArrayList<ChiTietPhieuNhapHangDTO> timTheoMaPN(int maPN) {
-        if (dsctpn == null) dsctpn = new ArrayList<>();
         return data.docTheoMaPN(maPN);
     }
 

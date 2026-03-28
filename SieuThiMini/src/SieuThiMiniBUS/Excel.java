@@ -143,7 +143,7 @@ public class Excel {
     }
 
     // --- HÀM NHẬP EXCEL (PHỤC HỒI DỮ LIỆU) ---
-    public String importFullDatabase(Component parent) {
+    public String   importFullDatabase(Component parent) {
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Phục hồi dữ liệu (Restore)");
         FileNameExtensionFilter filter = new FileNameExtensionFilter("Excel Files (*.xlsx)", "xlsx");
@@ -196,7 +196,14 @@ public class Excel {
         new KhachHangBUS().docDSKH();
         new LoaiSanPhamBUS().docDSLSP();
         new HangSanXuatBUS().docDSHSX();
-        // Thêm các lệnh docDS... khác nếu cần
+        new NhaCungCapBUS().docDSNCC();
+        new NhanVienBUS().docDSNV();
+        
+        new PhieuNhapHangBUS().docDSPN(); 
+        new ChuongTrinhKhuyenMaiBUS().docDSKM();
+        new ChuongTrinhKhuyenMaiHDBUS().docTatCa();
+        new ChuongTrinhKhuyenMaiSpBUS().docTatCa();
+        new ChiTietHoaDonBUS().docDSCTHD();
     }
 
     private CellStyle createHeaderStyle(XSSFWorkbook workbook) {
@@ -423,11 +430,11 @@ public class Excel {
             cell.setCellValue(columnsCTPN[i]);
             cell.setCellStyle(headerStyle);
         }
-        ChiTietPhieuNhapHangBUS ctpnBus= new ChiTietPhieuNhapHangBUS();
-        java.util.List<ChiTietPhieuNhapHangDTO> dsctpnAll = ctpnBus.getAllChiTietPhieuNhapHang();
-        if (dsctpnAll != null) {
+        
+        // ĐÃ SỬA: Lấy trực tiếp từ dsctpn để đồng bộ với dòng debug in ra
+        if (ChiTietPhieuNhapHangBUS.dsctpn != null) {
             int rowNum = 1;
-            for (ChiTietPhieuNhapHangDTO ctpn : dsctpnAll) {
+            for (ChiTietPhieuNhapHangDTO ctpn : ChiTietPhieuNhapHangBUS.dsctpn) {
                 Row row = sheetCTPN.createRow(rowNum++);
                 row.createCell(0).setCellValue(ctpn.getMaPNH());
                 row.createCell(1).setCellValue(ctpn.getMaSP());
@@ -437,10 +444,10 @@ public class Excel {
             }
         }
     }
-
     private void exportSheetCTHD(XSSFWorkbook workbook, CellStyle style){
         CellStyle headerStyle = createHeaderStyle(workbook);
         System.out.println("=== EXPORT DEBUG: ChiTietHoaDon ===");
+        System.out.println("BUS.dscthd size: " + (ChiTietHoaDonBUS.dscthd != null ? ChiTietHoaDonBUS.dscthd.size() : "null"));
         Sheet sheetCTHD = workbook.createSheet("ChiTietHoaDon");
         String[] columnsCTHD = {"MaHD", "MaSP", "SoLuong", "DonGia", "ThanhTien"};
         Row headerCTHD = sheetCTHD.createRow(0);
@@ -476,6 +483,10 @@ public class Excel {
             cell.setCellValue(columnsKM[i]);
             cell.setCellStyle(headerStyle);
         }
+        
+        // TẠO BỘ ĐỊNH DẠNG NGÀY THÁNG
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+
         if (ChuongTrinhKhuyenMaiBUS.dskm != null) { 
             int rowNum = 1;
             for (ChuongTrinhKhuyenMaiDTO km : ChuongTrinhKhuyenMaiBUS.dskm) {
@@ -483,9 +494,9 @@ public class Excel {
                 row.createCell(0).setCellValue(km.getId());
                 row.createCell(1).setCellValue(km.getTen());
                 row.createCell(2).setCellValue(km.getGhiChu());
-                row.createCell(3).setCellValue(km.getNgayBatDau());
-                row.createCell(4).setCellValue(km.getNgayKetThuc());
-                row.createCell(5).setCellValue(km.isTrangThai());
+                row.createCell(3).setCellValue(km.getNgayBatDau() != null ? sdf.format(km.getNgayBatDau()) : "");
+                row.createCell(4).setCellValue(km.getNgayKetThuc() != null ? sdf.format(km.getNgayKetThuc()) : "");
+                row.createCell(5).setCellValue(String.valueOf(km.isTrangThai()));
             }
         }
     }

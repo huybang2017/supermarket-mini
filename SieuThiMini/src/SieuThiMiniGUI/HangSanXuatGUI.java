@@ -2,7 +2,6 @@ package SieuThiMiniGUI;
 
 import DTO.HangSanXuatDTO;
 import SieuThiMiniBUS.HangSanXuatBUS;
-
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.*;
@@ -23,6 +22,12 @@ public class HangSanXuatGUI extends JPanel {
     public HangSanXuatGUI() {
         initComponents();
         docDSHSX(); 
+        this.addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentShown(java.awt.event.ComponentEvent e) {
+                docDSHSX(); 
+            }
+        });
     }
 
     private void initComponents() {
@@ -93,7 +98,7 @@ public class HangSanXuatGUI extends JPanel {
         this.add(card, BorderLayout.CENTER);
     }
 
-    private void docDSHSX() {
+    public void docDSHSX() {
         hsxBUS.docDSHSX();
         hienThiBang();
     }

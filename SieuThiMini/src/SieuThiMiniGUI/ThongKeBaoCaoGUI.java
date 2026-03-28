@@ -8,6 +8,9 @@ import javax.swing.event.ChangeEvent;
 
 import SieuThiMiniBUS.Excel;
 import SieuThiMiniBUS.ThongKeBaoCaoBUS;
+import SieuThiMiniBUS.LoaiSanPhamBUS;
+import DTO.LoaiSanPhamDTO; // Đổi lại tên đúng với project của bạn nếu khác
+
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -394,7 +397,29 @@ Runnable loadTableData = () -> {
         filterCard.setLayout(new FlowLayout(FlowLayout.LEFT, 12, 10));
         filterCard.add(label("Năm:")); JComboBox<String> cboNam = new JComboBox<>(new String[]{"Tất cả","2026","2025","2024"}); styleCombo(cboNam); filterCard.add(cboNam);
         filterCard.add(label("Tháng:")); JComboBox<String> cboThang = new JComboBox<>(new String[]{"Tất cả","1","2","3","4","5","6","7","8","9","10","11","12"}); styleCombo(cboThang); filterCard.add(cboThang);
-        filterCard.add(label("Danh mục:")); JComboBox<String> cboDM = new JComboBox<>(new String[]{"Tất cả","Thực Phẩm","Đồ Uống","Hóa Mỹ Phẩm","Gia Dụng"}); styleCombo(cboDM); filterCard.add(cboDM);
+        filterCard.add(label("Danh mục:")); 
+
+        // 1. Khởi tạo ComboBox và thêm item mặc định
+        JComboBox<String> cboDM = new JComboBox<>();
+        styleCombo(cboDM); 
+        cboDM.addItem("Tất cả");
+        
+        // 2. Khởi tạo BUS và nạp dữ liệu nếu danh sách static đang trống
+        LoaiSanPhamBUS loaiBUS = new LoaiSanPhamBUS();
+        if (LoaiSanPhamBUS.dslsp == null) {
+            loaiBUS.docDSLSP();
+        }
+        
+        // 3. Đổ dữ liệu từ danh sách static vào ComboBox
+        if (LoaiSanPhamBUS.dslsp != null) {
+            for (LoaiSanPhamDTO loai : LoaiSanPhamBUS.dslsp) {
+                // Giả sử trong file LoaiSanPhamDTO của bạn có hàm getTenLoai()
+                // Nếu tên hàm khác (ví dụ: getTenLSP()), bạn sửa lại cho khớp nhé
+                cboDM.addItem(loai.getTenLoai()); 
+            }
+        }
+        
+        filterCard.add(cboDM);
         filterCard.add(label("Tìm SP:")); JTextField txtSearch = styledField(14); txtSearch.setPreferredSize(new Dimension(150, 36)); filterCard.add(txtSearch);
         JButton btn = createBtn("Tìm Lọc", primaryColor); btn.setPreferredSize(new Dimension(110, 36)); filterCard.add(btn);
         root.add(filterCard, BorderLayout.NORTH);

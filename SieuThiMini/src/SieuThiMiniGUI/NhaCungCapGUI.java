@@ -23,6 +23,9 @@ public class NhaCungCapGUI extends JPanel {
     public NhaCungCapGUI() {
         initComponents();
         docDSNCC(); 
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override public void componentShown(java.awt.event.ComponentEvent e) { docDSNCC(); }
+        });
     }
 
     private void initComponents() {

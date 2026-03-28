@@ -9,7 +9,9 @@ public class PhieuNhapHangBUS {
     public static ArrayList<PhieuNhapHangDTO> dspn = null;
 
     public PhieuNhapHangBUS() {
-        dspn = new ArrayList<>();
+        if (dspn == null) {
+            dspn = new ArrayList<>();
+        }
     }
 
     public void docDSPN() {
