@@ -84,10 +84,15 @@ public class QuanLyNhapHangGUI extends JPanel {
         btnAdd.setBackground(new Color(40, 167, 69)); btnAdd.setForeground(Color.WHITE);
         btnAdd.addActionListener(e -> showDialogNhapHangMoi()); 
 
+        JButton btnDel = createActionBtn("Xóa phiếu");
+        btnDel.setBackground(new Color(40, 167, 69)); btnAdd.setForeground(Color.WHITE);
+        btnDel.addActionListener(e -> showDialogXoaPhieu());
+
         JButton btnEdit = createActionBtn("Sửa Phiếu");
         btnEdit.addActionListener(e -> showDialogSuaPhieu()); 
 
         pnlRight.add(btnAdd);
+        pnlRight.add(btnDel);
         pnlRight.add(btnEdit);
         
         toolbar.add(pnlLeft, BorderLayout.WEST);
@@ -439,6 +444,32 @@ public class QuanLyNhapHangGUI extends JPanel {
         pnlBot.setBackground(Color.WHITE); pnlBot.add(btnSave);
         dlg.add(form, BorderLayout.CENTER); dlg.add(pnlBot, BorderLayout.SOUTH);
         dlg.setVisible(true);
+    }
+
+    private void showDialogXoaPhieu() {
+        try{
+        int selectedRow = tblPhieuNhap.getSelectedRow();
+    
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn phiếu nhập để xóa!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        int maPN = (int) tblPhieuNhap.getValueAt(selectedRow, 0); 
+    
+        int confirm = JOptionPane.showConfirmDialog(this, 
+            "Bạn có chắc chắn muốn xóa phiếu nhập có mã: " + maPN + "?", 
+            "Xác nhận xóa", 
+            JOptionPane.YES_NO_OPTION, 
+            JOptionPane.QUESTION_MESSAGE);
+    
+        if (confirm == JOptionPane.YES_OPTION) {
+            PhieuNhapHangBUS bus = new PhieuNhapHangBUS();
+            bus.xoa(maPN);
+            ((DefaultTableModel) tblPhieuNhap.getModel()).removeRow(selectedRow);
+            JOptionPane.showMessageDialog(this, "Xóa phiếu nhập thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+        }}catch(Exception ex){
+            JOptionPane.showMessageDialog(this, "Xóa phiếu nhập thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
     }
 
     private void styleTable(JTable t) {
